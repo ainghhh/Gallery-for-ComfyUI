@@ -15,6 +15,14 @@
 
 ## 🖼️ 界面预览 / Interface
 
+### 从节点打开 / Open from the Node
+
+在 ComfyUI 画布中添加节点 **Gallery4ComfyUI**（分类 Gallery），点击节点上的「**打开图库**」按钮即可进入图库 —— 就这么简单。
+
+Add the **Gallery4ComfyUI** node (category: Gallery) in the ComfyUI canvas and click the「**打开图库**」button on the node — that's all it takes.
+
+![Node](docs/node-button.jpg)
+
 ### 主界面 / Main Interface
 
 打开图库后的主界面：顶部为来源标签页（ComfyUI / WebUI / ⭐收藏）、搜索框与快捷按钮，中间为图片网格，网格上下都有翻页条。
