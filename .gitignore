@@ -1,0 +1,15 @@
+# 运行时数据（绝不提交：含用户路径/索引/收藏）
+userdata/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 打包产物
+*.zip
+dist/
+build/
+
+# 系统文件
+.DS_Store
+Thumbs.db

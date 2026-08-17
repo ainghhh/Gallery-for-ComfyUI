@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery4ComfyUI</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#fff; --line:#e4e6eb; --txt:#1f2329; --dim:#6b7280;
+    --accent:#3b6ef5; --accent-weak:#eaf0fe; --star:#f5b301; --radius:10px; --sel:#dbe7ff;
+  }
+  [data-theme="dark"]{
+    --bg:#17181c; --card:#1f2127; --line:#2e3138; --txt:#e6e8ee; --dim:#8a91a0;
+    --accent:#5b8cff; --accent-weak:#222a40; --sel:#26344f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  /* 全局滚动条（跟随主题色） */
+  ::-webkit-scrollbar{width:10px; height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px; border:2px solid var(--bg)}
+  ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+  ::-webkit-scrollbar-corner{background:transparent}
+  /* 高级搜索 tag 统计列表：细滚动条 */
+  .advsearch .taglist::-webkit-scrollbar{width:6px}
+  .advsearch .taglist::-webkit-scrollbar-thumb{border:1px solid var(--bg)}
+  .advsearch .taglist::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+  .modal .pos::-webkit-scrollbar{width:8px}
+  body{background:var(--bg); color:var(--txt); font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif; font-size:14px; transition:background .2s}
+  button{font-family:inherit}
+  .topbar{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); padding:9px 16px}
+  .tb-inner{max-width:1320px; margin:0 auto; display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+  .title{font-size:16px; font-weight:600; margin-right:4px}
+  .title small{font-weight:400; color:var(--dim); font-size:12px; margin-left:5px}
+  input, select{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:13.5px; color:var(--txt); outline:none; font-family:inherit}
+  input:focus, select:focus{border-color:var(--accent)}
+  .q{flex:1; min-width:180px; max-width:400px; padding:9px 13px; font-size:14px}
+  .iconbtn{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:6px 10px; cursor:pointer; color:var(--dim); font-size:14px; transition:.15s}
+  .tb-inner .iconbtn{padding:9px 14px; font-size:15px; display:inline-flex; align-items:center; justify-content:center; min-width:44px}
+  .tb-inner #btnAdvSearch, .tb-inner #btnAdv{min-width:118px}
+  .tb-inner .q{font-size:14.5px}
+  .iconbtn:hover{border-color:var(--accent); color:var(--accent)}
+  .iconbtn.active{background:var(--accent); border-color:var(--accent); color:#fff}
+  .count{margin-left:auto; color:var(--dim); font-size:13px; white-space:nowrap}
+  /* 索引构建进度条 */
+  .indexbar{display:flex; align-items:center; gap:10px; max-width:1320px; margin:8px auto 0; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 14px}
+  .indexbar[hidden]{display:none}
+  .indexbar .track{flex:1; height:8px; background:var(--bg); border-radius:5px; overflow:hidden}
+  .indexbar .fill{height:100%; width:0%; background:linear-gradient(90deg, var(--accent), var(--star)); border-radius:5px; transition:width .4s ease}
+  .indexbar .txt{font-size:13px; color:var(--dim); white-space:nowrap}
+  .indexbar .txt b{color:var(--accent)}
+  .srctabs{display:flex; gap:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-right:4px}
+  .srctab{padding:6px 14px; cursor:pointer; background:var(--card); color:var(--dim); border:none; font-size:14px}
+  .srctab.on{background:var(--accent); color:#fff}
+  .adv{display:none; max-width:1320px; margin:8px auto 0; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; gap:10px; flex-wrap:wrap; align-items:flex-end}
+  .adv.show{display:flex}
+  .adv .f label{display:block; font-size:12px; color:var(--dim); margin-bottom:3px}
+  .adv .f input, .adv .f select{width:110px}
+  .wrap{max-width:1320px; margin:0 auto; padding:12px 16px 60px}
+  .grid{display:grid; gap:10px; transition:all .2s}
+  .grid.sm{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .grid.md{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+  .grid.lg{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .item{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; cursor:pointer; position:relative; transition:box-shadow .15s, transform .15s}
+  .item:hover{box-shadow:0 4px 14px rgba(0,0,0,.10); transform:translateY(-2px)}
+  .item.sel{outline:2px solid var(--accent); outline-offset:-2px}
+  .item img{width:100%; aspect-ratio:1/1; object-fit:cover; display:block; background:#ddd}
+  .item .meta{padding:6px 8px}
+  .item .fname{font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .item .sub{font-size:11.5px; color:var(--dim); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .item .favmark{position:absolute; top:6px; right:8px; color:var(--star); font-size:15px; text-shadow:0 1px 3px rgba(0,0,0,.5); display:none}
+  .item.faved .favmark{display:block}
+  .item .badge{position:absolute; left:6px; top:6px; background:rgba(0,0,0,.55); color:#fff; font-size:10px; padding:2px 7px; border-radius:6px; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .empty{grid-column:1/-1; text-align:center; color:var(--dim); padding:44px 0}
+  .loading{text-align:center; color:var(--dim); padding:12px 0; font-size:13px}
+  .pager{display:flex; align-items:center; justify-content:center; gap:8px; padding:16px 0 6px; flex-wrap:wrap}
+  .pager .pg-nums{display:flex; gap:4px; align-items:center}
+  .pager .pg-nums button{min-width:38px; padding:8px 10px}
+  .pager button.iconbtn{min-width:38px; padding:8px 10px}
+  .pager .pg-nums button.on{background:var(--accent); border-color:var(--accent); color:#fff}
+  .pager .pg-nums .dots{color:var(--dim); padding:0 3px; font-size:12px}
+  .pager .pg-jump{display:flex; align-items:center; gap:5px; color:var(--dim); font-size:12px}
+  .pager .pg-jump input{width:70px; padding:7px 9px}
+  /* 高级搜索 */
+  .advsearch{position:fixed; inset:0; z-index:150; background:var(--bg); display:none}
+  .advsearch.show{display:flex}
+  .adv-left{width:400px; min-width:0; border-right:1px solid var(--line); background:var(--card); overflow:hidden; transition:width .25s ease; display:flex; flex-direction:column}
+  .advsearch.folded .adv-left{width:0; border-right:none}
+  .adv-left-inner{width:400px; min-width:400px; padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1}
+  .foldbtn{position:absolute; left:400px; top:16px; z-index:160; width:28px; height:28px; border:1px solid var(--line); border-radius:50%; background:var(--card); color:var(--dim); cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; transition:left .25s ease, color .15s; box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .foldbtn:hover{color:var(--accent); border-color:var(--accent)}
+  .advsearch.folded .foldbtn{left:0}
+  .adv-right{flex:1; min-width:0; overflow-y:auto; padding:16px 20px 90px}
+  .advsearch h3{font-size:17px; margin-bottom:8px}
+  .advsearch .taglist{display:flex; flex-direction:column; gap:4px; max-height:340px; overflow-y:auto; border:1px solid var(--line); border-radius:10px; padding:6px; position:relative}
+  .advsearch .tagrow{display:flex; align-items:center; gap:9px; padding:7px 10px; border-radius:7px; cursor:pointer; font-size:14px; user-select:none}
+  .advsearch .tagrow:hover{background:var(--accent-weak)}
+  .advsearch .tagrow.on{background:var(--accent); color:#fff}
+  .advsearch .tagrow.pick{outline:1px solid var(--star); outline-offset:-1px}
+  .advsearch .tagrow .ck{width:14px; height:14px; border:1px solid var(--line); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:10px; flex:0 0 14px; cursor:pointer}
+  .advsearch .tagrow.pick .ck{background:var(--star); border-color:var(--star); color:#fff}
+  .advsearch .tagrow .tg{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .advsearch .tagrow .tc{font-size:12.5px; color:var(--dim); min-width:38px; text-align:right}
+  .advsearch .tagrow.on .tc{color:rgba(255,255,255,.85)}
+  .advsearch .tagrow .tk{font-size:11px; color:var(--bad,#dc2626); visibility:hidden}
+  .advsearch .tagrow:hover .tk{visibility:visible}
+  .advsearch .tagrow .tk:hover{color:#ff4d4f}
+  .ag-inputrow{display:flex; gap:8px; position:relative}
+  .ag-inputrow input{flex:1; padding:10px 14px; font-size:14.5px}
+  #tagSuggest{position:absolute; top:calc(100% + 5px); left:0; right:0; z-index:170; background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.16); max-height:260px; overflow-y:auto; display:none}
+  #tagSuggest.show{display:block}
+  #tagSuggest .srow{padding:10px 14px; cursor:pointer; font-size:14px; display:flex; justify-content:space-between; gap:10px}
+  #tagSuggest .srow:hover, #tagSuggest .srow.cur{background:var(--accent-weak)}
+  #tagSuggest .srow .sc{color:var(--dim); font-size:12px}
+  .tag-toolbar{display:flex; align-items:center; justify-content:space-between; gap:6px}
+  .tag-toolbar b{font-size:13.5px; color:var(--dim); font-weight:600}
+  .tag-sel{display:flex; flex-wrap:wrap; gap:6px; min-height:30px}
+  .tag-sel .selchip{font-size:13.5px; background:var(--accent-weak); color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:4px 13px; cursor:pointer}
+  .blist{display:flex; flex-wrap:wrap; gap:5px}
+  .blist .blchip{font-size:11px; background:var(--card); border:1px dashed var(--line); color:var(--dim); border-radius:999px; padding:2px 9px; cursor:pointer}
+  .blist .blchip:hover{border-color:var(--bad,#dc2626); color:var(--bad,#dc2626)}
+  .adv-filters{display:grid; grid-template-columns:1fr 1fr; gap:10px; border-top:1px solid var(--line); padding-top:13px}
+  .adv-filters .f label{display:block; font-size:13px; color:var(--dim); margin-bottom:4px}
+  .adv-filters .f input, .adv-filters .f select{width:100%; padding:9px 12px; font-size:13.5px}
+  /* 数值增减控件（− / +） */
+  .numstep{display:flex; align-items:stretch; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--card)}
+  .numstep input{width:100%; min-width:0; border:none; border-radius:0; text-align:center; padding:8px 2px; font-size:13.5px; background:transparent}
+  .numstep input:focus{border:none; outline:none}
+  .numstep input::-webkit-outer-spin-button, .numstep input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+  .numstep input{-moz-appearance:textfield; appearance:textfield}
+  .numstep .ns{flex:0 0 32px; border:none; background:var(--bg); color:var(--dim); cursor:pointer; font-size:16px; transition:.15s; display:flex; align-items:center; justify-content:center; padding:0}
+  .numstep .ns:hover{background:var(--accent); color:#fff}
+  /* 收藏 */
+  .fav-layout{display:flex; gap:14px; align-items:flex-start}
+  .fav-folders{width:220px; min-width:180px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px; position:sticky; top:110px; max-height:70vh; overflow-y:auto}
+  .fav-folders h4{font-size:14px; margin-bottom:8px; color:var(--dim)}
+  .folder{padding:9px 12px; border:1px solid var(--line); border-radius:8px; margin-bottom:6px; cursor:pointer; font-size:12.5px; display:flex; align-items:center; gap:6px; background:var(--bg)}
+  .folder:hover{border-color:var(--accent)}
+  .folder.on{border-color:var(--accent); background:var(--accent-weak)}
+  .folder .fn{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .folder .fc{font-size:11px; color:var(--dim)}
+  .folder .fdel{visibility:hidden; color:var(--dim); font-size:12px; cursor:pointer}
+  .folder:hover .fdel{visibility:visible}
+  .folder .fdel:hover{color:var(--bad,#dc2626)}
+  .folder.dragover{border-color:var(--star); background:rgba(245,179,1,.08)}
+  .fav-content{flex:1; min-width:0}
+  .fav-toolbar{display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap}
+  .fav-toolbar .ftname{font-size:14px; font-weight:600}
+  .fav-hint{font-size:12.5px; color:var(--dim)}
+  .selbar{display:flex; align-items:center; gap:10px; background:var(--accent); color:#fff; border-radius:8px; padding:7px 12px; margin-bottom:10px; font-size:12.5px}
+  .selbar[hidden]{display:none}
+  #errbar{position:fixed; top:0; left:0; right:0; z-index:999; background:#dc2626; color:#fff; font-size:12.5px; padding:7px 14px; text-align:center}
+  #errbar[hidden]{display:none}
+  .selbar button{background:rgba(255,255,255,.2); border:none; color:#fff; border-radius:6px; padding:5px 10px; cursor:pointer; font-size:12px}
+  .selbar .spacer{flex:1}
+  #selRect{position:absolute; border:1px dashed var(--accent); background:rgba(59,110,245,.12); z-index:120; pointer-events:none; display:none}
+  /* 弹层（灯箱） */
+  .modal{position:fixed; inset:0; z-index:200; background:rgba(10,12,16,.75); display:none; align-items:center; justify-content:center; padding:24px}
+  .modal.show{display:flex}
+  .modal .box{background:var(--card); border:1px solid var(--line); border-radius:14px; max-width:1180px; width:100%; height:min(82vh, 720px); display:grid; grid-template-columns:1.35fr 1fr; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,.4)}
+  @media (max-width:820px){ .modal .box{grid-template-columns:1fr; height:94vh; overflow:auto} }
+  .modal .imgside{background:#101014; display:flex; align-items:center; justify-content:center; position:relative; min-height:0}
+  .modal .imgside img{max-width:100%; max-height:100%; object-fit:contain; padding:8px}
+  .modal .imgside .imgbar{position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:10px; padding:8px 14px; background:linear-gradient(transparent, rgba(0,0,0,.65)); color:rgba(255,255,255,.9); font-size:12px}
+  .modal .imgside .imgbar .ib-name{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .modal .imgside .imgbar .ib-count{color:rgba(255,255,255,.6); white-space:nowrap}
+  .modal .imgside .imgbar .ib-fs{background:rgba(255,255,255,.14); border:none; color:#fff; border-radius:6px; width:28px; height:28px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:.15s; line-height:1}
+  .modal .imgside .imgbar .ib-fs:hover{background:var(--accent)}
+  /* 全屏观看模式：隐藏信息区，纯图 */
+  .modal.fs .box{max-width:none; width:100vw; height:100vh; grid-template-columns:1fr; border-radius:0; border:none}
+  .modal.fs .info{display:none}
+  .modal.fs .imgside{background:#000}
+  .modal.fs .imgside img{padding:0}
+  .modal.fs .close{display:none}
+  .modal .info{padding:16px 18px; overflow-y:auto; display:flex; flex-direction:column; gap:11px; min-height:0}
+  .modal .info-head{display:flex; align-items:flex-start; gap:8px}
+  .modal .info h3{font-size:14.5px; word-break:break-all; line-height:1.45; flex:1; min-width:0}
+  .modal .favstate{flex:0 0 auto; font-size:11.5px; color:var(--dim); border:1px solid var(--line); border-radius:999px; padding:3px 10px; cursor:pointer; white-space:nowrap}
+  .modal .favstate.on{color:var(--star); border-color:var(--star); background:rgba(245,179,1,.12)}
+  .modal .favstate.on::before{content:"★ "}
+  /* 参数徽章 */
+  .modal .param-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:7px}
+  .modal .pbadge{background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:6px 9px; min-width:0}
+  .modal .pbadge .pl{font-size:10.5px; color:var(--dim); margin-bottom:2px}
+  .modal .pbadge .pv{font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .modal .sec-title{font-size:11.5px; color:var(--dim); letter-spacing:.5px; margin-top:2px}
+  .modal .pos{font-size:13px; line-height:1.75; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:11px 13px; min-height:0; flex:1; overflow-y:auto; white-space:pre-wrap; word-break:break-word}
+  .modal .pos:empty::after{content:"(no prompt)"; color:var(--dim2, var(--dim))}
+  .modal .meta-raw{font-size:11px; font-family:Consolas,monospace; color:var(--dim); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 11px; max-height:150px; overflow:auto; white-space:pre-wrap; display:none}
+  .modal .meta-raw.show{display:block}
+  .modal .folderpick{display:flex; flex-wrap:wrap; gap:6px; border-top:1px solid var(--line); padding-top:10px; align-items:center}
+  .modal .folderpick .fp-label{font-size:11.5px; color:var(--dim)}
+  .modal .folderpick button{flex:0 1 auto; padding:5px 12px; border:1px solid var(--line); border-radius:999px; background:var(--card); color:var(--txt); cursor:pointer; font-size:12px; transition:.15s}
+  .modal .folderpick button:hover{border-color:var(--accent); color:var(--accent)}
+  .modal .folderpick button.in{border-color:var(--star); background:rgba(245,179,1,.14); color:var(--star)}
+  .modal .folderpick button.in::before{content:"✓ "}
+  /* 操作按钮：主按钮实色，次级描边 */
+  .modal .btns{display:flex; gap:8px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:11px}
+  .modal .btns button{flex:1; min-width:86px; padding:9px 6px; border:1px solid var(--line); border-radius:9px; background:var(--card); color:var(--txt); cursor:pointer; font-size:12.5px; transition:.15s}
+  .modal .btns button:hover{border-color:var(--accent); color:var(--accent)}
+  .modal .btns button.primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
+  .modal .btns button.primary:hover{opacity:.9; color:#fff}
+  .modal .close{position:absolute; top:14px; right:20px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.14); color:#fff; font-size:17px; cursor:pointer; z-index:6; display:flex; align-items:center; justify-content:center; line-height:1; backdrop-filter:blur(4px); transition:.15s}
+  .modal .close:hover{background:rgba(255,255,255,.28)}
+  .modal .nav{position:absolute; top:50%; transform:translateY(-50%); width:42px; height:56px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.07); color:rgba(255,255,255,.85); cursor:pointer; font-size:26px; user-select:none; z-index:5; border-radius:10px; transition:.15s}
+  .modal .nav:hover{background:rgba(255,255,255,.18); color:#fff}
+  .modal .nav.prev{left:12px}.modal .nav.next{right:12px}
+  .toast{position:fixed; bottom:26px; right:26px; z-index:400; background:var(--accent); color:#fff; border-radius:10px; padding:10px 18px; font-size:14px; box-shadow:0 6px 22px rgba(0,0,0,.25); opacity:0; transform:translateY(12px); transition:all .25s ease; pointer-events:none}
+  .toast.show{opacity:1; transform:translateY(0)}
+  /* 统计 */
+  .stats{display:none; max-width:1320px; margin:8px auto 0; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px}
+  .stats.show{display:block}
+  .stats h4{font-size:14px; margin-bottom:8px}
+  .statbar{display:flex; align-items:center; gap:8px; font-size:12.5px; margin-bottom:5px}
+  .statbar .nm{width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--dim)}
+  .statbar .track{flex:1; height:8px; background:var(--bg); border-radius:4px; overflow:hidden}
+  .statbar .fill{height:100%; background:var(--accent); border-radius:4px}
+  .statbar .cnt{width:52px; text-align:right; color:var(--dim)}
+  /* 设置 & 目录选择 */
+  .setup{position:fixed; inset:0; z-index:300; background:rgba(10,12,16,.6); display:none; align-items:center; justify-content:center; padding:20px}
+  .setup.show{display:flex}
+  .setup .card{background:var(--card); border:1px solid var(--line); border-radius:14px; max-width:560px; width:100%; padding:20px}
+  .setup h3{font-size:15px; margin-bottom:8px}
+  .setup p{font-size:13.5px; color:var(--dim); line-height:1.8; margin-bottom:12px}
+  .setup .row{display:flex; gap:8px; margin-top:10px}
+  .setup .row input{flex:1}
+  .fs-path{font-size:12.5px; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-bottom:8px; word-break:break-all; color:var(--accent)}
+  .fs-list{max-height:300px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; padding:4px}
+  .fs-row{display:flex; align-items:center; gap:7px; padding:6px 9px; border-radius:6px; cursor:pointer; font-size:12.5px}
+  .fs-row:hover{background:var(--accent-weak)}
+  .fs-row .ic{width:18px; text-align:center}
+  .fs-row .tag{font-size:10px; color:var(--accent); background:var(--accent-weak); border-radius:5px; padding:1px 6px; margin-left:6px}
+  .setup .msg{font-size:12px; margin-top:10px; min-height:16px}
+  .setup .msg.ok{color:#16a34a}
+  .setup .msg.err{color:#dc2626}
+</style>
+</head>
+<body data-theme="light">
+<div id="errbar" hidden></div>
+
+<div class="topbar">
+  <div class="tb-inner">
+    <span class="title"><span data-i18n="title">Gallery4ComfyUI</span> <small id="srcLabel" data-i18n="subComfy">ComfyUI 图片</small></span>
+    <div class="srctabs">
+      <button class="srctab on" data-src="comfyui" data-i18n="tabComfy">ComfyUI</button>
+      <button class="srctab" data-src="webui" data-i18n="tabWebui">WebUI</button>
+      <button class="srctab" data-src="fav" data-i18n="tabFav">⭐ 收藏</button>
+    </div>
+    <input class="q" id="q" type="text" data-i18n-ph="searchPh" placeholder="搜索文件名 / 提示词…">
+    <button class="iconbtn" id="btnAdvSearch" data-i18n="advBtn" data-i18n-title="titleAdv" title="🔍">🔍 高级</button>
+    <select id="modelSel"><option value="">全部模型</option></select>
+    <button class="iconbtn" id="btnAdv" data-i18n="btnAdv2" data-i18n-title="titleFilter" title="Filter">⚙ 筛选</button>
+    <button class="iconbtn" id="btnStats" data-i18n-title="titleStats" title="📊">📊</button>
+    <button class="iconbtn" id="btnFav" data-i18n-title="titleFav" title="★">★</button>
+    <button class="iconbtn" id="btnTheme" data-i18n-title="titleTheme" title="🌗">🌗</button>
+    <button class="iconbtn" id="btnLang" data-i18n-title="titleLang" title="EN">EN</button>
+    <button class="iconbtn" id="btnSetup" data-i18n-title="titleSetup" title="⚙">⚙</button>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="adv" id="adv">
+    <div class="f"><label data-i18n="fSampler">采样器</label><select id="samplerSel"><option value="">全部</option></select></div>
+    <div class="f"><label data-i18n="fStepsGe">步数 ≥</label><input type="number" id="stepsMin" placeholder="—"></div>
+    <div class="f"><label data-i18n="fStepsLe">步数 ≤</label><input type="number" id="stepsMax" placeholder="—"></div>
+    <div class="f"><label data-i18n="fCfgGe">CFG ≥</label><input type="number" id="cfgMin" step="0.5" placeholder="—"></div>
+    <div class="f"><label data-i18n="fCfgLe">CFG ≤</label><input type="number" id="cfgMax" step="0.5" placeholder="—"></div>
+    <div class="f"><label data-i18n="fWGe">宽 ≥</label><input type="number" id="minW" placeholder="—"></div>
+    <div class="f"><label data-i18n="fHGe">高 ≥</label><input type="number" id="minH" placeholder="—"></div>
+    <div class="f"><label data-i18n="fSort">排序</label><select id="sortSel">
+      <option value="newest" data-i18n="sNewest">最新</option><option value="oldest" data-i18n="sOldest">最旧</option>
+      <option value="random" data-i18n="sRandom">随机</option><option value="name" data-i18n="sName">文件名</option>
+    </select></div>
+    <div class="f"><label data-i18n="fGrid">网格</label><select id="densitySel">
+      <option value="md" data-i18n="gMd">中</option><option value="sm" data-i18n="gSm">小</option><option value="lg" data-i18n="gLg">大</option>
+    </select></div>
+    <div class="f"><label data-i18n="fPerPage">每页</label><select id="pageSizeSel">
+      <option value="30">30</option><option value="60" selected>60</option>
+      <option value="120">120</option><option value="240">240</option>
+    </select></div>
+    <button class="iconbtn" id="btnReset" data-i18n="fReset">重置</button>
+  </div>
+  <div class="stats" id="stats">
+    <h4><span data-i18n="statTitle">模型分布（</span><span id="statSrc">ComfyUI</span> · <span id="statTotal">0</span><span data-i18n="statTotal"> 张）</span></h4>
+    <div id="statBars"></div>
+  </div>
+</div>
+
+<div class="indexbar" id="indexBar" hidden>
+  <span class="txt" data-i18n="indexBuilding">📊 索引构建中：</span><b id="indexText">0/0 (0%)</b>
+  <div class="track"><div class="fill" id="indexFill"></div></div>
+</div>
+
+<div class="wrap">
+  <div id="mainView">
+    <div class="pager top" id="pagerTop">
+      <button class="iconbtn" id="pgTopFirst" title="«">«</button>
+      <button class="iconbtn" id="pgTopPrev" title="‹">‹</button>
+      <span id="pgTopInfo" style="color:var(--dim); font-size:13px">第 1 / 1 页</span>
+      <button class="iconbtn" id="pgTopNext" title="›">›</button>
+      <button class="iconbtn" id="pgTopLast" title="»">»</button>
+      <span class="pg-jump"><span data-i18n="pgJump">跳至</span> <input type="number" id="pgTopJump" min="1" max="99999" placeholder="1"><button class="iconbtn" id="pgTopGo" data-i18n="pgGo">GO</button></span>
+    </div>
+    <div class="grid md" id="grid"><div class="empty" data-i18n="loading">加载中…</div></div>
+    <div class="loading" id="loading"></div>
+    <div class="pager" id="pager">
+      <button class="iconbtn" id="pgFirst" data-i18n="pgFirst" title="«">«</button>
+      <button class="iconbtn" id="pgPrev" data-i18n="pgPrev" title="‹">‹</button>
+      <div class="pg-nums" id="pgNums"></div>
+      <button class="iconbtn" id="pgNext" data-i18n="pgNext" title="›">›</button>
+      <button class="iconbtn" id="pgLast" data-i18n="pgLast" title="»">»</button>
+      <span class="pg-jump"><span data-i18n="pgJump">跳至</span> <input type="number" id="pgJump" min="1" max="99999" placeholder="1"><button class="iconbtn" id="pgGo" data-i18n="pgGo">GO</button></span>
+    </div>
+  </div>
+
+  <!-- 收藏视图 -->
+  <div id="favView" hidden>
+    <div class="fav-layout">
+      <div class="fav-folders">
+        <h4 data-i18n="favTitle">收藏夹</h4>
+        <button class="iconbtn" id="btnNewFolder" data-i18n="favNew" style="width:100%; margin-bottom:8px">＋ 新建收藏夹</button>
+        <div id="folderList"></div>
+      </div>
+      <div class="fav-content">
+        <div class="fav-toolbar">
+          <span class="ftname" id="ftName">默认收藏</span>
+          <span class="fav-hint" data-i18n="favHint">拖动图片到左侧收藏夹 · 按住空白处拉框多选</span>
+          <span class="count" id="favCount"></span>
+        </div>
+        <div class="selbar" id="selBar" hidden>
+          <span id="selCount" data-i18n="favSelCount">已选 0 张</span>
+          <button id="selAddFolder" data-i18n="favSelDrag">拖入收藏夹…</button>
+          <button id="selRemoveFav" data-i18n="favSelRemove">移出本夹</button>
+          <span class="spacer"></span>
+          <button id="selClear" data-i18n="favSelClear">取消选择</button>
+        </div>
+        <div class="grid md" id="favGrid" style="position:relative"><div class="empty" data-i18n="favPickEmpty">选择左侧收藏夹查看图片</div></div>
+        <div class="pager" id="favPager">
+          <button class="iconbtn" id="fpgPrev">‹</button>
+          <div class="pg-nums" id="fpgNums"></div>
+          <button class="iconbtn" id="fpgNext">›</button>
+          <span class="pg-jump">跳至 <input type="number" id="fpgJump" min="1" placeholder="页码"><button class="iconbtn" id="fpgGo">GO</button></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 高级搜索 -->
+<div class="advsearch" id="advSearch">
+  <button class="foldbtn" id="advFold" title="折叠/展开左侧">◀</button>
+  <div class="adv-left" id="advLeft">
+    <div class="adv-left-inner">
+      <h3><span data-i18n="advTitle">🔍 高级搜索</span> <span style="float:right; font-size:11px; color:var(--dim); cursor:pointer" id="advCloseBtn" data-i18n="advClose">✕ 关闭</span></h3>
+      <div class="ag-inputrow">
+        <input id="tagQ" type="text" data-i18n-ph="advTagPh" placeholder="输入 tag，逗号分隔多个，回车搜索…">
+        <button class="iconbtn" id="btnAgSearch" data-i18n="advSearchBtn" style="background:var(--accent); color:#fff; border-color:var(--accent)">搜索</button>
+      </div>
+      <div id="tagSuggest"></div>
+      <div class="tag-sel" id="tagSel"></div>
+      <div class="tag-toolbar">
+        <b data-i18n="advHistory">历史 tag（点击加入搜索，按使用次数）</b>
+      </div>
+      <div class="taglist" id="tagList"></div>
+      <div class="adv-filters" id="advFilters"></div>
+    </div>
+  </div>
+  <div class="adv-right" id="advRight">
+    <div class="pager top" id="agPagerTop">
+      <button class="iconbtn" id="agTopPrev" title="‹">‹</button>
+      <span id="agTopInfo" style="color:var(--dim); font-size:13px">第 1 / 1 页</span>
+      <button class="iconbtn" id="agTopNext" title="›">›</button>
+      <span class="pg-jump"><span data-i18n="pgJump">跳至</span> <input type="number" id="agTopJump" min="1" max="99999" placeholder="1"><button class="iconbtn" id="agTopGo" data-i18n="pgGo">GO</button></span>
+    </div>
+    <div class="grid md" id="agGrid"><div class="empty" data-i18n="advInit">请选择 tag 或条件开始搜索</div></div>
+    <div class="loading" id="agLoading"></div>
+    <div class="pager" id="agPager">
+      <button class="iconbtn" id="agPrev">‹</button>
+      <div class="pg-nums" id="agNums"></div>
+      <button class="iconbtn" id="agNext">›</button>
+      <span class="pg-jump">跳至 <input type="number" id="agJump" min="1" placeholder="页码"><button class="iconbtn" id="agGo">GO</button></span>
+    </div>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div class="setup" id="setup">
+  <div class="card">
+    <h3 data-i18n="setupTitle">Stable Diffusion WebUI 设置</h3>
+    <p data-i18n="setupDesc">图库的「WebUI」来源需要读取 SD WebUI 的 <b>outputs</b> 目录（生成的图片）与 <b>models</b> 目录（模型）。
+       请通过浏览按钮在文件夹中选择你的 SD WebUI 安装根目录（通常是含有 <b>outputs</b> 文件夹的那一层）。
+       不配置也能正常使用 ComfyUI 图库，之后可随时在此修改。</p>
+    <div class="row">
+      <input id="setupPath" type="text" readonly data-i18n-ph="setupPathPh" placeholder="尚未选择目录">
+      <button class="iconbtn" id="btnBrowse" data-i18n="browse">📁 浏览…</button>
+    </div>
+    <div class="row">
+      <button class="iconbtn" id="btnSetupSave" data-i18n="save" style="flex:1; background:var(--accent); border-color:var(--accent); color:#fff">保存</button>
+      <button class="iconbtn" id="btnSetupSkip" data-i18n="skip">跳过</button>
+    </div>
+    <div class="msg" id="setupMsg"></div>
+  </div>
+</div>
+
+<!-- 目录选择器 -->
+<div class="setup" id="fsPicker">
+  <div class="card">
+    <h3 data-i18n="fsTitle">选择目录</h3>
+    <div class="fs-path" id="fsPath">/</div>
+    <div class="fs-list" id="fsList"></div>
+    <div class="row">
+      <button class="iconbtn" id="fsUp" data-i18n="fsUp">↑ 上级目录</button>
+      <button class="iconbtn" id="fsSelect" data-i18n="fsSelect" style="flex:1; background:var(--accent); border-color:var(--accent); color:#fff">选择此目录</button>
+      <button class="iconbtn" id="fsCancel" data-i18n="fsCancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 灯箱 -->
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal">
+  <span class="close" id="close">✕</span>
+  <div class="box">
+    <div class="imgside">
+      <span class="nav prev" id="prev">‹</span>
+      <img id="mimg" alt="">
+      <span class="nav next" id="next">›</span>
+      <div class="imgbar">
+        <span class="ib-name" id="mimgName"></span>
+        <span class="ib-count" id="mimgCount"></span>
+        <button class="ib-fs" id="mFs" data-i18n-title="titleFs" title="全屏观看 / Fullscreen">⛶</button>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-head">
+        <h3 id="mfile"></h3>
+        <span class="favstate" id="mFavState">☆ 收藏</span>
+      </div>
+      <div class="param-grid" id="mparams"></div>
+      <div class="sec-title" data-i18n="modalPrompt">正面提示词</div>
+      <div class="pos" id="mpos"></div>
+      <div class="meta-raw" id="mraw"></div>
+      <div class="folderpick" id="mFavPick"><span class="fp-label" data-i18n="modalAddFav">加入收藏夹：</span></div>
+      <div class="btns">
+        <button class="primary" id="mDown" data-i18n="modalDown">⬇ 下载</button>
+        <button id="mCopy" data-i18n="modalCopy">⧉ 复制提示词</button>
+        <button id="mCopyImg" data-i18n="modalCopyImg">🖼 复制图片</button>
+        <button id="mMeta" data-i18n="modalMeta">📄 PNG 信息</button>
+        <button id="mOpen" data-i18n="modalOpen">↗ 原图</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+// ---------- 国际化（中文 / English） ----------
+const I18N = {
+  zh: {
+    title: "Gallery4ComfyUI", subComfy: "ComfyUI 图片", subWebui: "WebUI 图片", subFav: "收藏",
+    tabComfy: "ComfyUI", tabWebui: "WebUI", tabFav: "⭐ 收藏",
+    searchPh: "搜索文件名 / 提示词…", advBtn: "🔍 高级", btnAdv2: "⚙ 筛选",
+    btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
+    fSampler: "采样器", fStepsGe: "步数 ≥", fStepsLe: "步数 ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
+    fWGe: "宽 ≥", fHGe: "高 ≥", fSort: "排序", fGrid: "网格", fPerPage: "每页", fReset: "重置",
+    sNewest: "最新", sOldest: "最旧", sRandom: "随机", sName: "文件名",
+    gSm: "小", gMd: "中", gLg: "大",
+    loading: "加载中…", noImage: "没有找到图片", noResult: "没有匹配的图片",
+    building: "索引构建中，请稍候…", notCfgWebui: "未配置 SD WebUI 源 — 点右上角 ⚙ 设置根目录后可用",
+    noCfgHint: "（不影响 ComfyUI 图库）",
+    pgFirst: "第一页", pgPrev: "上一页", pgNext: "下一页", pgLast: "最后一页", pgJump: "跳至", pgGo: "GO", pgPage: "页",
+    countTotal: "共", countOf: "张",
+    indexBuilding: "📊 索引构建中：",
+    advTitle: "🔍 高级搜索", advClose: "✕ 关闭", advSearchBtn: "搜索",
+    advTagPh: "输入 tag，逗号分隔多个，回车搜索…",
+    advHistory: "历史 tag（点击加入搜索，按使用次数）",
+    advSuggestPh: "输入 tag 补全…",
+    favTitle: "收藏", favNew: "＋ 新建收藏夹", favHint: "拖动图片到左侧收藏夹 · 按住空白处拉框多选",
+    favSelCount: "已选", favSelDrag: "拖入收藏夹…", favSelRemove: "移出本夹", favSelClear: "取消选择",
+    favEmpty: "该收藏夹还没有图片，从图库拖进来吧", favPickEmpty: "选择左侧收藏夹查看图片",
+    favNewName: "新收藏夹名称：", favDelConfirm: "删除收藏夹「",
+    modalCopy: "⧉ 复制提示词", modalCopyImg: "🖼 复制图片", modalDown: "⬇ 下载",
+    modalMeta: "📄 PNG 信息", modalOpen: "↗ 原图", modalAddFav: "加入收藏夹：",
+    modalPrompt: "正面提示词",
+    lblSeed: "种子", lblSteps: "步数", lblCfg: "CFG", lblSampler: "采样器",
+    lblScheduler: "调度器", lblSize: "尺寸", lblModel: "模型", lblSize2: "大小",
+    lblFav: "收藏", lblFaved: "已收藏",
+    unitSteps: "步", fAll: "全部", fModel: "模型",
+    advInit: "请选择 tag 或条件开始搜索", delTitle: "删除",
+    createFail: "创建失败", dragToWhich: "拖入哪个收藏夹？（输入名称）", noMeta: "(无 metadata)",
+    hasOutputs: "含 outputs", hasModels: "含 models",
+    titleAdv: "高级搜索 / Advanced Search", titleFilter: "筛选 / Filters",
+    titleStats: "统计 / Statistics", titleFav: "仅看收藏 / Favorites only",
+    titleTheme: "切换主题 / Toggle theme", titleLang: "语言 / Language",
+    titleSetup: "设置 / Settings", titleFs: "全屏观看 / Fullscreen",
+    toastAdded: "✅ 已加入「", toastRemoved: "已移出「", toastCopyOk: "提示词已复制", toastImgCopyOk: "图片已复制",
+    toastImgCopyFail: "复制图片失败", toastFolderExists: "收藏夹已存在", toastFolderEmpty: "名称不能为空",
+    setupTitle: "Stable Diffusion WebUI 设置",
+    setupDesc: "图库的「WebUI」来源需要读取 SD WebUI 的 <b>outputs</b> 目录（生成的图片）与 <b>models</b> 目录（模型）。请通过浏览按钮在文件夹中选择你的 SD WebUI 安装根目录（通常是含有 <b>outputs</b> 文件夹的那一层）。不配置也能正常使用 ComfyUI 图库，之后可随时在此修改。",
+    setupPathPh: "尚未选择目录", browse: "📁 浏览…", save: "保存", skip: "跳过",
+    setupSaved: "✅ 已保存", setupValid: "✅ 目录有效，已保存",
+    fsTitle: "选择目录", fsUp: "↑ 上级目录", fsSelect: "选择此目录", fsCancel: "取消",
+    fsPickDrive: "选择盘符", fsEmpty: "空目录",
+    statTitle: "模型分布（", statTotal: "张）",
+  },
+  en: {
+    title: "Gallery4ComfyUI", subComfy: "ComfyUI Images", subWebui: "WebUI Images", subFav: "Favorites",
+    tabComfy: "ComfyUI", tabWebui: "WebUI", tabFav: "⭐ Fav",
+    searchPh: "Search filename / prompt…", advBtn: "🔍 Advanced", btnAdv2: "⚙ Filter",
+    btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
+    fSampler: "Sampler", fStepsGe: "Steps ≥", fStepsLe: "Steps ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
+    fWGe: "W ≥", fHGe: "H ≥", fSort: "Sort", fGrid: "Grid", fPerPage: "Per page", fReset: "Reset",
+    sNewest: "Newest", sOldest: "Oldest", sRandom: "Random", sName: "Name",
+    gSm: "Small", gMd: "Medium", gLg: "Large",
+    loading: "Loading…", noImage: "No images found", noResult: "No matching images",
+    building: "Indexing, please wait…", notCfgWebui: "SD WebUI source not configured — click ⚙ (top right) to set its root folder",
+    noCfgHint: "(ComfyUI gallery still works)",
+    pgFirst: "First", pgPrev: "Prev", pgNext: "Next", pgLast: "Last", pgJump: "Jump to", pgGo: "GO", pgPage: "",
+    countTotal: "", countOf: " images",
+    indexBuilding: "📊 Indexing: ",
+    advTitle: "🔍 Advanced Search", advClose: "✕ Close", advSearchBtn: "Search",
+    advTagPh: "Enter tags, comma-separated, Enter to search…",
+    advHistory: "History tags (click to add, by usage)",
+    advSuggestPh: "Type for tag suggestions…",
+    favTitle: "Favorites", favNew: "＋ New Folder", favHint: "Drag images to folders · drag on empty area to multi-select",
+    favSelCount: "Selected", favSelDrag: "To folder…", favSelRemove: "Remove from folder", favSelClear: "Clear selection",
+    favEmpty: "No images in this folder yet — drag some in", favPickEmpty: "Pick a folder on the left",
+    favNewName: "New folder name:", favDelConfirm: "Delete folder 「",
+    modalCopy: "⧉ Copy prompt", modalCopyImg: "🖼 Copy image", modalDown: "⬇ Download",
+    modalMeta: "📄 PNG info", modalOpen: "↗ Open", modalAddFav: "Add to folder: ",
+    modalPrompt: "Positive prompt",
+    lblSeed: "Seed", lblSteps: "Steps", lblCfg: "CFG", lblSampler: "Sampler",
+    lblScheduler: "Scheduler", lblSize: "Size", lblModel: "Model", lblSize2: "Size",
+    lblFav: "Favorite", lblFaved: "Favorited",
+    unitSteps: " steps", fAll: "All", fModel: "Model",
+    advInit: "Select tags or conditions to search", delTitle: "Delete",
+    createFail: "Create failed", dragToWhich: "Drag to which folder? (enter name)", noMeta: "(no metadata)",
+    hasOutputs: "has outputs", hasModels: "has models",
+    titleAdv: "Advanced Search / 高级搜索", titleFilter: "Filters / 筛选",
+    titleStats: "Statistics / 统计", titleFav: "Favorites only / 仅看收藏",
+    titleTheme: "Toggle theme / 切换主题", titleLang: "Language / 语言",
+    titleSetup: "Settings / 设置", titleFs: "Fullscreen / 全屏观看",
+    toastAdded: "✅ Added to 「", toastRemoved: "Removed from 「", toastCopyOk: "Prompt copied", toastImgCopyOk: "Image copied",
+    toastImgCopyFail: "Copy image failed", toastFolderExists: "Folder already exists", toastFolderEmpty: "Name cannot be empty",
+    setupTitle: "Stable Diffusion WebUI Settings",
+    setupDesc: "The \"WebUI\" source needs SD WebUI's <b>outputs</b> (generated images) and <b>models</b> folders. Browse and pick your SD WebUI install root (the folder containing <b>outputs</b>). Not configuring is fine — the ComfyUI gallery works regardless; you can change this anytime.",
+    setupPathPh: "No folder selected", browse: "📁 Browse…", save: "Save", skip: "Skip",
+    setupSaved: "✅ Saved", setupValid: "✅ Valid folder, saved",
+    fsTitle: "Select Folder", fsUp: "↑ Up", fsSelect: "Select this folder", fsCancel: "Cancel",
+    fsPickDrive: "Choose a drive", fsEmpty: "Empty folder",
+    statTitle: "Model distribution (", statTotal: " images)",
+  }
+};
+let LANG = localStorage.getItem("gallery4comfyui-lang") || "zh";
+function t(key){ return (I18N[LANG] && I18N[LANG][key]) || I18N.zh[key] || key; }
+function applyLang(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.dataset.i18n;
+    if(el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT"){
+      if(el.dataset.i18nPh !== undefined) el.placeholder = t(k);
+    } else if(el.children.length === 0){
+      el.textContent = t(k);
+    } else {
+      // 含子元素：只替换首个文本节点（避免误清子元素）
+      const tn = [...el.childNodes].find(n => n.nodeType === 3);
+      if(tn) tn.textContent = t(k);
+    }
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{
+    const k = el.dataset.i18nPh;
+    if(k && el.placeholder !== undefined) el.placeholder = t(k);
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(el=>{
+    const k = el.dataset.i18nTitle;
+    if(k) el.title = t(k);
+  });
+  // 动态文本按钮
+  const langBtn = document.getElementById("btnLang");
+  if(langBtn) langBtn.textContent = LANG === "zh" ? "EN" : "中";
+}
+function switchLang(){
+  LANG = LANG === "zh" ? "en" : "zh";
+  try{ localStorage.setItem("gallery4comfyui-lang", LANG); }catch(e){}
+  applyLang();
+  // 重渲染动态内容
+  if(BOOTED){ loadModels(); loadSamplers(); loadStats(); if(FAV_FOLDER) loadFavGrid(false); }
+  if($("advSearch").classList.contains("show")){ buildAdvFilters(); }
+  load(false);
+}
+// 全局错误捕获（显示在页面顶部，方便定位问题）
+window.addEventListener("error", e=>{
+  const bar = document.getElementById("errbar");
+  if(bar){ bar.textContent = "⚠ " + (e.message || "script error"); bar.hidden = false; }
+});
+const $ = id => document.getElementById(id);
+const API = "/gallery4comfyui";
+let SRC = "comfyui", PAGE = 1, PAGE_SIZE = 60, LOADING = false, TOTAL = 0, TOTAL_PAGES = 1;
+let CUR_ITEMS = [], CUR_IDX = -1, DEFAULT_FAVS = new Set(), CFG_WEBUI = false;
+let ADV = {tags: [], page: 1, size: 60, total: 0, pages: 1, items: []};
+let FAV_FOLDER = "默认收藏", FAV_PAGE = 1, FAV_ITEMS = [], SEL = new Set(), FOLDERS = {};
+
+function esc(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+async function api(path, opts){
+  const r = await fetch(API + path, opts);
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+function imgUrl(src, file){ return `${API}/api/image?source=${src}&file=${encodeURIComponent(file)}`; }
+
+// ---------- 主题 ----------
+function applyTheme(t){ document.body.dataset.theme = t; try{ localStorage.setItem("gallery4comfyui-theme", t); }catch(e){} }
+applyTheme(localStorage.getItem("gallery4comfyui-theme") || "light");
+$("btnTheme").onclick = ()=>applyTheme(document.body.dataset.theme === "dark" ? "light" : "dark");
+$("btnLang").onclick = switchLang;
+applyLang();
+
+// ---------- Tab ----------
+document.querySelectorAll(".srctab").forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll(".srctab").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    if(b.dataset.src === "fav"){
+      $("mainView").hidden = true; $("favView").hidden = false;
+      $("srcLabel").textContent = "收藏";
+      loadFolders(); loadFavGrid(true);
+      return;
+    }
+    $("mainView").hidden = false; $("favView").hidden = true;
+    SEL.clear(); $("selBar").hidden = true;
+    $("favGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel"));
+    SRC = b.dataset.src;
+    $("srcLabel").textContent = SRC === "comfyui" ? "ComfyUI 图片" : "WebUI 图片";
+    $("modelSel").value = ""; $("samplerSel").value = "";
+    $("btnFav").classList.remove("active");
+    refreshSource();
+  };
+});
+async function refreshSource(){ loadModels(); loadSamplers(); loadStats(); load(true); }
+
+// ---------- 普通搜索（分页） ----------
+function pageList(cur, total){
+  if(total <= 9) return Array.from({length: total}, (_,i)=>i+1);
+  const set = new Set([1,2,3, total-2, total-1, total]);
+  for(let i=cur-2; i<=cur+2; i++){ if(i>=1 && i<=total) set.add(i); }
+  const arr = [...set].sort((a,b)=>a-b);
+  const out = []; let prev = 0;
+  for(const p of arr){ if(prev && p - prev > 1) out.push("..."); out.push(p); prev = p; }
+  return out;
+}
+function renderPager(){
+  const nums = $("pgNums"); nums.innerHTML = "";
+  $("pgPrev").disabled = PAGE <= 1; $("pgNext").disabled = PAGE >= TOTAL_PAGES || TOTAL === 0;
+  $("pgFirst").disabled = PAGE <= 1; $("pgLast").disabled = PAGE >= TOTAL_PAGES || TOTAL === 0;
+  $("pgJump").max = Math.max(1, TOTAL_PAGES);
+  // 顶部同步
+  $("pgTopPrev").disabled = PAGE <= 1; $("pgTopNext").disabled = PAGE >= TOTAL_PAGES || TOTAL === 0;
+  $("pgTopFirst").disabled = PAGE <= 1; $("pgTopLast").disabled = PAGE >= TOTAL_PAGES || TOTAL === 0;
+  $("pgTopJump").max = Math.max(1, TOTAL_PAGES);
+  $("pgTopInfo").textContent = `${PAGE} / ${TOTAL_PAGES}`;
+  pageList(PAGE, TOTAL_PAGES).forEach(item=>{
+    if(item === "..."){ const d = document.createElement("span"); d.className = "dots"; d.textContent = "…"; nums.appendChild(d); return; }
+    const b = document.createElement("button"); b.className = "iconbtn" + (item === PAGE ? " on" : ""); b.textContent = item;
+    b.onclick = ()=>goTo(item); nums.appendChild(b);
+  });
+}
+async function load(reset){
+  if(reset){ PAGE = 1; $("grid").innerHTML = '<div class="empty">' + t("loading") + '</div>'; }
+  if(LOADING) return;
+  // WebUI 源未配置：直接提示，不死循环
+  if(SRC === "webui" && !CFG_WEBUI){
+    $("grid").innerHTML = '<div class="empty">' + t("notCfgWebui") + '<br><br>' + t("noCfgHint") + '</div>';
+    $("loading").textContent = "";
+    renderPager();
+    return;
+  }
+  LOADING = true; $("loading").textContent = "";
+  try{
+    const p = new URLSearchParams({
+      source: SRC, q: $("q").value.trim(), model: $("modelSel").value,
+      sampler: $("samplerSel").value,
+      steps_min: $("stepsMin").value, steps_max: $("stepsMax").value,
+      cfg_min: $("cfgMin").value, cfg_max: $("cfgMax").value,
+      min_w: $("minW").value, min_h: $("minH").value,
+      fav: $("btnFav").classList.contains("active") ? "1" : "0",
+      sort: $("sortSel").value, page: PAGE, page_size: PAGE_SIZE,
+    });
+    const r = await api("/api/gallery?" + p.toString());
+    TOTAL = r.total; TOTAL_PAGES = Math.max(1, Math.ceil(r.total / PAGE_SIZE));
+    $("count").textContent = (t("countTotal") ? t("countTotal") + " " : "") + TOTAL + (t("countOf") ? " " + t("countOf") : "");
+    const grid = $("grid"); grid.innerHTML = "";
+    if(!r.total) grid.innerHTML = '<div class="empty">' + (r.ready ? t("noImage") : t("building")) + '</div>';
+    CUR_ITEMS = r.items;
+    r.items.forEach(it=>{ grid.appendChild(mkItem(it, SRC)); });
+    renderPager();
+    if(!r.ready) setTimeout(()=>load(false), 3000);
+  }catch(e){ $("loading").textContent = t("loading") + " ✖"; }
+  LOADING = false;
+}
+function mkItem(it, src){
+  const d = document.createElement("div"); d.className = "item";
+  d.draggable = true;
+  const key = src + ":" + it.file;
+  if(DEFAULT_FAVS.has(key)) d.classList.add("faved");
+  const img = document.createElement("img");
+  img.src = imgUrl(src, it.file); img.loading = "lazy";
+  const badge = document.createElement("div"); badge.className = "badge"; badge.textContent = it.model || "";
+  const meta = document.createElement("div"); meta.className = "meta";
+  const p2 = it.params || {};
+  const fname = document.createElement("div"); fname.className = "fname"; fname.textContent = it.file;
+  const sub = document.createElement("div"); sub.className = "sub";
+  sub.textContent = [p2.steps?`${p2.steps}${t("unitSteps")}`:"", p2.width&&p2.height?`${p2.width}×${p2.height}`:"", p2.sampler||""].filter(Boolean).join(" · ");
+  meta.appendChild(fname); meta.appendChild(sub);
+  const fm = document.createElement("span"); fm.className = "favmark"; fm.textContent = "★";
+  d.appendChild(badge); d.appendChild(img); d.appendChild(meta); d.appendChild(fm);
+  d.onclick = ()=>{ if(SEL.size){ toggleSel(d, it, src); return; } CUR_IDX = CUR_ITEMS.indexOf(it); openLightbox(CUR_IDX); };
+  d.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", JSON.stringify([{source: src, file: it.file}])); });
+  return d;
+}
+function goTo(target){
+  target = parseInt(target);
+  if(!Number.isFinite(target) || target < 1 || target > TOTAL_PAGES) return;
+  if(target === PAGE) return;
+  PAGE = target; load(false);
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+$("pgFirst").onclick = ()=>goTo(1); $("pgPrev").onclick = ()=>goTo(PAGE-1);
+$("pgNext").onclick = ()=>goTo(PAGE+1); $("pgLast").onclick = ()=>goTo(TOTAL_PAGES);
+$("pgGo").onclick = ()=>goTo($("pgJump").value);
+$("pgJump").addEventListener("keydown", e=>{ if(e.key === "Enter") goTo($("pgJump").value); });
+// 顶部翻页
+$("pgTopFirst").onclick = ()=>goTo(1); $("pgTopPrev").onclick = ()=>goTo(PAGE-1);
+$("pgTopNext").onclick = ()=>goTo(PAGE+1); $("pgTopLast").onclick = ()=>goTo(TOTAL_PAGES);
+$("pgTopGo").onclick = ()=>goTo($("pgTopJump").value);
+$("pgTopJump").addEventListener("keydown", e=>{ if(e.key === "Enter") goTo($("pgTopJump").value); });
+$("pageSizeSel").onchange = ()=>{ PAGE_SIZE = parseInt($("pageSizeSel").value) || 60; load(true); window.scrollTo({top:0,behavior:"smooth"}); };
+$("q").addEventListener("input", debounce(()=>load(true), 300));
+$("modelSel").onchange = ()=>load(true);
+$("samplerSel").onchange = ()=>load(true);
+$("sortSel").onchange = ()=>load(true);
+$("densitySel").onchange = ()=>$("grid").className = "grid " + $("densitySel").value;
+["stepsMin","stepsMax","cfgMin","cfgMax","minW","minH"].forEach(id=>$(id).addEventListener("change", ()=>load(true)));
+$("btnAdv").onclick = ()=>{ $("adv").classList.toggle("show"); $("btnAdv").classList.toggle("active"); };
+$("btnReset").onclick = ()=>{
+  ["stepsMin","stepsMax","cfgMin","cfgMax","minW","minH"].forEach(id=>$(id).value="");
+  $("samplerSel").value=""; $("modelSel").value=""; $("sortSel").value="newest"; load(true);
+};
+$("btnFav").onclick = ()=>{ $("btnFav").classList.toggle("active"); load(true); };
+
+// ---------- 下拉数据 ----------
+async function loadModels(){
+  try{
+    const r = await api("/api/models?source=" + SRC);
+    const sel = $("modelSel"); sel.innerHTML = '<option value="">全部模型</option>';
+    r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.model; op.textContent = `${it.model}（${it.count}）`; sel.appendChild(op); });
+  }catch(e){}
+}
+async function loadSamplers(){
+  try{
+    const r = await api("/api/samplers?source=" + SRC);
+    const sel = $("samplerSel"); sel.innerHTML = '<option value="">全部</option>';
+    r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.sampler; op.textContent = `${it.sampler}（${it.count}）`; sel.appendChild(op); });
+  }catch(e){}
+}
+async function loadStats(){
+  try{
+    const r = await api("/api/stats");
+    const st = r[SRC] || {};
+    $("statSrc").textContent = SRC === "webui" ? t("subWebui") : t("subComfy");
+    $("statTotal").textContent = st.total || 0;
+    const bars = $("statBars"); bars.innerHTML = "";
+    const max = Math.max(1, ...(st.models||[]).map(m=>m.count));
+    (st.models||[]).forEach(m=>{
+      const row = document.createElement("div"); row.className = "statbar";
+      row.innerHTML = `<span class="nm">${esc(m.model)}</span><div class="track"><div class="fill" style="width:${(m.count/max*100).toFixed(1)}%"></div></div><span class="cnt">${m.count}</span>`;
+      bars.appendChild(row);
+    });
+  }catch(e){}
+}
+$("btnStats").onclick = ()=>{ $("stats").classList.toggle("show"); $("btnStats").classList.toggle("active"); if($("stats").classList.contains("show")) loadStats(); };
+
+// ---------- 默认收藏集合 ----------
+async function loadDefaultFavs(){
+  try{
+    const r = await api("/api/folders/images?folder=" + encodeURIComponent("默认收藏"));
+    DEFAULT_FAVS = new Set(r.items.map(x=>x.source + ":" + x.file));
+  }catch(e){}
+}
+async function toggleFav(src, file){
+  const key = src + ":" + file;
+  const on = !DEFAULT_FAVS.has(key);
+  await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({action: on ? "add" : "remove", folder: "默认收藏", items: [{source: src, file}]})});
+  if(on) DEFAULT_FAVS.add(key); else DEFAULT_FAVS.delete(key);
+  return on;
+}
+
+// ---------- 高级搜索 ----------
+let SUG_CUR = -1;
+$("btnAdvSearch").onclick = ()=>{
+  $("advSearch").classList.add("show");
+  buildAdvFilters(); loadTags(""); syncTagQ(); advLoad(true);
+};
+$("advCloseBtn").onclick = ()=>$("advSearch").classList.remove("show");
+$("advFold").onclick = ()=>{
+  $("advSearch").classList.toggle("folded");
+  $("advFold").textContent = $("advSearch").classList.contains("folded") ? "▶" : "◀";
+};
+function syncTagQ(){ $("tagQ").value = ADV.tags.join(", "); }
+function parseTagQ(){
+  const parts = $("tagQ").value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  ADV.tags = [...new Set(parts)];
+  renderTagSel();
+}
+function advParams(){
+  const f = {};
+  ["model","sampler","stepsMin","stepsMax","cfgMin","cfgMax","minW","minH","sort","size"].forEach(k=>{
+    const el = document.getElementById("ag_"+k);
+    f[k] = el ? el.value : "";
+  });
+  return f;
+}
+function buildAdvFilters(){
+  const box = $("advFilters"); box.innerHTML = "";
+  const numStep = (id, step)=>`<div class="numstep"><button type="button" class="ns" data-t="ag_${id}" data-d="-1">−</button><input id="ag_${id}" type="number" step="${step}" placeholder="—"><button type="button" class="ns" data-t="ag_${id}" data-d="1">+</button></div>`;
+  const defs = [
+    ["model",t("fModel"),`<select id="ag_model"><option value="">${t("fAll")}</option></select>`],
+    ["sampler",t("fSampler"),`<select id="ag_sampler"><option value="">${t("fAll")}</option></select>`],
+    ["stepsMin",t("fStepsGe"),numStep("stepsMin",1)],
+    ["stepsMax",t("fStepsLe"),numStep("stepsMax",1)],
+    ["cfgMin",t("fCfgGe"),numStep("cfgMin",0.5)],
+    ["cfgMax",t("fCfgLe"),numStep("cfgMax",0.5)],
+    ["minW",t("fWGe"),numStep("minW",64)],
+    ["minH",t("fHGe"),numStep("minH",64)],
+    ["sort",t("fSort"),`<select id="ag_sort"><option value="newest">${t("sNewest")}</option><option value="oldest">${t("sOldest")}</option><option value="random">${t("sRandom")}</option><option value="name">${t("sName")}</option></select>`],
+    ["size",t("fPerPage"),`<select id="ag_size"><option value="30">30</option><option value="60" selected>60</option><option value="120">120</option><option value="240">240</option></select>`],
+  ];
+  defs.forEach(([id,label,html])=>{
+    const f = document.createElement("div"); f.className = "f";
+    f.innerHTML = `<label>${label}</label>${html}`;
+    box.appendChild(f);
+  });
+  api("/api/models?source=" + SRC).then(r=>{
+    const sel = $("ag_model");
+    r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.model; op.textContent = `${it.model}（${it.count}）`; sel.appendChild(op); });
+  });
+  api("/api/samplers?source=" + SRC).then(r=>{
+    const sel = $("ag_sampler");
+    r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.sampler; op.textContent = `${it.sampler}（${it.count}）`; sel.appendChild(op); });
+  });
+  box.querySelectorAll("input,select").forEach(el=>el.addEventListener("change", ()=>{ ADV.page = 1; advLoad(true); }));
+  // −/+ 增减按钮
+  box.addEventListener("click", e=>{
+    const b = e.target.closest(".ns");
+    if(!b) return;
+    const inp = document.getElementById(b.dataset.t);
+    if(!inp) return;
+    const step = parseFloat(inp.step) || 1;
+    const cur = parseFloat(inp.value);
+    inp.value = (Number.isFinite(cur) ? cur : 0) + (b.dataset.d === "-1" ? -step : step);
+    inp.dispatchEvent(new Event("change"));
+  });
+}
+// --- tag 补全（定位在输入框下，键盘 ↑↓ 选择 / Enter 确认 / Tab 补全）---
+async function suggestTags(){
+  const val = $("tagQ").value;
+  const seg = val.split(/[,，]/).pop().trim();
+  const box = $("tagSuggest"); box.innerHTML = "";
+  SUG_CUR = -1;
+  if(!seg){ box.classList.remove("show"); return; }
+  const r = await api(`/api/tags?source=${SRC}&search=${encodeURIComponent(seg)}&limit=8`);
+  if(!r.items.length){ box.classList.remove("show"); return; }
+  r.items.forEach(t=>{
+    const d = document.createElement("div"); d.className = "srow";
+    d.innerHTML = `<span>${esc(t.tag)}</span><span class="sc">${t.count}</span>`;
+    d.onmousedown = (e)=>{ e.preventDefault(); addTag(t.tag); };
+    box.appendChild(d);
+  });
+  box.classList.add("show");
+}
+function addTag(tag){
+  if(!ADV.tags.includes(tag)) ADV.tags.push(tag);
+  syncTagQ(); renderTagSel(); $("tagSuggest").classList.remove("show");
+}
+function suggestMove(dir){
+  const rows = $("tagSuggest").querySelectorAll(".srow");
+  if(!rows.length) return;
+  SUG_CUR = Math.max(0, Math.min(rows.length - 1, SUG_CUR + dir));
+  rows.forEach((r,i)=>r.classList.toggle("cur", i === SUG_CUR));
+}
+$("tagQ").addEventListener("input", debounce(()=>suggestTags(), 200));
+$("tagQ").addEventListener("keydown", e=>{
+  const sugOpen = $("tagSuggest").classList.contains("show");
+  if(e.key === "ArrowDown"){ e.preventDefault(); suggestMove(1); }
+  else if(e.key === "ArrowUp"){ e.preventDefault(); suggestMove(-1); }
+  else if(e.key === "Tab"){
+    const rows = $("tagSuggest").querySelectorAll(".srow");
+    if(sugOpen && rows.length){
+      e.preventDefault();
+      const tag = rows[Math.max(0, SUG_CUR)].querySelector("span").textContent;
+      addTag(tag);
+    }
+  }
+  else if(e.key === "Enter"){
+    e.preventDefault();
+    const rows = $("tagSuggest").querySelectorAll(".srow");
+    if(sugOpen && rows.length && SUG_CUR >= 0){
+      addTag(rows[SUG_CUR].querySelector("span").textContent);
+    } else {
+      parseTagQ(); $("tagSuggest").classList.remove("show"); ADV.page = 1; advLoad(true);
+    }
+  }
+  else if(e.key === "Escape"){ $("tagSuggest").classList.remove("show"); }
+});
+$("btnAgSearch").onclick = ()=>{ parseTagQ(); $("tagSuggest").classList.remove("show"); ADV.page = 1; advLoad(true); };
+// --- tag 统计列表：点击行 = 加入/移除搜索 ---
+async function loadTags(search){
+  try{
+    const r = await api(`/api/tags?source=${SRC}&search=${encodeURIComponent(search||"")}&limit=300`);
+    const box = $("tagList"); box.innerHTML = "";
+    r.items.forEach(t=>{
+      const row = document.createElement("div");
+      row.className = "tagrow" + (ADV.tags.includes(t.tag) ? " on" : "");
+      row.innerHTML = `<span class="tg">${esc(t.tag)}</span><span class="tc">${t.count}</span>`;
+      row.onclick = ()=>{
+        const i = ADV.tags.indexOf(t.tag);
+        if(i >= 0) ADV.tags.splice(i,1); else ADV.tags.push(t.tag);
+        syncTagQ(); renderTagSel();
+        row.classList.toggle("on", ADV.tags.includes(t.tag));
+        ADV.page = 1; advLoad(true);
+      };
+      box.appendChild(row);
+    });
+  }catch(e){}
+}
+function renderTagSel(){
+  const box = $("tagSel"); box.innerHTML = "";
+  ADV.tags.forEach(t=>{
+    const c = document.createElement("span"); c.className = "selchip"; c.textContent = "✕ " + t;
+    c.onclick = ()=>{ ADV.tags = ADV.tags.filter(x=>x!==t); syncTagQ(); renderTagSel(); ADV.page = 1; advLoad(true); };
+    box.appendChild(c);
+  });
+}
+async function advLoad(reset){
+  if(reset) ADV.page = 1;
+  const f = advParams();
+  const p = new URLSearchParams({
+    source: SRC, q: $("q").value.trim(),
+    tags: ADV.tags.join(","), model: f.model, sampler: f.sampler,
+    steps_min: f.stepsMin, steps_max: f.stepsMax, cfg_min: f.cfgMin, cfg_max: f.cfgMax,
+    min_w: f.minW, min_h: f.minH, sort: f.sort, page: ADV.page, page_size: f.size || 60,
+  });
+  $("agLoading").textContent = t("loading");
+  try{
+    const r = await api("/api/gallery?" + p.toString());
+    ADV.total = r.total; ADV.size = parseInt(f.size) || 60;
+    ADV.pages = Math.max(1, Math.ceil(r.total / ADV.size));
+    ADV.items = r.items;
+    CUR_ITEMS = r.items;
+    const grid = $("agGrid"); grid.innerHTML = "";
+    if(!r.total) grid.innerHTML = '<div class="empty">' + t("noResult") + '</div>';
+    r.items.forEach(it=>{
+      try{ grid.appendChild(mkItem(it, SRC)); }catch(err){}
+    });
+    renderAdvPager();
+    $("agLoading").textContent = (t("countTotal") ? t("countTotal") + " " : "") + r.total + (t("countOf") ? " " + t("countOf") : "");
+  }catch(e){ $("agLoading").textContent = "✖ " + (e.message || ""); }
+}
+function renderAdvPager(){
+  const nums = $("agNums"); nums.innerHTML = "";
+  $("agPrev").disabled = ADV.page <= 1; $("agNext").disabled = ADV.page >= ADV.pages;
+  $("agJump").max = ADV.pages;
+  // 顶部同步
+  $("agTopPrev").disabled = ADV.page <= 1; $("agTopNext").disabled = ADV.page >= ADV.pages;
+  $("agTopJump").max = ADV.pages;
+  $("agTopInfo").textContent = `${ADV.page} / ${ADV.pages}`;
+  pageList(ADV.page, ADV.pages).forEach(item=>{
+    if(item === "..."){ const d = document.createElement("span"); d.className = "dots"; d.textContent = "…"; nums.appendChild(d); return; }
+    const b = document.createElement("button"); b.className = "iconbtn" + (item === ADV.page ? " on" : ""); b.textContent = item;
+    b.onclick = ()=>{ ADV.page = item; advLoad(false); $("advRight").scrollTo({top:0,behavior:"smooth"}); };
+    nums.appendChild(b);
+  });
+}
+$("agPrev").onclick = ()=>{ if(ADV.page>1){ ADV.page--; advLoad(false); } };
+$("agNext").onclick = ()=>{ if(ADV.page<ADV.pages){ ADV.page++; advLoad(false); } };
+$("agGo").onclick = ()=>{ const t=parseInt($("agJump").value); if(t>=1&&t<=ADV.pages){ ADV.page=t; advLoad(false); } };
+// 顶部翻页
+$("agTopPrev").onclick = ()=>{ if(ADV.page>1){ ADV.page--; advLoad(false); } };
+$("agTopNext").onclick = ()=>{ if(ADV.page<ADV.pages){ ADV.page++; advLoad(false); } };
+$("agTopGo").onclick = ()=>{ const t=parseInt($("agTopJump").value); if(t>=1&&t<=ADV.pages){ ADV.page=t; advLoad(false); } };
+$("agTopJump").addEventListener("keydown", e=>{ if(e.key === "Enter") $("agTopGo").click(); });
+
+// ---------- 收藏夹 ----------
+async function loadFolders(){
+  try{
+    const r = await api("/api/folders");
+    FOLDERS = r.folders || {};
+    const box = $("folderList"); box.innerHTML = "";
+    Object.keys(FOLDERS).forEach(name=>{
+      const d = document.createElement("div");
+      d.className = "folder" + (name === FAV_FOLDER ? " on" : "");
+      d.innerHTML = `<span class="fn">${esc(name)}</span><span class="fc">${FOLDERS[name]}</span><span class="fdel" title="删除 / Delete">✕</span>`;
+      d.onclick = ()=>{ FAV_FOLDER = name; loadFolders(); loadFavGrid(true); };
+      d.querySelector(".fdel").onclick = async e=>{
+        e.stopPropagation();
+        if(!confirm(t("favDelConfirm") + name + "」？")) return;
+        await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"delete", name})});
+        if(FAV_FOLDER === name) FAV_FOLDER = "默认收藏";
+        loadFolders(); loadFavGrid(true);
+      };
+      d.addEventListener("dragover", e=>{ e.preventDefault(); d.classList.add("dragover"); });
+      d.addEventListener("dragleave", ()=>d.classList.remove("dragover"));
+      d.addEventListener("drop", async e=>{
+        e.preventDefault(); d.classList.remove("dragover");
+        try{
+          const items = JSON.parse(e.dataTransfer.getData("text/plain") || "[]");
+          if(SEL.size){ // 拖整组（SEL 的 key 是 "source:file"）
+            const all = [...SEL.values()].map(k=>{ const i = k.indexOf(":"); return {source: k.slice(0, i), file: k.slice(i+1)}; });
+            await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"add", folder: d.querySelector(".fn").textContent, items: all})});
+          } else {
+            await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"add", folder: d.querySelector(".fn").textContent, items})});
+          }
+          loadFolders();
+        }catch(err){}
+      });
+      box.appendChild(d);
+    });
+  }catch(e){}
+}
+let FAV_PAGE_SIZE = 60, FAV_LOADING = false;
+async function loadFavGrid(reset){
+  if(reset) FAV_PAGE = 1;
+  if(FAV_LOADING) return;
+  FAV_LOADING = true;
+  try{
+    const r = await api(`/api/folders/images?folder=${encodeURIComponent(FAV_FOLDER)}`);
+    const total = r.items.length;
+    const pages = Math.max(1, Math.ceil(total / FAV_PAGE_SIZE));
+    if(FAV_PAGE > pages) FAV_PAGE = pages;
+    const slice = r.items.slice((FAV_PAGE-1)*FAV_PAGE_SIZE, FAV_PAGE*FAV_PAGE_SIZE);
+    $("ftName").textContent = FAV_FOLDER;
+    $("favCount").textContent = (t("countTotal") ? t("countTotal") + " " : "") + total + (t("countOf") ? " " + t("countOf") : "");
+    const grid = $("favGrid"); grid.innerHTML = "";
+    if(!slice.length) grid.innerHTML = '<div class="empty">' + t("favEmpty") + '</div>';
+    FAV_ITEMS = slice;
+    slice.forEach(it=>{ grid.appendChild(mkItem(it, it.source)); });
+    renderFavPager(pages);
+  }catch(e){}
+  FAV_LOADING = false;
+}
+function renderFavPager(pages){
+  const nums = $("fpgNums"); nums.innerHTML = "";
+  $("fpgPrev").disabled = FAV_PAGE <= 1; $("fpgNext").disabled = FAV_PAGE >= pages;
+  $("fpgJump").max = pages;
+  pageList(FAV_PAGE, pages).forEach(item=>{
+    if(item === "..."){ const d = document.createElement("span"); d.className = "dots"; d.textContent = "…"; nums.appendChild(d); return; }
+    const b = document.createElement("button"); b.className = "iconbtn" + (item === FAV_PAGE ? " on" : ""); b.textContent = item;
+    b.onclick = ()=>{ FAV_PAGE = item; loadFavGrid(false); window.scrollTo({top:0,behavior:"smooth"}); };
+    nums.appendChild(b);
+  });
+}
+$("fpgPrev").onclick = ()=>{ if(FAV_PAGE>1){ FAV_PAGE--; loadFavGrid(false); } };
+$("fpgNext").onclick = ()=>{ FAV_PAGE++; loadFavGrid(false); };
+$("fpgGo").onclick = ()=>{ const t=parseInt($("fpgJump").value); if(t>=1){ FAV_PAGE=t; loadFavGrid(false); } };
+$("btnNewFolder").onclick = async ()=>{
+  const name = prompt(t("favNewName"));
+  if(!name || !name.trim()) return;
+  const r = await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"create", name: name.trim()})});
+  if(!r.ok){ alert(r.error || t("createFail")); return; }
+  FAV_FOLDER = name.trim(); loadFolders(); loadFavGrid(true);
+};
+
+// ---------- 拉框多选（收藏视图） ----------
+function toggleSel(d, it, src){
+  const key = src + ":" + it.file;
+  if(SEL.has(key)){ SEL.delete(key); d.classList.remove("sel"); }
+  else { SEL.add(key); d.classList.add("sel"); }
+  $("selBar").hidden = !SEL.size;
+  $("selCount").textContent = t("favSelCount") + " " + SEL.size;
+}
+(function(){
+  let x0=0, y0=0, active=false, selEl=null, lastSel=[];
+  const grid = $("favGrid");
+  grid.addEventListener("mousedown", e=>{
+    if(e.button !== 0 || e.target.closest(".item")) return;
+    active = true;
+    x0 = e.clientX; y0 = e.clientY;
+    if(!selEl){ selEl = document.createElement("div"); selEl.id = "selRect"; document.body.appendChild(selEl); }
+    selEl.style.display = "block";
+  });
+  document.addEventListener("mousemove", e=>{
+    if(!active) return;
+    const x = Math.min(e.clientX, x0), y = Math.min(e.clientY, y0);
+    const w = Math.abs(e.clientX - x0), h = Math.abs(e.clientY - y0);
+    selEl.style.left = x+"px"; selEl.style.top = y+"px"; selEl.style.width = w+"px"; selEl.style.height = h+"px";
+  });
+  document.addEventListener("mouseup", e=>{
+    if(!active) return;
+    active = false; selEl.style.display = "none";
+    const rect = {x: Math.min(e.clientX,x0), y: Math.min(e.clientY,y0), w: Math.abs(e.clientX-x0), h: Math.abs(e.clientY-y0)};
+    const items = grid.querySelectorAll(".item");
+    lastSel = [];
+    items.forEach(d=>{
+      const r = d.getBoundingClientRect();
+      if(r.left < rect.x+rect.w && r.right > rect.x && r.top < rect.y+rect.h && r.bottom > rect.y){
+        d.classList.add("sel");
+        const it = FAV_ITEMS[Array.from(items).indexOf(d)];
+        const key = it.source + ":" + it.file;
+        SEL.add(key); lastSel.push({source: it.source, file: it.file});
+      }
+    });
+    $("selBar").hidden = !SEL.size;
+    $("selCount").textContent = t("favSelCount") + " " + SEL.size;
+  });
+})();
+$("selClear").onclick = ()=>{
+  SEL.clear(); $("selBar").hidden = true;
+  $("favGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel"));
+};
+$("selRemoveFav").onclick = async ()=>{
+  const items = [...SEL.values()].map(k=>{ const [s,f] = k.split(":"); return {source: s, file: f}; });
+  await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"remove", folder: FAV_FOLDER, items})});
+  SEL.clear(); $("selBar").hidden = true;
+  loadFolders(); loadFavGrid(false);
+};
+$("selAddFolder").onclick = async ()=>{
+  const items = [...SEL.values()].map(k=>{ const [s,f] = k.split(":"); return {source: s, file: f}; });
+  const name = prompt(t("dragToWhich"));
+  if(!name || !name.trim()) return;
+  await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"add", folder: name.trim(), items})});
+  loadFolders();
+};
+
+let toastTimer = null;
+function showToast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+// ---------- 灯箱 ----------
+function paramBadges(it){
+  const p = it.params || {};
+  const defs = [
+    [t("lblSeed"), p.seed], [t("lblSteps"), p.steps ? `${p.steps}` : ""],
+    [t("lblCfg"), p.cfg], [t("lblSampler"), p.sampler],
+    [t("lblScheduler"), p.scheduler],
+    [t("lblSize"), p.width && p.height ? `${p.width}×${p.height}` : ""],
+    [t("lblModel"), it.model], [t("lblSize2"), it.size ? `${(it.size/1024).toFixed(0)} KB` : ""],
+  ];
+  return defs.filter(d=>d[1] !== "" && d[1] !== undefined && d[1] !== null)
+             .map(d=>`<div class="pbadge"><div class="pl">${esc(d[0])}</div><div class="pv" title="${esc(d[1])}">${esc(d[1])}</div></div>`)
+             .join("");
+}
+function openLightbox(idx){
+  const it = CUR_ITEMS[idx]; if(!it) return;
+  CUR_IDX = idx;
+  $("mimg").src = imgUrl(SRC, it.file);
+  $("mfile").textContent = it.file;
+  $("mimgName").textContent = it.file.split("/").pop();
+  $("mimgCount").textContent = `${CUR_IDX + 1} / ${CUR_ITEMS.length}`;
+  $("mparams").innerHTML = paramBadges(it);
+  $("mpos").textContent = it.positive || "";
+  $("mraw").classList.remove("show");
+  // 收藏夹选择：标记已包含的收藏夹 + 点击切换（加入/移出）带反馈
+  const pick = $("mFavPick");
+  pick.innerHTML = '<span class="fp-label">' + t("modalAddFav") + '</span>';
+  const file = it.file, src = SRC;
+  const favBtn = $("mFavState");
+  favBtn.classList.remove("on");
+  favBtn.textContent = "☆ " + t("lblFav");
+  api(`/api/folders/of?source=${src}&file=${encodeURIComponent(file)}`).then(r=>{
+    const inFolders = new Set(r.folders || []);
+    if(inFolders.size){ favBtn.classList.add("on"); favBtn.textContent = "★ " + t("lblFaved"); }
+    favBtn.onclick = async ()=>{
+      const target = inFolders.has("默认收藏") ? null : "默认收藏";
+      if(!target){ favBtn.classList.remove("on"); favBtn.textContent = "☆ " + t("lblFav");
+        await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({action:"remove", folder: "默认收藏", items: [{source: src, file}]})});
+        inFolders.delete("默认收藏"); showToast(t("toastRemoved") + "默认收藏」");
+      } else {
+        favBtn.classList.add("on"); favBtn.textContent = "★ " + t("lblFaved");
+        await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({action:"add", folder: "默认收藏", items: [{source: src, file}]})});
+        inFolders.add("默认收藏"); showToast(t("toastAdded") + "默认收藏」");
+      }
+      loadFolders(); loadDefaultFavs();
+    };
+    Object.keys(FOLDERS).forEach(name=>{
+      const b = document.createElement("button");
+      const isIn = inFolders.has(name);
+      if(isIn) b.classList.add("in");
+      b.textContent = name;
+      b.onclick = async ()=>{
+        if(b.classList.contains("in")){
+          await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({action:"remove", folder: name, items: [{source: src, file}]})});
+          b.classList.remove("in");
+          showToast(t("toastRemoved") + name + "」");
+        } else {
+          await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({action:"add", folder: name, items: [{source: src, file}]})});
+          b.classList.add("in");
+          showToast(t("toastAdded") + name + "」");
+        }
+        loadFolders(); loadDefaultFavs();
+      };
+      pick.appendChild(b);
+    });
+  }).catch(()=>{});
+  $("modal").classList.add("show");
+}
+$("close").onclick = ()=>$("modal").classList.remove("show");
+$("modal").onclick = e=>{ if(e.target === $("modal")) $("modal").classList.remove("show"); };
+$("prev").onclick = e=>{ e.stopPropagation(); if(CUR_IDX>0) openLightbox(CUR_IDX-1); };
+$("next").onclick = e=>{ e.stopPropagation(); if(CUR_IDX<CUR_ITEMS.length-1) openLightbox(CUR_IDX+1); };
+// 全屏观看：按钮进入全屏，滚轮 / 左右按钮切换图片
+$("mFs").onclick = e=>{
+  e.stopPropagation();
+  const el = $("modal");
+  if(document.fullscreenElement){ document.exitFullscreen(); }
+  else if(el.requestFullscreen){
+    el.classList.add("fs");
+    el.requestFullscreen().catch(()=>{});
+  }
+};
+document.addEventListener("fullscreenchange", ()=>{
+  if(!document.fullscreenElement) $("modal").classList.remove("fs");
+});
+let wheelLock = 0;
+$("modal").addEventListener("wheel", e=>{
+  if(!document.fullscreenElement) return;
+  e.preventDefault();
+  const now = Date.now();
+  if(now - wheelLock < 250) return;
+  wheelLock = now;
+  if(e.deltaY > 0) $("next").click(); else $("prev").click();
+}, {passive:false});
+document.addEventListener("keydown", e=>{
+  if(!$("modal").classList.contains("show")) return;
+  if(e.key === "Escape") $("modal").classList.remove("show");
+  if(e.key === "ArrowLeft") openLightbox(Math.max(0, CUR_IDX-1));
+  if(e.key === "ArrowRight") openLightbox(Math.min(CUR_ITEMS.length-1, CUR_IDX+1));
+});
+$("mCopy").onclick = ()=>{ const it = CUR_ITEMS[CUR_IDX]; if(it) navigator.clipboard.writeText(it.positive || "").then(()=>showToast(t("toastCopyOk"))); };
+$("mCopyImg").onclick = async ()=>{
+  const it = CUR_ITEMS[CUR_IDX]; if(!it) return;
+  try{ const blob = await fetch(imgUrl(SRC, it.file)).then(r=>r.blob());
+       await navigator.clipboard.write([new ClipboardItem({"image/png": blob})]); showToast(t("toastImgCopyOk")); }catch(e){ showToast(t("toastImgCopyFail")); }
+};
+$("mDown").onclick = ()=>{
+  const it = CUR_ITEMS[CUR_IDX]; if(!it) return;
+  const a = document.createElement("a"); a.href = imgUrl(SRC, it.file); a.download = it.file.split("/").pop(); a.click();
+};
+$("mMeta").onclick = async ()=>{
+  const it = CUR_ITEMS[CUR_IDX]; if(!it) return;
+  const raw = $("mraw");
+  if(raw.classList.contains("show")){ raw.classList.remove("show"); return; }
+  try{ const r = await api(`/api/meta?source=${SRC}&file=${encodeURIComponent(it.file)}`); raw.textContent = r.metadata || t("noMeta"); raw.classList.add("show"); }catch(e){}
+};
+$("mOpen").onclick = ()=>{ const it = CUR_ITEMS[CUR_IDX]; if(it) window.open(imgUrl(SRC, it.file), "_blank"); };
+
+// ---------- 设置 & 目录选择 ----------
+async function checkSettings(){
+  const s = await api("/api/settings");
+  CFG_WEBUI = !!s.configured;
+  $("setupPath").value = s.webui_root || "";
+  if(!s.configured){
+    $("setup").classList.add("show");
+    boot();   // 未配置也先启动（ComfyUI 源可用），设置框叠在上面
+    return;
+  }
+  boot();     // 已配置：直接启动
+}
+$("btnSetup").onclick = ()=>$("setup").classList.add("show");
+$("btnSetupSkip").onclick = ()=>{ CFG_WEBUI = false; $("setup").classList.remove("show"); if(!BOOTED) boot(); };
+$("btnSetupSave").onclick = async ()=>{
+  const r = await api("/api/settings", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({webui_root: $("setupPath").value})});
+  const msg = $("setupMsg");
+  if(r.ok){
+    CFG_WEBUI = true;
+    msg.textContent = t("setupSaved"); msg.className = "msg ok";
+    setTimeout(()=>{ $("setup").classList.remove("show"); if(!BOOTED) boot(); else { refreshSource(); } }, 500);
+  }
+  else { msg.textContent = "❌ " + (r.error||""); msg.className = "msg err"; }
+};
+// 目录选择器
+let FS_PATH = "";
+async function fsShowDrives(){
+  FS_PATH = "";
+  const r = await api("/api/fs/drives");
+  const box = $("fsList"); box.innerHTML = "";
+  $("fsPath").textContent = "选择盘符";
+  r.drives.forEach(d=>{
+    const row = document.createElement("div"); row.className = "fs-row";
+    row.innerHTML = `<span class="ic">💽</span>${d}`;
+    row.onclick = ()=>fsEnter(d);
+    box.appendChild(row);
+  });
+}
+async function fsEnter(path){
+  const r = await api("/api/fs/list?path=" + encodeURIComponent(path));
+  if(r.error){ alert(r.error); return; }
+  FS_PATH = r.path;
+  $("fsPath").textContent = r.path;
+  const box = $("fsList"); box.innerHTML = "";
+  (r.dirs||[]).forEach(d=>{
+    const row = document.createElement("div"); row.className = "fs-row";
+    row.innerHTML = `<span class="ic">📁</span><span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${esc(d.name)}</span>${d.has_outputs?'<span class="tag">${t("hasOutputs")}</span>':''}${d.has_models?'<span class="tag">${t("hasModels")}</span>':''}`;
+    row.onclick = ()=>fsEnter(r.path + "\\" + d.name);
+    box.appendChild(row);
+  });
+  if(!(r.dirs||[]).length) box.innerHTML = '<div class="empty">空目录</div>';
+}
+$("btnBrowse").onclick = ()=>{ $("fsPicker").classList.add("show"); fsShowDrives(); };
+$("fsUp").onclick = async ()=>{
+  if(!FS_PATH) return;
+  const parent = (await api("/api/fs/list?path=" + encodeURIComponent(FS_PATH))).parent;
+  if(parent) fsEnter(parent);
+  else fsShowDrives();
+};
+$("fsSelect").onclick = ()=>{
+  if(!FS_PATH) return;
+  $("setupPath").value = FS_PATH;
+  $("fsPicker").classList.remove("show");
+};
+$("fsCancel").onclick = ()=>$("fsPicker").classList.remove("show");
+
+// ---------- 启动 ----------
+let BOOTED = false;
+async function boot(){
+  if(BOOTED){ await load(false); return; }
+  BOOTED = true;
+  await loadDefaultFavs(); await loadFolders();
+  await loadModels(); await loadSamplers(); await loadStats();
+  try{ await fetch(`${API}/api/boot`); }catch(e){}
+  await load(true);
+  const iv = setInterval(async ()=>{
+    try{
+      const st = await api("/api/status");
+      const c = st.comfyui || {}, w = st.webui || {};
+      const building = [c, w].filter(x => !x.ready && x.total > 0);
+      if(building.length){
+        const total = (c.total||0) + (w.total||0);
+        const scanned = (c.scanned||0) + (w.scanned||0);
+        const pct = total ? Math.round(scanned / total * 100) : 0;
+        $("indexBar").hidden = false;
+        $("indexFill").style.width = pct + "%";
+        $("indexText").textContent = `${scanned}/${total} (${pct}%)`;
+        return;
+      }
+      $("indexBar").hidden = true;
+      const cur = st[SRC] || {};
+      if(!cur.ready){
+        if(cur.total > 0) $("count").textContent = `... ${cur.scanned}/${cur.total}`;
+        return;
+      }
+      clearInterval(iv);
+      $("count").textContent = (t("countTotal") ? t("countTotal") + " " : "") + TOTAL + (t("countOf") ? " " + t("countOf") : "");
+      await loadModels(); await loadSamplers(); await loadStats();
+      await load(false);
+    }catch(e){}
+  }, 2000);
+}
+checkSettings();
+</script>
+</body>
+</html>
