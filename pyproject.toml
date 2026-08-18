@@ -9,7 +9,8 @@ authors = [{ name = "Gallery4ComfyUI" }]
 keywords = ["comfyui", "gallery", "sd-webui", "image-browser"]
 
 [tool.comfy]
-PublisherId = "gallery4comfyui"
-PublisherName = "Gallery4ComfyUI"
+PublisherId = "ainghhh"
 DisplayName = "Gallery4ComfyUI"
+Description = "双来源图片图库，浏览、搜索、筛选ComfyUI与SD WebUI生成的图片，支持高级tag搜索、多收藏夹与全屏浏览。"
 Icon = ""
+Tags = ["gallery","image","utilities"]
