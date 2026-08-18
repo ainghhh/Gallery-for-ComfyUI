@@ -1,5 +1,5 @@
 [project]
-name = "ComfyUI-Gallery4ComfyUI"
+name = "gallery4comfyui"
 version = "1.0.0"
 description = "Dual-source image gallery for ComfyUI: browse/search/filter ComfyUI & Stable Diffusion WebUI outputs with advanced tag search and favorites"
 readme = "README.md"
@@ -7,6 +7,9 @@ requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Gallery4ComfyUI" }]
 keywords = ["comfyui", "gallery", "sd-webui", "image-browser"]
+
+[project.urls]
+Repository = "https://github.com/ainghhh/Gallery-for-ComfyUI"
 
 [tool.comfy]
 PublisherId = "ainghhh"
