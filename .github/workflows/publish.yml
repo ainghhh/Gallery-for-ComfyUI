@@ -18,4 +18,4 @@ jobs:
       - name: Publish node to registry
         run: comfy node publish
         env:
-          REGISTRY_ACCESS_TOKEN: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+          COMFY_REGISTRY_API_KEY: ${{ secrets.COMFY_REGISTRY_API_KEY }}
