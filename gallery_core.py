@@ -355,10 +355,12 @@ def _parser_webui(fp):
     return _parse_sd_parameters(texts.get("parameters") or texts.get("Description") or "")
 
 
-def start_scan(source, force=False):
+def start_scan(source, force=False, refresh=False):
     """惰性启动扫描（幂等）：
     内存已就绪 -> 直接返回；磁盘有缓存 -> 加载进内存返回（不启动线程）；
-    两者都没有 -> 启动后台线程扫描。force=True 时删除缓存全量重建。"""
+    两者都没有 -> 启动后台线程扫描。force=True 时删除缓存全量重建。
+    refresh=True 时即使内存/缓存已就绪，也启动后台增量扫描
+    （_scan_directory 复用缓存中未变化文件，仅解析新文件，速度快）。"""
     if source == "comfyui":
         root = folder_paths.get_output_directory() if folder_paths else None
         parser = _parser_comfyui
@@ -376,9 +378,9 @@ def start_scan(source, force=False):
                 pass
     with _indexes_lock:
         st = _indexes.get(source)
-        if st and st.get("ready") and not force:
+        if st and st.get("ready") and not force and not refresh:
             return {"ok": True, "ready": True}
-    if not force:
+    if not force and not refresh:
         cached = _load_cached_index(source)
         if cached is not None:
             with _indexes_lock:

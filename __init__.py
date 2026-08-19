@@ -107,7 +107,8 @@ async def api_settings_save(request):
 async def api_scan(request):
     source = request.query.get("source", "comfyui")
     force = request.query.get("force", "0") == "1"
-    r = G.start_scan(source, force=force)
+    refresh = request.query.get("refresh", "0") == "1"
+    r = G.start_scan(source, force=force, refresh=refresh)
     return _json(r)
 
 
@@ -195,10 +196,10 @@ async def api_meta(request):
 
 @PromptServer.instance.routes.get(P + "/api/boot")
 async def api_boot(request):
-    """点节点按钮时调用：惰性启动图库（幂等：索引已就绪则跳过扫描）"""
+    """点节点按钮时调用：惰性启动图库；每次打开都触发后台增量扫描（新图片立即可见）"""
     results = {}
     for src in ("comfyui", "webui"):
-        results[src] = G.start_scan(src, force=False)
+        results[src] = G.start_scan(src, refresh=True)
     return _json({"ok": True, "booted": results})
 
 
