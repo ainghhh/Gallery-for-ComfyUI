@@ -82,7 +82,9 @@ def _safe_name(name):
 async def page_index(request):
     fp = os.path.join(WEB_DIR, "index.html")
     if os.path.isfile(fp):
-        return web.FileResponse(fp)
+        resp = web.FileResponse(fp)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
     return web.Response(status=404, text="index.html not found")
 
 
