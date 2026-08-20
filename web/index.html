@@ -444,6 +444,7 @@
         <button id="mCopyImg" data-i18n="modalCopyImg">🖼 复制图片</button>
         <button id="mMeta" data-i18n="modalMeta">📄 PNG 信息</button>
         <button id="mOpen" data-i18n="modalOpen">↗ 原图</button>
+        <button id="mOpenFolder" data-i18n="modalOpenFolder">📂 所在位置</button>
       </div>
     </div>
   </div>
@@ -477,7 +478,7 @@ const I18N = {
     favEmpty: "该收藏夹还没有图片，从图库拖进来吧", favPickEmpty: "选择左侧收藏夹查看图片",
     favNewName: "新收藏夹名称：", favDelConfirm: "删除收藏夹「",
     modalCopy: "⧉ 复制提示词", modalCopyImg: "🖼 复制图片", modalDown: "⬇ 下载",
-    modalMeta: "📄 PNG 信息", modalOpen: "↗ 原图", modalAddFav: "加入收藏夹：",
+    modalMeta: "📄 PNG 信息", modalOpen: "↗ 原图", modalOpenFolder: "📂 所在位置", modalAddFav: "加入收藏夹：", openFolderFail: "打开位置失败",
     modalPrompt: "正面提示词",
     lblSeed: "种子", lblSteps: "步数", lblCfg: "CFG", lblSampler: "采样器",
     lblScheduler: "调度器", lblSize: "尺寸", lblModel: "模型", lblSize2: "大小",
@@ -524,7 +525,7 @@ const I18N = {
     favEmpty: "No images in this folder yet — drag some in", favPickEmpty: "Pick a folder on the left",
     favNewName: "New folder name:", favDelConfirm: "Delete folder 「",
     modalCopy: "⧉ Copy prompt", modalCopyImg: "🖼 Copy image", modalDown: "⬇ Download",
-    modalMeta: "📄 PNG info", modalOpen: "↗ Open", modalAddFav: "Add to folder: ",
+    modalMeta: "📄 PNG info", modalOpen: "↗ Open", modalOpenFolder: "📂 Open folder", modalAddFav: "Add to folder: ", openFolderFail: "Failed to open folder",
     modalPrompt: "Positive prompt",
     lblSeed: "Seed", lblSteps: "Steps", lblCfg: "CFG", lblSampler: "Sampler",
     lblScheduler: "Scheduler", lblSize: "Size", lblModel: "Model", lblSize2: "Size",
@@ -694,7 +695,7 @@ async function load(reset){
   }catch(e){ $("loading").textContent = t("loading") + " ✖"; }
   LOADING = false;
 }
-function mkItem(it, src){
+function mkItem(it, src, items){
   const d = document.createElement("div"); d.className = "item";
   d.draggable = true;
   const key = src + ":" + it.file;
@@ -710,7 +711,7 @@ function mkItem(it, src){
   meta.appendChild(fname); meta.appendChild(sub);
   const fm = document.createElement("span"); fm.className = "favmark"; fm.textContent = "★";
   d.appendChild(badge); d.appendChild(img); d.appendChild(meta); d.appendChild(fm);
-  d.onclick = ()=>{ if(SEL.size){ toggleSel(d, it, src); return; } CUR_IDX = CUR_ITEMS.indexOf(it); openLightbox(CUR_IDX); };
+  d.onclick = ()=>{ if(SEL.size){ toggleSel(d, it, src); return; } CUR_ITEMS = items || CUR_ITEMS; CUR_IDX = CUR_ITEMS.indexOf(it); openLightbox(CUR_IDX); };
   d.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", JSON.stringify([{source: src, file: it.file}])); });
   return d;
 }
@@ -1040,7 +1041,7 @@ async function loadFavGrid(reset){
     const grid = $("favGrid"); grid.innerHTML = "";
     if(!slice.length) grid.innerHTML = '<div class="empty">' + t("favEmpty") + '</div>';
     FAV_ITEMS = slice;
-    slice.forEach(it=>{ grid.appendChild(mkItem(it, it.source)); });
+    slice.forEach(it=>{ grid.appendChild(mkItem(it, it.source, FAV_ITEMS)); });
     renderFavPager(pages);
   }catch(e){}
   FAV_LOADING = false;
@@ -1257,6 +1258,7 @@ $("mMeta").onclick = async ()=>{
   try{ const r = await api(`/api/meta?source=${SRC}&file=${encodeURIComponent(it.file)}`); raw.textContent = r.metadata || t("noMeta"); raw.classList.add("show"); }catch(e){}
 };
 $("mOpen").onclick = ()=>{ const it = CUR_ITEMS[CUR_IDX]; if(it) window.open(imgUrl(SRC, it.file), "_blank"); };
+$("mOpenFolder").onclick = async ()=>{ const it = CUR_ITEMS[CUR_IDX]; if(!it) return; const r = await api(`/api/image/open-folder?source=${SRC}&file=${encodeURIComponent(it.file)}`); if(!r.ok) showToast(r.error || t("openFolderFail")); };
 
 // ---------- 设置 & 目录选择 ----------
 async function checkSettings(){

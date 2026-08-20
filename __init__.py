@@ -187,6 +187,21 @@ async def api_image(request):
     return web.FileResponse(fp)
 
 
+@PromptServer.instance.routes.get(P + "/api/image/open-folder")
+async def api_open_folder(request):
+    """在文件管理器中打开图片所在文件夹（Windows）"""
+    source = request.query.get("source", "comfyui")
+    file = _safe_name(request.query.get("file", ""))
+    fp = G.image_path(source, file)
+    if not fp:
+        return _json({"error": "not found"}, 404)
+    try:
+        os.startfile(os.path.dirname(fp))
+        return _json({"ok": True})
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)})
+
+
 @PromptServer.instance.routes.get(P + "/api/meta")
 async def api_meta(request):
     source = request.query.get("source", "comfyui")
