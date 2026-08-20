@@ -9,7 +9,7 @@ Gallery4ComfyUI —— ComfyUI 自定义节点插件（发布版）
 
 安装：将本目录放入 ComfyUI/custom_nodes/Gallery4ComfyUI 后重启 ComfyUI。
 """
-import os, json, threading
+import os, json, threading, subprocess
 
 from server import PromptServer
 from aiohttp import web
@@ -191,14 +191,14 @@ async def api_image(request):
 
 @PromptServer.instance.routes.get(P + "/api/image/open-folder")
 async def api_open_folder(request):
-    """在文件管理器中打开图片所在文件夹（Windows）"""
+    """在文件管理器中打开图片所在文件夹并选中该文件（Windows）"""
     source = request.query.get("source", "comfyui")
     file = _safe_name(request.query.get("file", ""))
     fp = G.image_path(source, file)
     if not fp:
         return _json({"error": "not found"}, 404)
     try:
-        os.startfile(os.path.dirname(fp))
+        subprocess.Popen(["explorer", "/select,", fp])
         return _json({"ok": True})
     except Exception as e:
         return _json({"ok": False, "error": str(e)})
