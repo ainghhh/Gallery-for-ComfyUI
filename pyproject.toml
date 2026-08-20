@@ -1,6 +1,6 @@
 [project]
 name = "gallery4comfyui"
-version = "1.0.1"
+version = "1.0.2"
 description = "Dual-source image gallery for ComfyUI: browse/search/filter ComfyUI & Stable Diffusion WebUI outputs with advanced tag search and favorites"
 readme = "README.md"
 requires-python = ">=3.9"
