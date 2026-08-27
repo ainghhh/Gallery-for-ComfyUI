@@ -1323,6 +1323,14 @@ $("btnSetupSave").onclick = async ()=>{
 let FS_PATH = "";
 async function fsShowDrives(){
   FS_PATH = "";
+  // 位置记忆：优先进入上次使用的目录
+  const last = localStorage.getItem("gallery4comfyui-lastdir") || "";
+  if(last){
+    try{
+      const r = await api("/api/fs/list?path=" + encodeURIComponent(last));
+      if(!r.error){ fsEnter(last); return; }
+    }catch(e){}
+  }
   const r = await api("/api/fs/drives");
   const box = $("fsList"); box.innerHTML = "";
   $("fsPath").textContent = "选择盘符";
@@ -1337,6 +1345,7 @@ async function fsEnter(path){
   const r = await api("/api/fs/list?path=" + encodeURIComponent(path));
   if(r.error){ alert(r.error); return; }
   FS_PATH = r.path;
+  try{ localStorage.setItem("gallery4comfyui-lastdir", r.path); }catch(e){}
   $("fsPath").textContent = r.path;
   const box = $("fsList"); box.innerHTML = "";
   (r.dirs||[]).forEach(d=>{
@@ -1386,12 +1395,14 @@ function packImages(payload){
   FS_MODE = "pack";
   FS_PICK_CB = async (target)=>{
     FS_PATH = "";
+    try{ localStorage.setItem("gallery4comfyui-lastdir", target); }catch(e){}
     showToast(t("packing"));
     try{
-      const r = await api("/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
-      if(r.ok){ showToast("✅ " + t("packDone") + " " + r.count + " 张 → " + r.zip); }
-      else { showToast("❌ " + (r.error || "打包失败")); }
-    }catch(e){ showToast("❌ 打包失败（" + (e.message || e) + "）"); }
+      const r = await fetch(API + "/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
+      let j = {}; try{ j = await r.json(); }catch(e){}
+      if(r.ok && j.ok){ showToast("✅ " + t("packDone") + " " + j.count + " 张 → " + j.zip); }
+      else { showToast("❌ " + (j.error || ("打包失败 (" + r.status + ")"))); }
+    }catch(e){ showToast("❌ 打包失败（" + (e.message||e) + "）"); }
   };
   $("fsPicker").classList.add("show"); fsShowDrives();
 }
