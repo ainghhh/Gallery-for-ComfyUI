@@ -62,7 +62,9 @@
   .grid.lg{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   .item{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; cursor:pointer; position:relative; transition:box-shadow .15s, transform .15s}
   .item:hover{box-shadow:0 4px 14px rgba(0,0,0,.10); transform:translateY(-2px)}
-  .item.sel{outline:2px solid var(--accent); outline-offset:-2px}
+  .grid, .grid .item, .grid img{user-select:none;-webkit-user-select:none}
+.grid img{-webkit-user-drag:none;user-drag:none}
+.item.sel{outline:2px solid var(--accent); outline-offset:-2px}
   .item img{width:100%; aspect-ratio:1/1; object-fit:cover; display:block; background:#ddd}
   .item .meta{padding:6px 8px}
   .item .fname{font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -1407,12 +1409,12 @@ $("gSelClear").onclick = ()=>{ SEL.clear(); updateSelBars(); $("grid").querySele
 $("agSelClear").onclick = ()=>{ SEL.clear(); updateSelBars(); $("agGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel")); };
 // ---------- 拉框多选（主图库 + 高级搜索）----------
 function bindMarquee(gridId, getItems){
-  let x0=0, y0=0, active=false, selEl=null;
+  let x0=0, y0=0, active=false, selEl=null, dragging=false;
   const grid = $(gridId);
   grid.addEventListener("mousedown", e=>{
-    if(e.button !== 0 || e.target.closest(".item")) return;
-    e.preventDefault();  // 阻止拖拽时选中文字
-    active = true;
+    if(e.button !== 0) return;
+    e.preventDefault();  // 阻止文字选择 + 图片原生拖拽，任何位置都能开始框选
+    active = true; dragging = false;
     const gr = grid.getBoundingClientRect();
     x0 = e.clientX - gr.left; y0 = e.clientY - gr.top;
     if(!selEl){ selEl = document.createElement("div"); selEl.id = "selRect"; grid.appendChild(selEl); }
@@ -1422,6 +1424,7 @@ function bindMarquee(gridId, getItems){
     if(!active) return;
     const gr = grid.getBoundingClientRect();
     const cx = e.clientX - gr.left, cy = e.clientY - gr.top;
+    if(Math.abs(cx - x0) > 5 || Math.abs(cy - y0) > 5) dragging = true;
     const x = Math.min(cx, x0), y = Math.min(cy, y0);
     const w = Math.abs(cx - x0), h = Math.abs(cy - y0);
     selEl.style.left = x+"px"; selEl.style.top = y+"px"; selEl.style.width = w+"px"; selEl.style.height = h+"px";
@@ -1430,6 +1433,7 @@ function bindMarquee(gridId, getItems){
     if(!active) return;
     active = false;
     if(selEl) selEl.style.display = "none";
+    if(!dragging){ return; }  // 视为点击：不框选，交给 click 处理（开灯箱/单选）
     const gr = grid.getBoundingClientRect();
     const cx = e.clientX - gr.left, cy = e.clientY - gr.top;
     const rectX = Math.min(cx, x0), rectY = Math.min(cy, y0);
