@@ -1178,8 +1178,9 @@ function showToast(msg, openPath){
   t.classList.add("show");
   TOAST_OPEN_PATH = openPath || null;
   t.style.cursor = openPath ? "pointer" : "default";
+  t.style.pointerEvents = openPath ? "auto" : "none";
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ t.classList.remove("show"); TOAST_OPEN_PATH = null; }, 4000);
+  toastTimer = setTimeout(()=>{ t.classList.remove("show"); TOAST_OPEN_PATH = null; t.style.pointerEvents = "none"; }, 4000);
 }
 $("toast").onclick = async ()=>{
   if(TOAST_OPEN_PATH){
