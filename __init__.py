@@ -9,7 +9,7 @@ Gallery4ComfyUI —— ComfyUI 自定义节点插件（发布版）
 
 安装：将本目录放入 ComfyUI/custom_nodes/Gallery4ComfyUI 后重启 ComfyUI。
 """
-import os, json, threading, subprocess, zipfile, datetime
+import os, json, threading, subprocess, zipfile, datetime, asyncio
 
 from server import PromptServer
 from aiohttp import web
@@ -76,6 +76,27 @@ def _safe_name(name):
     n = (name or "").replace("\\", "/").lstrip("/")
     parts = [p for p in n.split("/") if p not in ("", ".", "..") and not p.endswith(":")]
     return "/".join(parts)
+
+
+def _pick_native_folder():
+    """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径或空串"""
+    ps = (
+        "Add-Type -AssemblyName System.Windows.Forms; "
+        "$f = New-Object System.Windows.Forms.FolderBrowserDialog; "
+        "$f.Description = '选择打包保存文件夹'; "
+        "$f.ShowNewFolderButton = $true; "
+        "if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
+        "{ Write-Output $f.SelectedPath }"
+    )
+    try:
+        r = subprocess.run(
+            ["powershell", "-STA", "-NoProfile", "-Command", ps],
+            capture_output=True, text=True, timeout=600,
+        )
+        lines = [x.strip() for x in (r.stdout or "").splitlines() if x.strip()]
+        return lines[-1] if lines else ""
+    except Exception:
+        return ""
 
 
 @PromptServer.instance.routes.get(P + "/")
@@ -298,6 +319,15 @@ async def api_fs_list(request):
     path = request.query.get("path", "")
     r = G.list_dir(path)
     return _json(r, 200 if "error" not in r else 400)
+
+
+@PromptServer.instance.routes.post(P + "/api/fs/pick-dir")
+async def api_pick_dir(request):
+    """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径"""
+    path = await asyncio.to_thread(_pick_native_folder)
+    if path and os.path.isdir(path):
+        return _json({"path": path})
+    return _json({"path": ""})
 
 
 @PromptServer.instance.routes.post(P + "/api/zip")

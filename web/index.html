@@ -1382,15 +1382,16 @@ function advQuery(){
     min_w: f.minW, min_h: f.minH, sort: f.sort};
 }
 function packImages(payload){
-  FS_MODE = "pack";
-  FS_PICK_CB = async (target)=>{
-    FS_PATH = "";
+  (async ()=>{
+    let target = "";
+    try{ const r = await api("/api/fs/pick-dir", {method:"POST"}); target = (r && r.path) || ""; }
+    catch(e){ target = ""; }
+    if(!target){ showToast("已取消"); return; }
     showToast(t("packing"));
     const r = await api("/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
     if(r.ok) showToast("✅ " + t("packDone") + " " + r.count + " 张 → " + r.zip);
     else showToast("❌ " + (r.error || "打包失败"));
-  };
-  $("fsPicker").classList.add("show"); fsShowDrives();
+  })();
 }
 function updateSelBars(){
   const n = SEL.size;

@@ -11,7 +11,7 @@ Gallery4ComfyUI · 独立启动器
 - 默认 output 目录 = 绘世整合包 ComfyUI 的 output（可用 --output 覆盖）
 - 启动后浏览器访问 http://127.0.0.1:8288/
 """
-import os, sys, json, subprocess
+import os, sys, json, subprocess, zipfile, datetime, asyncio
 from types import SimpleNamespace
 
 PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -81,6 +81,27 @@ def _safe_name(name):
     n = (name or "").replace("\\", "/").lstrip("/")
     parts = [p for p in n.split("/") if p not in ("", ".", "..") and not p.endswith(":")]
     return "/".join(parts)
+
+
+def _pick_native_folder():
+    """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径或空串"""
+    ps = (
+        "Add-Type -AssemblyName System.Windows.Forms; "
+        "$f = New-Object System.Windows.Forms.FolderBrowserDialog; "
+        "$f.Description = '选择打包保存文件夹'; "
+        "$f.ShowNewFolderButton = $true; "
+        "if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
+        "{ Write-Output $f.SelectedPath }"
+    )
+    try:
+        r = subprocess.run(
+            ["powershell", "-STA", "-NoProfile", "-Command", ps],
+            capture_output=True, text=True, timeout=600,
+        )
+        lines = [x.strip() for x in (r.stdout or "").splitlines() if x.strip()]
+        return lines[-1] if lines else ""
+    except Exception:
+        return ""
 
 
 app = web.Application()
@@ -281,6 +302,14 @@ async def api_fs_list(request):
     return _json(r, 200 if "error" not in r else 400)
 
 
+async def api_pick_dir(request):
+    """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径"""
+    path = await asyncio.to_thread(_pick_native_folder)
+    if path and os.path.isdir(path):
+        return _json({"path": path})
+    return _json({"path": ""})
+
+
 async def api_zip(request):
     """打包图片到用户选择的目标文件夹：items(选中) 或 query(筛选结果整体)"""
     try:
@@ -336,6 +365,7 @@ async def api_zip(request):
 # 启动
 # ---------------------------------------------------------------------------
 app.router.add_get(P + "/api/fs/list", api_fs_list)
+app.router.add_post(P + "/api/fs/pick-dir", api_pick_dir)
 app.router.add_post(P + "/api/zip", api_zip)
 app.router.add_get(P + "/api/fs/drives", api_fs_drives)
 app.router.add_post(P + "/api/folders", api_folders_manage)
