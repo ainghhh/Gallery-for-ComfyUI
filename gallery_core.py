@@ -577,6 +577,7 @@ def samplers(source):
 
 
 def loras(source):
+    """LoRA 列表：仅保留磁盘上仍存在的 LoRA，按安装时间（文件 mtime）倒序"""
     entries, _ = get_index(source)
     counter = {}
     for e in entries:
@@ -584,7 +585,57 @@ def loras(source):
             l = str(l).strip()
             if l:
                 counter[l] = counter.get(l, 0) + 1
-    return [{"lora": l, "count": n} for l, n in sorted(counter.items(), key=lambda kv: -kv[1])]
+    dmap = _lora_disk_map(source)
+    has_disk = bool(dmap)
+    items = []
+    for l, n in counter.items():
+        if has_disk and l not in dmap:
+            continue  # 磁盘已不存在该 LoRA：从列表清除
+        items.append((l, n, dmap.get(l, 0)))
+    items.sort(key=lambda x: (-x[2], -x[1]))  # 按安装时间倒序（新装的在前），同时间按使用次数
+    return [{"lora": l, "count": n, "mtime": mt} for l, n, mt in items]
+
+
+_LORA_EXTS = (".safetensors", ".pt", ".ckpt", ".bin", ".pth", ".sft")
+
+
+def _lora_disk_map(source):
+    """扫描磁盘 LoRA 目录：{规范化名: 文件mtime}；目录不可用时返回空 dict（表示不过滤）"""
+    roots = []
+    if source == "comfyui":
+        if folder_paths is not None:
+            try:
+                roots = list(folder_paths.get_folder_paths("loras") or [])
+            except Exception:
+                roots = []
+            if not roots:
+                try:
+                    mdir = folder_paths.models_dir
+                    if mdir:
+                        roots = [os.path.join(mdir, "loras")]
+                except Exception:
+                    pass
+    else:
+        root = os.path.join(load_settings().get("webui_root", ""), "models", "Lora")
+        if os.path.isdir(root):
+            roots = [root]
+    m = {}
+    for root in roots:
+        if not root or not os.path.isdir(root):
+            continue
+        try:
+            for dirpath, _dirnames, filenames in os.walk(root):
+                for fn in filenames:
+                    if fn.lower().endswith(_LORA_EXTS):
+                        base = os.path.splitext(fn)[0].strip()
+                        if base:
+                            try:
+                                m[base] = os.path.getmtime(os.path.join(dirpath, fn))
+                            except Exception:
+                                pass
+        except Exception:
+            continue
+    return m
 
 
 def stats():

@@ -9,7 +9,7 @@ Gallery4ComfyUI —— ComfyUI 自定义节点插件（发布版）
 
 安装：将本目录放入 ComfyUI/custom_nodes/Gallery4ComfyUI 后重启 ComfyUI。
 """
-import os, json, threading, subprocess, zipfile, datetime, asyncio, time, tempfile
+import os, json, threading, subprocess, zipfile, datetime, asyncio, time, tempfile, re
 
 from server import PromptServer
 from aiohttp import web
@@ -366,8 +366,9 @@ async def api_pick_dir(request):
 @PromptServer.instance.routes.post(P + "/api/zip")
 async def api_zip(request):
     """打包图片到用户选择的目标文件夹。
-    body: {target: "<目录>", items: [{source, file}, ...]}  选中打包
+    body: {target: "<目录>", items: [{source, file}, ...]}                选中打包
           或  {target: "<目录>", query: {source, model, sampler, lora, ...}}  筛选结果整体打包
+    by_model=true 时 query 模式按大模型（model）分子目录打包。
     """
     try:
         data = await request.json()
@@ -376,12 +377,14 @@ async def api_zip(request):
     target = (data.get("target") or "").strip()
     if not target or not os.path.isdir(target):
         return _json({"error": "目标目录不存在"}, 400)
-    files = []
+    by_model = bool(data.get("by_model", False))
+    entries = []  # (磁盘路径, 子目录)
+    n_candidates = 0
     if data.get("items"):
         for it in data["items"]:
             fp = G.image_path(it.get("source", "comfyui"), _safe_name(it.get("file", "")))
             if fp:
-                files.append(fp)
+                entries.append((fp, ""))
     elif data.get("query"):
         q = data["query"]
         r = G.query(
@@ -394,26 +397,35 @@ async def api_zip(request):
             fav_only=q.get("fav", "0") == "1", tags=q.get("tags", ""),
             sort="newest", page=1, page_size=10000,
         )
+        n_candidates = len(r.get("items", []))
         for it in r.get("items", []):
             fp = G.image_path(q.get("source", "comfyui"), _safe_name(it.get("file", "")))
             if fp:
-                files.append(fp)
+                sub = str(it.get("model") or "未分类") if by_model else ""
+                entries.append((fp, sub))
     else:
         return _json({"error": "no items"}, 400)
-    if not files:
-        return _json({"error": "没有可打包的图片"}, 400)
+    if not entries:
+        msg = "没有可打包的图片"
+        if n_candidates:
+            msg += "（候选 %d 个，磁盘均找不到文件）" % n_candidates
+        return _json({"error": msg}, 400)
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     zpath = os.path.join(target, "gallery_export_%s.zip" % ts)
     try:
         with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
             seen = set()
-            for fp in files:
+            for fp, sub in entries:
                 name = os.path.basename(fp)
                 if name in seen:
                     name = "%d_%s" % (len(seen), name)
                 seen.add(name)
-                z.write(fp, name)
-        return _json({"ok": True, "zip": zpath, "count": len(files)})
+                if sub:
+                    safe = re.sub(r'[\\/:*?"<>|]', "_", sub).strip() or "未分类"
+                    z.write(fp, os.path.join(safe, name))
+                else:
+                    z.write(fp, name)
+        return _json({"ok": True, "zip": zpath, "count": len(entries)})
     except Exception as e:
         return _json({"ok": False, "error": str(e)}, 500)
 

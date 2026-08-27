@@ -251,6 +251,7 @@
     <button class="iconbtn" id="btnAdvSearch" data-i18n="advBtn" data-i18n-title="titleAdv" title="🔍">🔍 高级</button>
     <select id="modelSel"><option value="">全部模型</option></select>
     <select id="loraSel"><option value="">全部 LoRA</option></select>
+    <button class="iconbtn" id="btnPackLora" data-i18n="packLora" title="打包此 LoRA 全部图片（按大模型分子目录）">📦 LoRA</button>
     <button class="iconbtn" id="btnAdv" data-i18n="btnAdv2" data-i18n-title="titleFilter" title="Filter">⚙ 筛选</button>
     <button class="iconbtn" id="btnStats" data-i18n-title="titleStats" title="📊">📊</button>
     <button class="iconbtn" id="btnFav" data-i18n-title="titleFav" title="★">★</button>
@@ -493,7 +494,7 @@ const I18N = {
     advHistory: "历史 tag（点击加入搜索，按使用次数）",
     advSuggestPh: "输入 tag 补全…",
     favTitle: "收藏", favNew: "＋ 新建收藏夹", favHint: "拖动图片到左侧收藏夹 · 按住空白处拉框多选",
-    favSelCount: "已选", favSelDrag: "拖入收藏夹…", favSelRemove: "移出本夹", favSelClear: "取消选择", packSel: "📦 打包选中", packAll: "📥 打包全部结果", packing: "打包中…", packDone: "已打包",
+    favSelCount: "已选", favSelDrag: "拖入收藏夹…", favSelRemove: "移出本夹", favSelClear: "取消选择", packSel: "📦 打包选中", packAll: "📥 打包全部结果", packing: "打包中…", packDone: "已打包", packLora: "📦 LoRA",
     favEmpty: "该收藏夹还没有图片，从图库拖进来吧", favPickEmpty: "选择左侧收藏夹查看图片",
     favNewName: "新收藏夹名称：", favDelConfirm: "删除收藏夹「",
     modalCopy: "⧉ 复制提示词", modalCopyImg: "🖼 复制图片", modalDown: "⬇ 下载",
@@ -540,7 +541,7 @@ const I18N = {
     advHistory: "History tags (click to add, by usage)",
     advSuggestPh: "Type for tag suggestions…",
     favTitle: "Favorites", favNew: "＋ New Folder", favHint: "Drag images to folders · drag on empty area to multi-select",
-    favSelCount: "Selected", favSelDrag: "To folder…", favSelRemove: "Remove from folder", favSelClear: "Clear selection", packSel: "📦 Pack selected", packAll: "📥 Pack all results", packing: "Packing…", packDone: "Packed",
+    favSelCount: "Selected", favSelDrag: "To folder…", favSelRemove: "Remove from folder", favSelClear: "Clear selection", packSel: "📦 Pack selected", packAll: "📥 Pack all results", packing: "Packing…", packDone: "Packed", packLora: "📦 LoRA",
     favEmpty: "No images in this folder yet — drag some in", favPickEmpty: "Pick a folder on the left",
     favNewName: "New folder name:", favDelConfirm: "Delete folder 「",
     modalCopy: "⧉ Copy prompt", modalCopyImg: "🖼 Copy image", modalDown: "⬇ Download",
@@ -754,6 +755,11 @@ $("pageSizeSel").onchange = ()=>{ PAGE_SIZE = parseInt($("pageSizeSel").value) |
 $("q").addEventListener("input", debounce(()=>load(true), 300));
 $("modelSel").onchange = ()=>load(true);
 $("loraSel").onchange = ()=>load(true);
+$("btnPackLora").onclick = ()=>{
+  const lo = $("loraSel").value;
+  if(!lo){ showToast("请先在上方选择一个 LoRA"); return; }
+  packImages({query: mainQuery(), by_model: true});
+};
 $("samplerSel").onchange = ()=>load(true);
 $("sortSel").onchange = ()=>load(true);
 $("densitySel").onchange = ()=>$("grid").className = "grid " + $("densitySel").value;
