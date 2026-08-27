@@ -1387,9 +1387,11 @@ function packImages(payload){
   FS_PICK_CB = async (target)=>{
     FS_PATH = "";
     showToast(t("packing"));
-    const r = await api("/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
-    if(r.ok) showToast("✅ " + t("packDone") + " " + r.count + " 张 → " + r.zip);
-    else showToast("❌ " + (r.error || "打包失败"));
+    try{
+      const r = await api("/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
+      if(r.ok){ showToast("✅ " + t("packDone") + " " + r.count + " 张 → " + r.zip); }
+      else { showToast("❌ " + (r.error || "打包失败")); }
+    }catch(e){ showToast("❌ 打包失败（" + (e.message || e) + "）"); }
   };
   $("fsPicker").classList.add("show"); fsShowDrives();
 }
