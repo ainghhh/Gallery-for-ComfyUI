@@ -281,10 +281,62 @@ async def api_fs_list(request):
     return _json(r, 200 if "error" not in r else 400)
 
 
+async def api_zip(request):
+    """打包图片到用户选择的目标文件夹：items(选中) 或 query(筛选结果整体)"""
+    try:
+        data = await request.json()
+    except Exception:
+        return _json({"error": "bad json"}, 400)
+    target = (data.get("target") or "").strip()
+    if not target or not os.path.isdir(target):
+        return _json({"error": "目标目录不存在"}, 400)
+    files = []
+    if data.get("items"):
+        for it in data["items"]:
+            fp = G.image_path(it.get("source", "comfyui"), _safe_name(it.get("file", "")))
+            if fp:
+                files.append(fp)
+    elif data.get("query"):
+        q = data["query"]
+        r = G.query(
+            q.get("source", "comfyui"),
+            q=q.get("q", ""), model=q.get("model", ""), sampler=q.get("sampler", ""),
+            lora=q.get("lora", ""),
+            steps_min=_int(q.get("steps_min")), steps_max=_int(q.get("steps_max")),
+            cfg_min=_float(q.get("cfg_min")), cfg_max=_float(q.get("cfg_max")),
+            min_w=_int(q.get("min_w")), min_h=_int(q.get("min_h")),
+            fav_only=q.get("fav", "0") == "1", tags=q.get("tags", ""),
+            sort="newest", page=1, page_size=10000,
+        )
+        for it in r.get("items", []):
+            fp = G.image_path(q.get("source", "comfyui"), _safe_name(it.get("file", "")))
+            if fp:
+                files.append(fp)
+    else:
+        return _json({"error": "no items"}, 400)
+    if not files:
+        return _json({"error": "没有可打包的图片"}, 400)
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    zpath = os.path.join(target, "gallery_export_%s.zip" % ts)
+    try:
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
+            seen = set()
+            for fp in files:
+                name = os.path.basename(fp)
+                if name in seen:
+                    name = "%d_%s" % (len(seen), name)
+                seen.add(name)
+                z.write(fp, name)
+        return _json({"ok": True, "zip": zpath, "count": len(files)})
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)}, 500)
+
+
 # ---------------------------------------------------------------------------
 # 启动
 # ---------------------------------------------------------------------------
 app.router.add_get(P + "/api/fs/list", api_fs_list)
+app.router.add_post(P + "/api/zip", api_zip)
 app.router.add_get(P + "/api/fs/drives", api_fs_drives)
 app.router.add_post(P + "/api/folders", api_folders_manage)
 app.router.add_get(P + "/api/folders/of", api_folders_of)

@@ -9,7 +9,7 @@ Gallery4ComfyUI —— ComfyUI 自定义节点插件（发布版）
 
 安装：将本目录放入 ComfyUI/custom_nodes/Gallery4ComfyUI 后重启 ComfyUI。
 """
-import os, json, threading, subprocess
+import os, json, threading, subprocess, zipfile, datetime
 
 from server import PromptServer
 from aiohttp import web
@@ -298,6 +298,61 @@ async def api_fs_list(request):
     path = request.query.get("path", "")
     r = G.list_dir(path)
     return _json(r, 200 if "error" not in r else 400)
+
+
+@PromptServer.instance.routes.post(P + "/api/zip")
+async def api_zip(request):
+    """打包图片到用户选择的目标文件夹。
+    body: {target: "<目录>", items: [{source, file}, ...]}  选中打包
+          或  {target: "<目录>", query: {source, model, sampler, lora, ...}}  筛选结果整体打包
+    """
+    try:
+        data = await request.json()
+    except Exception:
+        return _json({"error": "bad json"}, 400)
+    target = (data.get("target") or "").strip()
+    if not target or not os.path.isdir(target):
+        return _json({"error": "目标目录不存在"}, 400)
+    files = []
+    if data.get("items"):
+        for it in data["items"]:
+            fp = G.image_path(it.get("source", "comfyui"), _safe_name(it.get("file", "")))
+            if fp:
+                files.append(fp)
+    elif data.get("query"):
+        q = data["query"]
+        r = G.query(
+            q.get("source", "comfyui"),
+            q=q.get("q", ""), model=q.get("model", ""), sampler=q.get("sampler", ""),
+            lora=q.get("lora", ""),
+            steps_min=_int(q.get("steps_min")), steps_max=_int(q.get("steps_max")),
+            cfg_min=_float(q.get("cfg_min")), cfg_max=_float(q.get("cfg_max")),
+            min_w=_int(q.get("min_w")), min_h=_int(q.get("min_h")),
+            fav_only=q.get("fav", "0") == "1", tags=q.get("tags", ""),
+            sort="newest", page=1, page_size=10000,
+        )
+        for it in r.get("items", []):
+            fp = G.image_path(q.get("source", "comfyui"), _safe_name(it.get("file", "")))
+            if fp:
+                files.append(fp)
+    else:
+        return _json({"error": "no items"}, 400)
+    if not files:
+        return _json({"error": "没有可打包的图片"}, 400)
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    zpath = os.path.join(target, "gallery_export_%s.zip" % ts)
+    try:
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
+            seen = set()
+            for fp in files:
+                name = os.path.basename(fp)
+                if name in seen:
+                    name = "%d_%s" % (len(seen), name)
+                seen.add(name)
+                z.write(fp, name)
+        return _json({"ok": True, "zip": zpath, "count": len(files)})
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)}, 500)
 
 
 # 注意：不在 ComfyUI 启动时做任何扫描 —— 图库为懒启动，

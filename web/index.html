@@ -299,6 +299,13 @@
       <button class="iconbtn" id="pgTopLast" title="»">»</button>
       <span class="pg-jump"><span data-i18n="pgJump">跳至</span> <input type="number" id="pgTopJump" min="1" max="99999" placeholder="1"><button class="iconbtn" id="pgTopGo" data-i18n="pgGo">GO</button></span>
     </div>
+    <div class="selbar" id="gSelBar" hidden>
+      <span id="gSelCount">已选 0 张</span>
+      <button id="gPackSel" data-i18n="packSel">📦 打包选中</button>
+      <button id="gPackAll" data-i18n="packAll">📥 打包全部结果</button>
+      <span class="spacer"></span>
+      <button id="gSelClear" data-i18n="favSelClear">取消选择</button>
+    </div>
     <div class="grid md" id="grid"><div class="empty" data-i18n="loading">加载中…</div></div>
     <div class="loading" id="loading"></div>
     <div class="pager" id="pager">
@@ -329,6 +336,7 @@
           <span id="selCount" data-i18n="favSelCount">已选 0 张</span>
           <button id="selAddFolder" data-i18n="favSelDrag">拖入收藏夹…</button>
           <button id="selRemoveFav" data-i18n="favSelRemove">移出本夹</button>
+          <button id="selPack" data-i18n="packSel">📦 打包选中</button>
           <span class="spacer"></span>
           <button id="selClear" data-i18n="favSelClear">取消选择</button>
         </div>
@@ -369,6 +377,13 @@
       <span id="agTopInfo" style="color:var(--dim); font-size:13px">第 1 / 1 页</span>
       <button class="iconbtn" id="agTopNext" title="›">›</button>
       <span class="pg-jump"><span data-i18n="pgJump">跳至</span> <input type="number" id="agTopJump" min="1" max="99999" placeholder="1"><button class="iconbtn" id="agTopGo" data-i18n="pgGo">GO</button></span>
+    </div>
+    <div class="selbar" id="agSelBar" hidden>
+      <span id="agSelCount">已选 0 张</span>
+      <button id="agPackSel" data-i18n="packSel">📦 打包选中</button>
+      <button id="agPackAll" data-i18n="packAll">📥 打包全部结果</button>
+      <span class="spacer"></span>
+      <button id="agSelClear" data-i18n="favSelClear">取消选择</button>
     </div>
     <div class="grid md" id="agGrid"><div class="empty" data-i18n="advInit">请选择 tag 或条件开始搜索</div></div>
     <div class="loading" id="agLoading"></div>
@@ -460,7 +475,7 @@ const I18N = {
     tabComfy: "ComfyUI", tabWebui: "WebUI", tabFav: "⭐ 收藏",
     searchPh: "搜索文件名 / 提示词…", advBtn: "🔍 高级", btnAdv2: "⚙ 筛选",
     btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
-    fSampler: "采样器", fStepsGe: "步数 ≥", fStepsLe: "步数 ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
+    fSampler: "采样器", fLora: "LoRA", fStepsGe: "步数 ≥", fStepsLe: "步数 ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
     fWGe: "宽 ≥", fHGe: "高 ≥", fSort: "排序", fGrid: "网格", fPerPage: "每页", fReset: "重置",
     sNewest: "最新", sOldest: "最旧", sRandom: "随机", sName: "文件名",
     gSm: "小", gMd: "中", gLg: "大",
@@ -475,7 +490,7 @@ const I18N = {
     advHistory: "历史 tag（点击加入搜索，按使用次数）",
     advSuggestPh: "输入 tag 补全…",
     favTitle: "收藏", favNew: "＋ 新建收藏夹", favHint: "拖动图片到左侧收藏夹 · 按住空白处拉框多选",
-    favSelCount: "已选", favSelDrag: "拖入收藏夹…", favSelRemove: "移出本夹", favSelClear: "取消选择",
+    favSelCount: "已选", favSelDrag: "拖入收藏夹…", favSelRemove: "移出本夹", favSelClear: "取消选择", packSel: "📦 打包选中", packAll: "📥 打包全部结果", packing: "打包中…", packDone: "已打包",
     favEmpty: "该收藏夹还没有图片，从图库拖进来吧", favPickEmpty: "选择左侧收藏夹查看图片",
     favNewName: "新收藏夹名称：", favDelConfirm: "删除收藏夹「",
     modalCopy: "⧉ 复制提示词", modalCopyImg: "🖼 复制图片", modalDown: "⬇ 下载",
@@ -507,7 +522,7 @@ const I18N = {
     tabComfy: "ComfyUI", tabWebui: "WebUI", tabFav: "⭐ Fav",
     searchPh: "Search filename / prompt…", advBtn: "🔍 Advanced", btnAdv2: "⚙ Filter",
     btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
-    fSampler: "Sampler", fStepsGe: "Steps ≥", fStepsLe: "Steps ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
+    fSampler: "Sampler", fLora: "LoRA", fStepsGe: "Steps ≥", fStepsLe: "Steps ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
     fWGe: "W ≥", fHGe: "H ≥", fSort: "Sort", fGrid: "Grid", fPerPage: "Per page", fReset: "Reset",
     sNewest: "Newest", sOldest: "Oldest", sRandom: "Random", sName: "Name",
     gSm: "Small", gMd: "Medium", gLg: "Large",
@@ -522,7 +537,7 @@ const I18N = {
     advHistory: "History tags (click to add, by usage)",
     advSuggestPh: "Type for tag suggestions…",
     favTitle: "Favorites", favNew: "＋ New Folder", favHint: "Drag images to folders · drag on empty area to multi-select",
-    favSelCount: "Selected", favSelDrag: "To folder…", favSelRemove: "Remove from folder", favSelClear: "Clear selection",
+    favSelCount: "Selected", favSelDrag: "To folder…", favSelRemove: "Remove from folder", favSelClear: "Clear selection", packSel: "📦 Pack selected", packAll: "📥 Pack all results", packing: "Packing…", packDone: "Packed",
     favEmpty: "No images in this folder yet — drag some in", favPickEmpty: "Pick a folder on the left",
     favNewName: "New folder name:", favDelConfirm: "Delete folder 「",
     modalCopy: "⧉ Copy prompt", modalCopyImg: "🖼 Copy image", modalDown: "⬇ Download",
@@ -712,7 +727,7 @@ function mkItem(it, src, items){
   meta.appendChild(fname); meta.appendChild(sub);
   const fm = document.createElement("span"); fm.className = "favmark"; fm.textContent = "★";
   d.appendChild(badge); d.appendChild(img); d.appendChild(meta); d.appendChild(fm);
-  d.onclick = ()=>{ if(SEL.size){ toggleSel(d, it, src); return; } CUR_ITEMS = items || CUR_ITEMS; CUR_IDX = CUR_ITEMS.indexOf(it); openLightbox(CUR_IDX); };
+  d.onclick = ()=>{ if(SEL.size){ toggleSel(d, it, src); updateSelBars(); return; } CUR_ITEMS = items || CUR_ITEMS; CUR_IDX = CUR_ITEMS.indexOf(it); openLightbox(CUR_IDX); };
   d.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", JSON.stringify([{source: src, file: it.file}])); });
   return d;
 }
@@ -823,7 +838,7 @@ function parseTagQ(){
 }
 function advParams(){
   const f = {};
-  ["model","sampler","stepsMin","stepsMax","cfgMin","cfgMax","minW","minH","sort","size"].forEach(k=>{
+  ["model","sampler","lora","stepsMin","stepsMax","cfgMin","cfgMax","minW","minH","sort","size"].forEach(k=>{
     const el = document.getElementById("ag_"+k);
     f[k] = el ? el.value : "";
   });
@@ -835,6 +850,7 @@ function buildAdvFilters(){
   const defs = [
     ["model",t("fModel"),`<select id="ag_model"><option value="">${t("fAll")}</option></select>`],
     ["sampler",t("fSampler"),`<select id="ag_sampler"><option value="">${t("fAll")}</option></select>`],
+    ["lora",t("fLora"),`<select id="ag_lora"><option value="">${t("fAll")}</option></select>`],
     ["stepsMin",t("fStepsGe"),numStep("stepsMin",1)],
     ["stepsMax",t("fStepsLe"),numStep("stepsMax",1)],
     ["cfgMin",t("fCfgGe"),numStep("cfgMin",0.5)],
@@ -856,6 +872,10 @@ function buildAdvFilters(){
   api("/api/samplers?source=" + SRC).then(r=>{
     const sel = $("ag_sampler");
     r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.sampler; op.textContent = `${it.sampler}（${it.count}）`; sel.appendChild(op); });
+  });
+  api("/api/loras?source=" + SRC).then(r=>{
+    const sel = $("ag_lora");
+    r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.lora; op.textContent = `${it.lora}（${it.count}）`; sel.appendChild(op); });
   });
   box.querySelectorAll("input,select").forEach(el=>el.addEventListener("change", ()=>{ ADV.page = 1; advLoad(true); }));
   // −/+ 增减按钮
@@ -955,7 +975,7 @@ async function advLoad(reset){
   const f = advParams();
   const p = new URLSearchParams({
     source: SRC, q: $("q").value.trim(),
-    tags: ADV.tags.join(","), model: f.model, sampler: f.sampler,
+    tags: ADV.tags.join(","), model: f.model, sampler: f.sampler, lora: f.lora,
     steps_min: f.stepsMin, steps_max: f.stepsMax, cfg_min: f.cfgMin, cfg_max: f.cfgMax,
     min_w: f.minW, min_h: f.minH, sort: f.sort, page: ADV.page, page_size: f.size || 60,
   });
@@ -1123,7 +1143,7 @@ function toggleSel(d, it, src){
   });
 })();
 $("selClear").onclick = ()=>{
-  SEL.clear(); $("selBar").hidden = true;
+  SEL.clear(); updateSelBars();
   $("favGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel"));
 };
 $("selRemoveFav").onclick = async ()=>{
@@ -1332,10 +1352,93 @@ $("fsUp").onclick = async ()=>{
 };
 $("fsSelect").onclick = ()=>{
   if(!FS_PATH) return;
-  $("setupPath").value = FS_PATH;
-  $("fsPicker").classList.remove("show");
+  if(FS_MODE === "pack" && FS_PICK_CB){
+    const cb = FS_PICK_CB; FS_PICK_CB = null; FS_MODE = "setup";
+    $("fsPicker").classList.remove("show");
+    cb(FS_PATH);
+  } else {
+    $("setupPath").value = FS_PATH;
+    $("fsPicker").classList.remove("show");
+  }
 };
-$("fsCancel").onclick = ()=>$("fsPicker").classList.remove("show");
+$("fsCancel").onclick = ()=>{ FS_PICK_CB = null; FS_MODE = "setup"; $("fsPicker").classList.remove("show"); };
+
+// ---------- 打包 ----------
+let FS_MODE = "setup"; let FS_PICK_CB = null;
+function selItems(){ return [...SEL.values()].map(k=>{ const i=k.indexOf(":"); return {source: k.slice(0,i), file: k.slice(i+1)}; }); }
+function mainQuery(){
+  return {source: SRC, q: $("q").value.trim(), model: $("modelSel").value, sampler: $("samplerSel").value, lora: $("loraSel").value,
+    fav: $("btnFav").classList.contains("active") ? "1" : "0", sort: $("sortSel").value,
+    steps_min: $("stepsMin").value, steps_max: $("stepsMax").value, cfg_min: $("cfgMin").value, cfg_max: $("cfgMax").value,
+    min_w: $("minW").value, min_h: $("minH").value};
+}
+function advQuery(){
+  const f = advParams();
+  return {source: SRC, q: $("q").value.trim(), tags: ADV.tags.join(","), model: f.model, sampler: f.sampler, lora: f.lora,
+    steps_min: f.stepsMin, steps_max: f.stepsMax, cfg_min: f.cfgMin, cfg_max: f.cfgMax,
+    min_w: f.minW, min_h: f.minH, sort: f.sort};
+}
+function packImages(payload){
+  FS_MODE = "pack";
+  FS_PICK_CB = async (target)=>{
+    FS_PATH = "";
+    showToast(t("packing"));
+    const r = await api("/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
+    if(r.ok) showToast("✅ " + t("packDone") + " " + r.count + " 张 → " + r.zip);
+    else showToast("❌ " + (r.error || "打包失败"));
+  };
+  $("fsPicker").classList.add("show"); fsShowDrives();
+}
+function updateSelBars(){
+  const n = SEL.size;
+  const bars = [["selBar","selCount"],["gSelBar","gSelCount"],["agSelBar","agSelCount"]];
+  bars.forEach(([bid,cid])=>{
+    const b = $(bid); if(!b) return;
+    b.hidden = !n; if(n) $(cid).textContent = t("favSelCount") + " " + n;
+  });
+}
+$("gPackSel").onclick = ()=>{ if(SEL.size) packImages({items: selItems()}); };
+$("selPack").onclick = ()=>{ if(SEL.size) packImages({items: selItems()}); };
+$("agPackSel").onclick = ()=>{ if(SEL.size) packImages({items: selItems()}); };
+$("gPackAll").onclick = ()=>packImages({query: mainQuery()});
+$("agPackAll").onclick = ()=>packImages({query: advQuery()});
+$("gSelClear").onclick = ()=>{ SEL.clear(); updateSelBars(); $("grid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel")); };
+$("agSelClear").onclick = ()=>{ SEL.clear(); updateSelBars(); $("agGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel")); };
+// ---------- 拉框多选（主图库 + 高级搜索）----------
+function bindMarquee(gridId, getItems){
+  let x0=0, y0=0, active=false, selEl=null;
+  const grid = $(gridId);
+  grid.addEventListener("mousedown", e=>{
+    if(e.button !== 0 || e.target.closest(".item")) return;
+    active = true; x0 = e.clientX; y0 = e.clientY;
+    if(!selEl){ selEl = document.createElement("div"); selEl.id = "selRect"; document.body.appendChild(selEl); }
+    selEl.style.display = "block";
+  });
+  document.addEventListener("mousemove", e=>{
+    if(!active) return;
+    const x = Math.min(e.clientX, x0), y = Math.min(e.clientY, y0);
+    const w = Math.abs(e.clientX - x0), h = Math.abs(e.clientY - y0);
+    selEl.style.left = x+"px"; selEl.style.top = y+"px"; selEl.style.width = w+"px"; selEl.style.height = h+"px";
+  });
+  document.addEventListener("mouseup", e=>{
+    if(!active) return;
+    active = false; selEl.style.display = "none";
+    const rect = {x: Math.min(e.clientX,x0), y: Math.min(e.clientY,y0), w: Math.abs(e.clientX-x0), h: Math.abs(e.clientY-y0)};
+    const items = grid.querySelectorAll(".item");
+    const list = getItems();
+    items.forEach((d,i)=>{
+      const rc = d.getBoundingClientRect();
+      if(rc.left < rect.x+rect.w && rc.right > rect.x && rc.top < rect.y+rect.h && rc.bottom > rect.y){
+        d.classList.add("sel");
+        const it = list[i]; if(!it) return;
+        SEL.add(it.source + ":" + it.file);
+      }
+    });
+    updateSelBars();
+  });
+}
+bindMarquee("grid", ()=>CUR_ITEMS);
+bindMarquee("agGrid", ()=>ADV.items);
 
 // ---------- 启动 ----------
 let BOOTED = false;
