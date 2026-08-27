@@ -147,25 +147,49 @@ def _resolve_text(prompt, nid, depth=0):
 
 
 def _norm_lora(name):
-    """规范化 LoRA 名：去目录路径、去扩展名（SD 无扩展名，ComfyUI 有，统一后好合并）"""
-    return os.path.splitext(os.path.basename(str(name).replace("\\", "/")))[0].strip()
+    """规范化 LoRA 名：去目录路径、去扩展名，并过滤明显不是 LoRA 名的值"""
+    n = os.path.splitext(os.path.basename(str(name).replace("\\", "/")))[0].strip()
+    if not n:
+        return ""
+    low = n.lower()
+    # 过滤布尔/空/结构体/JSON 片段等非 LoRA 值
+    if low in ("true", "false", "none", "null", "1", "0", "[]", "{}"):
+        return ""
+    if len(n) > 80:
+        return ""  # 过长：被误提取的整段提示词
+    if n.startswith("{") or n.startswith("["):
+        return ""
+    return n
+
+
+# 明确的 LoRA 加载节点（精确匹配避免误把提示词当 LoRA）
+_LORA_NODE_TYPES = {"loraloader", "loraloadermodelonly"}
 
 
 def _extract_loras(prompt, workflow):
-    """从 ComfyUI prompt / workflow 提取 LoRA 名列表（原始名）"""
+    """从 ComfyUI prompt / workflow 提取 LoRA 名列表（原始未规范化）
+    - prompt: 仅精确匹配 LoraLoader / LoraLoaderModelOnly，取 inputs.lora_name（必须是字符串）
+    - workflow: 仅精确匹配节点类型，从 widgets_values 里找第一个合法字符串作 lora_name
+    """
     loras = []
     if isinstance(prompt, dict):
         for node in prompt.values():
             ct = str(node.get("class_type", "")).lower()
-            i = node.get("inputs", {})
-            if "lora" in ct and i.get("lora_name"):
-                loras.append(str(i["lora_name"]))
+            i = node.get("inputs", {}) or {}
+            v = i.get("lora_name")
+            if ct in _LORA_NODE_TYPES and isinstance(v, str):
+                loras.append(v)
+            elif "lora" in ct and isinstance(v, str):
+                loras.append(v)  # 宽松兜底：class_type 含 lora 且 lora_name 是字符串
     if workflow:
         try:
             for n in workflow.get("nodes", []):
                 t = str(n.get("type", "")).lower()
-                if "lora" in t and n.get("widgets_values") and n["widgets_values"][0]:
-                    loras.append(str(n["widgets_values"][0]))
+                if t in _LORA_NODE_TYPES:
+                    for wv in (n.get("widgets_values") or []):
+                        if isinstance(wv, str) and len(wv) > 2 and not wv.startswith("{") and " " not in wv.strip():
+                            loras.append(wv)
+                            break
         except Exception:
             pass
     return loras
@@ -173,7 +197,7 @@ def _extract_loras(prompt, workflow):
 
 def _extract_comfyui(prompt, workflow):
     info = {"positive": "", "negative": "", "model": "", "params": {}, "loras": []}
-    info["loras"] = sorted({_norm_lora(x) for x in _extract_loras(prompt, workflow)})
+    info["loras"] = sorted({x for x in (_norm_lora(y) for y in _extract_loras(prompt, workflow)) if x})
     if isinstance(prompt, dict):
         def sval(nid, key):
             v = prompt.get(nid, {}).get("inputs", {}).get(key, "")
@@ -286,7 +310,7 @@ def _parse_sd_parameters(text):
         if m:
             info["params"]["width"] = int(m.group(1))
             info["params"]["height"] = int(m.group(2))
-    info["loras"] = sorted({_norm_lora(x) for x in re.findall(r"<lora:([^:>]+)", info["positive"])})
+    info["loras"] = sorted({x for x in (_norm_lora(y) for y in re.findall(r"<lora:([^:>]+)", info["positive"])) if x})
     return info
 
 
