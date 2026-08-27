@@ -9,7 +9,7 @@ Gallery4ComfyUI —— ComfyUI 自定义节点插件（发布版）
 
 安装：将本目录放入 ComfyUI/custom_nodes/Gallery4ComfyUI 后重启 ComfyUI。
 """
-import os, json, threading, subprocess, zipfile, datetime, asyncio
+import os, json, threading, subprocess, zipfile, datetime, asyncio, time, tempfile
 
 from server import PromptServer
 from aiohttp import web
@@ -79,22 +79,31 @@ def _safe_name(name):
 
 
 def _pick_native_folder():
-    """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径或空串"""
-    ps = (
-        "Add-Type -AssemblyName System.Windows.Forms; "
-        "$f = New-Object System.Windows.Forms.FolderBrowserDialog; "
-        "$f.Description = '选择打包保存文件夹'; "
-        "$f.ShowNewFolderButton = $true; "
-        "if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
-        "{ Write-Output $f.SelectedPath }"
-    )
+    """用 Win32 SHBrowseForFolder 弹出原生“选择文件夹”对话框（可新建文件夹），返回路径或空串。
+    不经过 PowerShell（其 stdout 管道在模态对话框下会挂起），直接用 ctypes 调用，可靠。"""
     try:
-        r = subprocess.run(
-            ["powershell", "-STA", "-NoProfile", "-Command", ps],
-            capture_output=True, text=True, timeout=600,
-        )
-        lines = [x.strip() for x in (r.stdout or "").splitlines() if x.strip()]
-        return lines[-1] if lines else ""
+        import ctypes
+        from ctypes import POINTER, byref
+        class BROWSEINFOW(ctypes.Structure):
+            _fields_ = [("hwndOwner", ctypes.c_void_p), ("pidlRoot", ctypes.c_void_p),
+                        ("pszDisplayName", ctypes.c_wchar_p), ("lpszTitle", ctypes.c_wchar_p),
+                        ("ulFlags", ctypes.c_uint), ("lpfn", ctypes.c_void_p), ("lParam", ctypes.c_void_p),
+                        ("iImage", ctypes.c_int)]
+        ctypes.windll.ole32.CoInitializeEx(None, 0x2)  # STA（对话框中需要）
+        shell32 = ctypes.windll.shell32
+        shell32.SHBrowseForFolderW.restype = ctypes.c_void_p
+        shell32.SHBrowseForFolderW.argtypes = [POINTER(BROWSEINFOW)]
+        shell32.SHGetPathFromIDListW.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p]
+        bi = BROWSEINFOW()
+        bi.hwndOwner = None
+        bi.lpszTitle = "选择打包保存文件夹（可新建）"
+        bi.ulFlags = 0x40  # BIF_NEWDIALOGSTYLE：使用新式对话框（含“新建文件夹”按钮）
+        pidl = shell32.SHBrowseForFolderW(byref(bi))
+        if pidl:
+            buf = ctypes.create_unicode_buffer(260)
+            if shell32.SHGetPathFromIDListW(pidl, buf):
+                return buf.value.strip()
+        return ""
     except Exception:
         return ""
 
@@ -319,6 +328,30 @@ async def api_fs_list(request):
     path = request.query.get("path", "")
     r = G.list_dir(path)
     return _json(r, 200 if "error" not in r else 400)
+
+
+@PromptServer.instance.routes.post(P + "/api/fs/mkdir")
+async def api_fs_mkdir(request):
+    """在当前浏览目录下新建文件夹（打包保存用）"""
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    parent = (data.get("path") or "").strip()
+    name = (data.get("name") or "").strip()
+    if not parent or not name:
+        return _json({"error": "缺少路径或名称"}, 400)
+    if not os.path.isdir(parent):
+        return _json({"error": "父目录不存在"}, 400)
+    name = name.replace("\\", "/").replace("/", "")
+    if not name:
+        return _json({"error": "名称无效"}, 400)
+    target = os.path.join(parent, name)
+    try:
+        os.makedirs(target, exist_ok=True)
+        return _json({"ok": True, "path": target})
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)}, 500)
 
 
 @PromptServer.instance.routes.post(P + "/api/fs/pick-dir")

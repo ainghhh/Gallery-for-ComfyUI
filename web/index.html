@@ -425,6 +425,7 @@
     <div class="fs-list" id="fsList"></div>
     <div class="row">
       <button class="iconbtn" id="fsUp" data-i18n="fsUp">↑ 上级目录</button>
+      <button class="iconbtn" id="fsNew" data-i18n="fsNew">📁 新建文件夹</button>
       <button class="iconbtn" id="fsSelect" data-i18n="fsSelect" style="flex:1; background:var(--accent); border-color:var(--accent); color:#fff">选择此目录</button>
       <button class="iconbtn" id="fsCancel" data-i18n="fsCancel">取消</button>
     </div>
@@ -515,7 +516,7 @@ const I18N = {
     setupDesc: "图库的「WebUI」来源需要读取 SD WebUI 的 <b>outputs</b> 目录（生成的图片）与 <b>models</b> 目录（模型）。请通过浏览按钮在文件夹中选择你的 SD WebUI 安装根目录（通常是含有 <b>outputs</b> 文件夹的那一层）。不配置也能正常使用 ComfyUI 图库，之后可随时在此修改。",
     setupPathPh: "尚未选择目录", browse: "📁 浏览…", save: "保存", skip: "跳过",
     setupSaved: "✅ 已保存", setupValid: "✅ 目录有效，已保存",
-    fsTitle: "选择目录", fsUp: "↑ 上级目录", fsSelect: "选择此目录", fsCancel: "取消",
+    fsTitle: "选择目录", fsUp: "↑ 上级目录", fsSelect: "选择此目录", fsCancel: "取消", fsNew: "📁 新建文件夹",
     fsPickDrive: "选择盘符", fsEmpty: "空目录",
     statTitle: "模型分布（", statTotal: "张）",
   },
@@ -562,7 +563,7 @@ const I18N = {
     setupDesc: "The \"WebUI\" source needs SD WebUI's <b>outputs</b> (generated images) and <b>models</b> folders. Browse and pick your SD WebUI install root (the folder containing <b>outputs</b>). Not configuring is fine — the ComfyUI gallery works regardless; you can change this anytime.",
     setupPathPh: "No folder selected", browse: "📁 Browse…", save: "Save", skip: "Skip",
     setupSaved: "✅ Saved", setupValid: "✅ Valid folder, saved",
-    fsTitle: "Select Folder", fsUp: "↑ Up", fsSelect: "Select this folder", fsCancel: "Cancel",
+    fsTitle: "Select Folder", fsUp: "↑ Up", fsSelect: "Select this folder", fsCancel: "Cancel", fsNew: "📁 New folder",
     fsPickDrive: "Choose a drive", fsEmpty: "Empty folder",
     statTitle: "Model distribution (", statTotal: " images)",
   }
@@ -1383,11 +1384,16 @@ function advQuery(){
 }
 function packImages(payload){
   (async ()=>{
-    let target = "";
-    try{ const r = await api("/api/fs/pick-dir", {method:"POST"}); target = (r && r.path) || ""; }
-    catch(e){ target = ""; }
-    if(!target){ showToast("已取消"); return; }
     showToast(t("packing"));
+    let target = "";
+    try{
+      const ctl = new AbortController();
+      const t = setTimeout(()=>ctl.abort(), 300000);  // 最多等 5 分钟
+      const r = await fetch(API + "/api/fs/pick-dir", {method:"POST", signal: ctl.signal}).then(x=>x.json());
+      clearTimeout(t);
+      target = (r && r.path) || "";
+    }catch(e){ target = ""; }
+    if(!target){ showToast("已取消"); return; }
     const r = await api("/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
     if(r.ok) showToast("✅ " + t("packDone") + " " + r.count + " 张 → " + r.zip);
     else showToast("❌ " + (r.error || "打包失败"));
