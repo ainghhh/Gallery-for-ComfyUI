@@ -1383,22 +1383,23 @@ function advQuery(){
     min_w: f.minW, min_h: f.minH, sort: f.sort};
 }
 function packImages(payload){
-  (async ()=>{
+  FS_MODE = "pack";
+  FS_PICK_CB = async (target)=>{
+    FS_PATH = "";
     showToast(t("packing"));
-    let target = "";
-    try{
-      const ctl = new AbortController();
-      const t = setTimeout(()=>ctl.abort(), 300000);  // 最多等 5 分钟
-      const r = await fetch(API + "/api/fs/pick-dir", {method:"POST", signal: ctl.signal}).then(x=>x.json());
-      clearTimeout(t);
-      target = (r && r.path) || "";
-    }catch(e){ target = ""; }
-    if(!target){ showToast("已取消"); return; }
     const r = await api("/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
     if(r.ok) showToast("✅ " + t("packDone") + " " + r.count + " 张 → " + r.zip);
     else showToast("❌ " + (r.error || "打包失败"));
-  })();
+  };
+  $("fsPicker").classList.add("show"); fsShowDrives();
 }
+$("fsNew").onclick = async ()=>{
+  if(!FS_PATH){ alert("请先进入一个目录"); return; }
+  const name = prompt("新建文件夹名称：");
+  if(!name || !name.trim()) return;
+  const r = await api("/api/fs/mkdir", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({path: FS_PATH, name: name.trim()})});
+  if(r.ok){ fsEnter(FS_PATH); } else { alert(r.error || "创建失败"); }
+};
 function updateSelBars(){
   const n = SEL.size;
   const bars = [["selBar","selCount"],["gSelBar","gSelCount"],["agSelBar","agSelCount"]];
