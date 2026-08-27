@@ -248,6 +248,7 @@
     <input class="q" id="q" type="text" data-i18n-ph="searchPh" placeholder="搜索文件名 / 提示词…">
     <button class="iconbtn" id="btnAdvSearch" data-i18n="advBtn" data-i18n-title="titleAdv" title="🔍">🔍 高级</button>
     <select id="modelSel"><option value="">全部模型</option></select>
+    <select id="loraSel"><option value="">全部 LoRA</option></select>
     <button class="iconbtn" id="btnAdv" data-i18n="btnAdv2" data-i18n-title="titleFilter" title="Filter">⚙ 筛选</button>
     <button class="iconbtn" id="btnStats" data-i18n-title="titleStats" title="📊">📊</button>
     <button class="iconbtn" id="btnFav" data-i18n-title="titleFav" title="★">★</button>
@@ -634,7 +635,7 @@ document.querySelectorAll(".srctab").forEach(b=>{
     refreshSource();
   };
 });
-async function refreshSource(){ loadModels(); loadSamplers(); loadStats(); load(true); }
+async function refreshSource(){ loadModels(); loadSamplers(); loadLoras(); loadStats(); load(true); }
 
 // ---------- 普通搜索（分页） ----------
 function pageList(cur, total){
@@ -676,7 +677,7 @@ async function load(reset){
   try{
     const p = new URLSearchParams({
       source: SRC, q: $("q").value.trim(), model: $("modelSel").value,
-      sampler: $("samplerSel").value,
+      sampler: $("samplerSel").value, lora: $("loraSel").value,
       steps_min: $("stepsMin").value, steps_max: $("stepsMax").value,
       cfg_min: $("cfgMin").value, cfg_max: $("cfgMax").value,
       min_w: $("minW").value, min_h: $("minH").value,
@@ -734,6 +735,7 @@ $("pgTopJump").addEventListener("keydown", e=>{ if(e.key === "Enter") goTo($("pg
 $("pageSizeSel").onchange = ()=>{ PAGE_SIZE = parseInt($("pageSizeSel").value) || 60; load(true); window.scrollTo({top:0,behavior:"smooth"}); };
 $("q").addEventListener("input", debounce(()=>load(true), 300));
 $("modelSel").onchange = ()=>load(true);
+$("loraSel").onchange = ()=>load(true);
 $("samplerSel").onchange = ()=>load(true);
 $("sortSel").onchange = ()=>load(true);
 $("densitySel").onchange = ()=>$("grid").className = "grid " + $("densitySel").value;
@@ -741,7 +743,7 @@ $("densitySel").onchange = ()=>$("grid").className = "grid " + $("densitySel").v
 $("btnAdv").onclick = ()=>{ $("adv").classList.toggle("show"); $("btnAdv").classList.toggle("active"); };
 $("btnReset").onclick = ()=>{
   ["stepsMin","stepsMax","cfgMin","cfgMax","minW","minH"].forEach(id=>$(id).value="");
-  $("samplerSel").value=""; $("modelSel").value=""; $("sortSel").value="newest"; load(true);
+  $("samplerSel").value=""; $("modelSel").value=""; $("loraSel").value=""; $("sortSel").value="newest"; load(true);
 };
 $("btnFav").onclick = ()=>{ $("btnFav").classList.toggle("active"); load(true); };
 
@@ -758,6 +760,15 @@ async function loadSamplers(){
     const r = await api("/api/samplers?source=" + SRC);
     const sel = $("samplerSel"); sel.innerHTML = '<option value="">全部</option>';
     r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.sampler; op.textContent = `${it.sampler}（${it.count}）`; sel.appendChild(op); });
+  }catch(e){}
+}
+async function loadLoras(){
+  try{
+    const r = await api("/api/loras?source=" + SRC);
+    const sel = $("loraSel"); const cur = sel.value;
+    sel.innerHTML = '<option value="">全部 LoRA</option>';
+    r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.lora; op.textContent = `${it.lora}（${it.count}）`; sel.appendChild(op); });
+    sel.value = cur;
   }catch(e){}
 }
 async function loadStats(){
@@ -1332,7 +1343,7 @@ async function boot(){
   if(BOOTED){ await load(false); return; }
   BOOTED = true;
   await loadDefaultFavs(); await loadFolders();
-  await loadModels(); await loadSamplers(); await loadStats();
+  await loadModels(); await loadSamplers(); await loadLoras(); await loadStats();
   try{ await fetch(`${API}/api/boot`); }catch(e){}
   await load(true);
   const iv = setInterval(async ()=>{

@@ -132,6 +132,7 @@ async def api_gallery(request):
         q=q.get("q", ""),
         model=q.get("model", ""),
         sampler=q.get("sampler", ""),
+        lora=q.get("lora", ""),
         steps_min=_int(q.get("steps_min")),
         steps_max=_int(q.get("steps_max")),
         cfg_min=_float(q.get("cfg_min")),
@@ -157,6 +158,12 @@ async def api_models(request):
 async def api_samplers(request):
     source = request.query.get("source", "comfyui")
     return _json({"items": G.samplers(source)})
+
+
+@PromptServer.instance.routes.get(P + "/api/loras")
+async def api_loras(request):
+    source = request.query.get("source", "comfyui")
+    return _json({"items": G.loras(source)})
 
 
 @PromptServer.instance.routes.get(P + "/api/stats")

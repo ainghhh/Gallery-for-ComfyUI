@@ -146,8 +146,34 @@ def _resolve_text(prompt, nid, depth=0):
     return ""
 
 
+def _norm_lora(name):
+    """规范化 LoRA 名：去目录路径、去扩展名（SD 无扩展名，ComfyUI 有，统一后好合并）"""
+    return os.path.splitext(os.path.basename(str(name).replace("\\", "/")))[0].strip()
+
+
+def _extract_loras(prompt, workflow):
+    """从 ComfyUI prompt / workflow 提取 LoRA 名列表（原始名）"""
+    loras = []
+    if isinstance(prompt, dict):
+        for node in prompt.values():
+            ct = str(node.get("class_type", "")).lower()
+            i = node.get("inputs", {})
+            if "lora" in ct and i.get("lora_name"):
+                loras.append(str(i["lora_name"]))
+    if workflow:
+        try:
+            for n in workflow.get("nodes", []):
+                t = str(n.get("type", "")).lower()
+                if "lora" in t and n.get("widgets_values") and n["widgets_values"][0]:
+                    loras.append(str(n["widgets_values"][0]))
+        except Exception:
+            pass
+    return loras
+
+
 def _extract_comfyui(prompt, workflow):
-    info = {"positive": "", "negative": "", "model": "", "params": {}}
+    info = {"positive": "", "negative": "", "model": "", "params": {}, "loras": []}
+    info["loras"] = sorted({_norm_lora(x) for x in _extract_loras(prompt, workflow)})
     if isinstance(prompt, dict):
         def sval(nid, key):
             v = prompt.get(nid, {}).get("inputs", {}).get(key, "")
@@ -217,7 +243,7 @@ def _extract_comfyui(prompt, workflow):
 # SD WebUI 条目解析（parameters 串）
 # ---------------------------------------------------------------------------
 def _parse_sd_parameters(text):
-    info = {"positive": "", "negative": "", "model": "", "params": {}}
+    info = {"positive": "", "negative": "", "model": "", "params": {}, "loras": []}
     if not text:
         return info
     lines = text.split("\n")
@@ -260,6 +286,7 @@ def _parse_sd_parameters(text):
         if m:
             info["params"]["width"] = int(m.group(1))
             info["params"]["height"] = int(m.group(2))
+    info["loras"] = sorted({_norm_lora(x) for x in re.findall(r"<lora:([^:>]+)", info["positive"])})
     return info
 
 
@@ -314,7 +341,7 @@ def _scan_directory(source, root, parser):
         rel = os.path.relpath(fp, root).replace("\\", "/")
         key = (rel, os.path.dirname(rel))
         cached_e = cache_map.get(key)
-        if cached_e and cached_e.get("_k") == [st.st_mtime_ns, st.st_size]:
+        if cached_e and cached_e.get("_k") == [st.st_mtime_ns, st.st_size] and "loras" in cached_e:
             new_entries.append(cached_e)
         else:
             entry = parser(fp)
@@ -441,7 +468,7 @@ def save_fav(source, file, on):
     return {"ok": True}
 
 
-def query(source, q="", model="", sampler="", steps_min=None, steps_max=None,
+def query(source, q="", model="", sampler="", lora="", steps_min=None, steps_max=None,
           cfg_min=None, cfg_max=None, min_w=None, min_h=None, fav_only=False,
           sort="newest", page=1, page_size=60, tags=""):
     entries, ready = get_index(source)
@@ -462,6 +489,8 @@ def query(source, q="", model="", sampler="", steps_min=None, steps_max=None,
         entries = [e for e in entries
                    if str(e.get("params", {}).get("sampler")
                           or e.get("params", {}).get("sampler_name") or "") == sampler]
+    if lora:
+        entries = [e for e in entries if lora in (e.get("loras") or [])]
     if steps_min is not None or steps_max is not None:
         entries = [e for e in entries
                    if (steps_min is None or _num(e, "steps", steps_min) >= steps_min)
@@ -489,7 +518,7 @@ def query(source, q="", model="", sampler="", steps_min=None, steps_max=None,
         entries = random.sample(entries, len(entries)) if entries else entries
     total = len(entries)
     start = (int(page) - 1) * int(page_size)
-    items = [{k: e.get(k) for k in ("file", "mtime", "size", "positive", "negative", "model", "params")}
+    items = [{k: e.get(k) for k in ("file", "mtime", "size", "positive", "negative", "model", "params", "loras")}
              for e in entries[start:start + int(page_size)]]
     return {"total": total, "page": int(page), "items": items, "ready": ready}
 
@@ -521,6 +550,17 @@ def samplers(source):
         if s:
             counter[s] = counter.get(s, 0) + 1
     return [{"sampler": s, "count": n} for s, n in sorted(counter.items(), key=lambda kv: -kv[1])]
+
+
+def loras(source):
+    entries, _ = get_index(source)
+    counter = {}
+    for e in entries:
+        for l in (e.get("loras") or []):
+            l = str(l).strip()
+            if l:
+                counter[l] = counter.get(l, 0) + 1
+    return [{"lora": l, "count": n} for l, n in sorted(counter.items(), key=lambda kv: -kv[1])]
 
 
 def stats():
