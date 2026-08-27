@@ -1416,7 +1416,11 @@ function packImages(payload){
     try{
       const r = await fetch(API + "/api/zip", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target, ...payload})});
       let j = {}; try{ j = await r.json(); }catch(e){}
-      if(r.ok && j.ok){ showToast("✅ " + t("packDone") + " " + j.count + " 张 → " + j.zip + "（点击打开目录）", j.zip ? j.zip.replace(/\\[^\\]*$/, "") : ""); }
+      if(r.ok && j.ok){
+        const dir = j.zip ? j.zip.replace(/\\[^\\]*$/, "") : "";
+        showToast("✅ " + t("packDone") + " " + j.count + " 张 → " + j.zip, dir);
+        if(dir){ try{ fetch(API + "/api/fs/open-dir?path=" + encodeURIComponent(dir)); }catch(e){} }
+      }
       else { showToast("❌ " + (j.error || ("打包失败 (" + r.status + ")"))); }
     }catch(e){ showToast("❌ 打包失败（" + (e.message||e) + "）"); }
   };
