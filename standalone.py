@@ -337,6 +337,18 @@ async def api_fs_mkdir(request):
         return _json({"ok": False, "error": str(e)}, 500)
 
 
+async def api_fs_open_dir(request):
+    """在资源管理器中打开一个目录"""
+    path = request.query.get("path", "").strip()
+    if not path or not os.path.isdir(path):
+        return _json({"error": "目录不存在"}, 400)
+    try:
+        subprocess.Popen(["explorer", path])
+        return _json({"ok": True})
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)}, 500)
+
+
 async def api_pick_dir(request):
     """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径"""
     path = await asyncio.to_thread(_pick_native_folder)
@@ -346,15 +358,23 @@ async def api_pick_dir(request):
 
 
 async def api_zip(request):
-    """打包图片到用户选择的目标文件夹。
-    body: {target, items} 选中打包 或 {target, query} 筛选结果整体打包；by_model=true 按大模型分子目录"""
+    """打包图片到用户选择的目标文件夹（打包在后台线程执行，不阻塞服务）。
+    body: {target, items} 选中打包 或 {target, query} 筛选结果整体打包；
+    by_model=true 按大模型分子目录；name=指定 zip 文件名（默认时间戳）。"""
     try:
         data = await request.json()
     except Exception:
         return _json({"error": "bad json"}, 400)
+    resp = await asyncio.to_thread(_pack_images, data)
+    code = resp.pop("_code", 200)
+    return _json(resp, code)
+
+
+def _pack_images(data):
+    """同步执行：收集文件 + 写 zip（在后台线程运行）。返回 resp dict"""
     target = (data.get("target") or "").strip()
     if not target or not os.path.isdir(target):
-        return _json({"error": "目标目录不存在"}, 400)
+        return {"error": "目标目录不存在", "_code": 400}
     by_model = bool(data.get("by_model", False))
     entries = []  # (磁盘路径, 子目录)
     n_candidates = 0
@@ -382,14 +402,21 @@ async def api_zip(request):
                 sub = str(it.get("model") or "未分类") if by_model else ""
                 entries.append((fp, sub))
     else:
-        return _json({"error": "no items"}, 400)
+        return {"error": "no items", "_code": 400}
     if not entries:
         msg = "没有可打包的图片"
         if n_candidates:
             msg += "（候选 %d 个，磁盘均找不到文件）" % n_candidates
-        return _json({"error": msg}, 400)
+        return {"error": msg, "_code": 400}
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    zpath = os.path.join(target, "gallery_export_%s.zip" % ts)
+    zname = (data.get("name") or "").strip()
+    if zname:
+        safe_n = re.sub(r'[\\/:*?"<>|]', "_", zname).strip() or "gallery_export"
+        zpath = os.path.join(target, safe_n + ".zip")
+        if os.path.exists(zpath):
+            zpath = os.path.join(target, "%s_%s.zip" % (safe_n, ts))
+    else:
+        zpath = os.path.join(target, "gallery_export_%s.zip" % ts)
     try:
         with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
             seen = set()
@@ -403,9 +430,9 @@ async def api_zip(request):
                     z.write(fp, os.path.join(safe, name))
                 else:
                     z.write(fp, name)
-        return _json({"ok": True, "zip": zpath, "count": len(entries)})
+        return {"ok": True, "zip": zpath, "count": len(entries), "_code": 200}
     except Exception as e:
-        return _json({"ok": False, "error": str(e)}, 500)
+        return {"ok": False, "error": str(e), "_code": 500}
 
 
 # ---------------------------------------------------------------------------
@@ -413,6 +440,7 @@ async def api_zip(request):
 # ---------------------------------------------------------------------------
 app.router.add_get(P + "/api/fs/list", api_fs_list)
 app.router.add_post(P + "/api/fs/mkdir", api_fs_mkdir)
+app.router.add_get(P + "/api/fs/open-dir", api_fs_open_dir)
 app.router.add_post(P + "/api/fs/pick-dir", api_pick_dir)
 app.router.add_post(P + "/api/zip", api_zip)
 app.router.add_get(P + "/api/fs/drives", api_fs_drives)
