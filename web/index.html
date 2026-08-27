@@ -306,7 +306,7 @@
       <span class="spacer"></span>
       <button id="gSelClear" data-i18n="favSelClear">取消选择</button>
     </div>
-    <div class="grid md" id="grid"><div class="empty" data-i18n="loading">加载中…</div></div>
+    <div class="grid md" id="grid" style="position:relative"><div class="empty" data-i18n="loading">加载中…</div></div>
     <div class="loading" id="loading"></div>
     <div class="pager" id="pager">
       <button class="iconbtn" id="pgFirst" data-i18n="pgFirst" title="«">«</button>
@@ -385,7 +385,7 @@
       <span class="spacer"></span>
       <button id="agSelClear" data-i18n="favSelClear">取消选择</button>
     </div>
-    <div class="grid md" id="agGrid"><div class="empty" data-i18n="advInit">请选择 tag 或条件开始搜索</div></div>
+    <div class="grid md" id="agGrid" style="position:relative"><div class="empty" data-i18n="advInit">请选择 tag 或条件开始搜索</div></div>
     <div class="loading" id="agLoading"></div>
     <div class="pager" id="agPager">
       <button class="iconbtn" id="agPrev">‹</button>
@@ -1112,6 +1112,7 @@ function toggleSel(d, it, src){
   const grid = $("favGrid");
   grid.addEventListener("mousedown", e=>{
     if(e.button !== 0 || e.target.closest(".item")) return;
+    e.preventDefault();  // 阻止拖拽时选中文字
     active = true;
     x0 = e.clientX; y0 = e.clientY;
     if(!selEl){ selEl = document.createElement("div"); selEl.id = "selRect"; document.body.appendChild(selEl); }
@@ -1410,25 +1411,35 @@ function bindMarquee(gridId, getItems){
   const grid = $(gridId);
   grid.addEventListener("mousedown", e=>{
     if(e.button !== 0 || e.target.closest(".item")) return;
-    active = true; x0 = e.clientX; y0 = e.clientY;
-    if(!selEl){ selEl = document.createElement("div"); selEl.id = "selRect"; document.body.appendChild(selEl); }
+    e.preventDefault();  // 阻止拖拽时选中文字
+    active = true;
+    const gr = grid.getBoundingClientRect();
+    x0 = e.clientX - gr.left; y0 = e.clientY - gr.top;
+    if(!selEl){ selEl = document.createElement("div"); selEl.id = "selRect"; grid.appendChild(selEl); }
     selEl.style.display = "block";
   });
   document.addEventListener("mousemove", e=>{
     if(!active) return;
-    const x = Math.min(e.clientX, x0), y = Math.min(e.clientY, y0);
-    const w = Math.abs(e.clientX - x0), h = Math.abs(e.clientY - y0);
+    const gr = grid.getBoundingClientRect();
+    const cx = e.clientX - gr.left, cy = e.clientY - gr.top;
+    const x = Math.min(cx, x0), y = Math.min(cy, y0);
+    const w = Math.abs(cx - x0), h = Math.abs(cy - y0);
     selEl.style.left = x+"px"; selEl.style.top = y+"px"; selEl.style.width = w+"px"; selEl.style.height = h+"px";
   });
   document.addEventListener("mouseup", e=>{
     if(!active) return;
-    active = false; selEl.style.display = "none";
-    const rect = {x: Math.min(e.clientX,x0), y: Math.min(e.clientY,y0), w: Math.abs(e.clientX-x0), h: Math.abs(e.clientY-y0)};
+    active = false;
+    if(selEl) selEl.style.display = "none";
+    const gr = grid.getBoundingClientRect();
+    const cx = e.clientX - gr.left, cy = e.clientY - gr.top;
+    const rectX = Math.min(cx, x0), rectY = Math.min(cy, y0);
+    const rectW = Math.abs(cx - x0), rectH = Math.abs(cy - y0);
     const items = grid.querySelectorAll(".item");
     const list = getItems();
     items.forEach((d,i)=>{
       const rc = d.getBoundingClientRect();
-      if(rc.left < rect.x+rect.w && rc.right > rect.x && rc.top < rect.y+rect.h && rc.bottom > rect.y){
+      const dl = rc.left - gr.left, dt = rc.top - gr.top;
+      if(dl < rectX+rectW && rc.right-gr.left > rectX && dt < rectY+rectH && rc.bottom-gr.top > rectY){
         d.classList.add("sel");
         const it = list[i]; if(!it) return;
         SEL.add(it.source + ":" + it.file);
