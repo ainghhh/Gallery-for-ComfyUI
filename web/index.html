@@ -1429,7 +1429,7 @@ $("agPackAll").onclick = ()=>packImages({query: advQuery()});
 $("gSelClear").onclick = ()=>{ SEL.clear(); updateSelBars(); $("grid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel")); };
 $("agSelClear").onclick = ()=>{ SEL.clear(); updateSelBars(); $("agGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel")); };
 // ---------- 拉框多选（主图库 + 高级搜索）----------
-function bindMarquee(gridId, getItems){
+function bindMarquee(gridId, getItems, src){
   let x0=0, y0=0, active=false, selEl=null, dragging=false;
   const grid = $(gridId);
   grid.addEventListener("mousedown", e=>{
@@ -1467,14 +1467,14 @@ function bindMarquee(gridId, getItems){
       if(dl < rectX+rectW && rc.right-gr.left > rectX && dt < rectY+rectH && rc.bottom-gr.top > rectY){
         d.classList.add("sel");
         const it = list[i]; if(!it) return;
-        SEL.add(it.source + ":" + it.file);
+        SEL.add((src || it.source || "comfyui") + ":" + it.file);
       }
     });
     updateSelBars();
   });
 }
-bindMarquee("grid", ()=>CUR_ITEMS);
-bindMarquee("agGrid", ()=>ADV.items);
+bindMarquee("grid", ()=>CUR_ITEMS, SRC);
+bindMarquee("agGrid", ()=>ADV.items, SRC);
 
 // ---------- 启动 ----------
 let BOOTED = false;
