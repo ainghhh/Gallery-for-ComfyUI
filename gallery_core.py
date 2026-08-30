@@ -147,13 +147,15 @@ def _resolve_text(prompt, nid, depth=0):
 
 
 def _norm_lora(name):
-    """规范化 LoRA 名：去目录路径、去扩展名，并过滤明显不是 LoRA 名的值"""
+    """规范化 LoRA 名：去目录路径、去扩展名，并过滤明显不是 LoRA 名的值。
+    注：不把纯数字（如 "1","0"）当垃圾过滤——它们可能是合法 LoRA 名（如 Anima/画风/self 下的 1.safetensors）。
+    布尔/JSON/null 结构值仍过滤。"""
     n = os.path.splitext(os.path.basename(str(name).replace("\\", "/")))[0].strip()
     if not n:
         return ""
     low = n.lower()
-    # 过滤布尔/空/结构体/JSON 片段等非 LoRA 值
-    if low in ("true", "false", "none", "null", "1", "0", "[]", "{}"):
+    # 过滤布尔/结构体/JSON 片段等非 LoRA 值（数字除外）
+    if low in ("true", "false", "none", "null", "[]", "{}"):
         return ""
     if len(n) > 80:
         return ""  # 过长：被误提取的整段提示词
@@ -164,12 +166,42 @@ def _norm_lora(name):
 
 # 明确的 LoRA 加载节点（精确匹配避免误把提示词当 LoRA）
 _LORA_NODE_TYPES = {"loraloader", "loraloadermodelonly"}
+# Weilin/Anima 的 LoRA 堆叠节点：widgets 里存 lobby 列表 JSON（含 hidden 字段标记激活状态）
+_LORA_STACK_NODE_HINTS = ("weilinpromptuionlylorastack", "animamultiloraloader")
+
+
+def _parse_lora_json_field(text):
+    """解析 weilin 堆叠节点的 lora 列表 JSON，返回其中实际激活（hidden=false）的 lora 名列表。
+    输入可能是 JSON 数组字符串，也可能本身已是 list。"""
+    if not text:
+        return []
+    try:
+        if isinstance(text, str):
+            data = json.loads(text)
+        else:
+            data = text
+    except Exception:
+        return []
+    names = []
+    if isinstance(data, list):
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            # hidden == true 表示堆在节点里但未激活；未隐藏（false/缺失）视为激活
+            if item.get("hidden"):
+                continue
+            name = item.get("name") or item.get("lora") or ""
+            if name:
+                names.append(str(name))
+    return names
 
 
 def _extract_loras(prompt, workflow):
     """从 ComfyUI prompt / workflow 提取 LoRA 名列表（原始未规范化）
-    - prompt: 仅精确匹配 LoraLoader / LoraLoaderModelOnly，取 inputs.lora_name（必须是字符串）
+    - 标准 LoRA 节点：LoraLoader / LoraLoaderModelOnly，取 inputs.lora_name（字符串）
+    - Weilin/Anima 堆叠节点：从 widgets 的 lora 列表 JSON 解析，仅取激活（hidden!=true）的 lora
     - workflow: 仅精确匹配节点类型，从 widgets_values 里找第一个合法字符串作 lora_name
+    不做 class_type 含 'lora' 的宽松匹配（避免把 ControlNet-Lora 等非 LoraLoader 节点误判为 LoRA）。
     """
     loras = []
     if isinstance(prompt, dict):
@@ -179,17 +211,30 @@ def _extract_loras(prompt, workflow):
             v = i.get("lora_name")
             if ct in _LORA_NODE_TYPES and isinstance(v, str):
                 loras.append(v)
-            elif "lora" in ct and isinstance(v, str):
-                loras.append(v)  # 宽松兜底：class_type 含 lora 且 lora_name 是字符串
+            elif any(h in ct for h in _LORA_STACK_NODE_HINTS):
+                # 堆叠节点：从 lora_str / lora_list_json / temp_lora_str 解析激活的 lora
+                for key in ("lora_list_json", "lora_str"):
+                    loras.extend(_parse_lora_json_field(i.get(key)))
     if workflow:
         try:
             for n in workflow.get("nodes", []):
                 t = str(n.get("type", "")).lower()
+                wv = n.get("widgets_values") or []
                 if t in _LORA_NODE_TYPES:
-                    for wv in (n.get("widgets_values") or []):
-                        if isinstance(wv, str) and len(wv) > 2 and not wv.startswith("{") and " " not in wv.strip():
-                            loras.append(wv)
+                    for item in wv:
+                        if isinstance(item, str) and len(item) > 2 and not item.startswith("{") and " " not in item.strip():
+                            loras.append(item)
                             break
+                elif any(h in t for h in _LORA_STACK_NODE_HINTS):
+                    # 堆叠节点：widgets[0]=激活列表(lora_str), widgets[1]=临时列表(temp_lora_str)
+                    # 优先用第一个（当前激活）的 JSON
+                    for item in wv:
+                        if isinstance(item, list):
+                            loras.extend(_parse_lora_json_field(item))
+                            break
+                    else:
+                        if wv and isinstance(wv[0], str) and wv[0].startswith("["):
+                            loras.extend(_parse_lora_json_field(wv[0]))
         except Exception:
             pass
     return loras
@@ -577,7 +622,12 @@ def samplers(source):
 
 
 def loras(source):
-    """LoRA 列表：仅保留磁盘上仍存在的 LoRA，按安装时间（文件 mtime）倒序"""
+    """LoRA 列表：合并【图片实际用过】与【磁盘上存在】两类 LoRA。
+    - 图片用过：count = 使用次数
+    - 磁盘存在但未用过：count = 0（新加入的 LoRA 也能在此列表看到）
+    - 磁盘已不存在的（被拷贝/删除）：不列出
+    - folder：该 LoRA 相对于 loras 根目录的文件夹（如 'Anima/画风'，根目录为 ''），供前端按文件夹分组
+    按安装时间（文件 mtime）倒序，同时间按使用次数。"""
     entries, _ = get_index(source)
     counter = {}
     for e in entries:
@@ -586,56 +636,72 @@ def loras(source):
             if l:
                 counter[l] = counter.get(l, 0) + 1
     dmap = _lora_disk_map(source)
-    has_disk = bool(dmap)
+    # 磁盘上所有存在的 LoRA 名集合（含未使用过的）
+    all_disk = set(dmap.keys())
     items = []
+    seen = set()
     for l, n in counter.items():
-        if has_disk and l not in dmap:
+        if l not in all_disk:
             continue  # 磁盘已不存在该 LoRA：从列表清除
-        items.append((l, n, dmap.get(l, 0)))
+        info = dmap[l]
+        items.append((l, n, info["mtime"], info["folder"]))
+        seen.add(l)
+    # 补齐：磁盘存在但图片从未用过的（count=0）
+    for l in all_disk:
+        if l not in seen:
+            info = dmap[l]
+            items.append((l, 0, info["mtime"], info["folder"]))
     items.sort(key=lambda x: (-x[2], -x[1]))  # 按安装时间倒序（新装的在前），同时间按使用次数
-    return [{"lora": l, "count": n, "mtime": mt} for l, n, mt in items]
+    return [{"lora": l, "count": n, "mtime": mt, "folder": folder} for l, n, mt, folder in items]
 
 
 _LORA_EXTS = (".safetensors", ".pt", ".ckpt", ".bin", ".pth", ".sft")
 
 
 def _lora_disk_map(source):
-    """扫描磁盘 LoRA 目录：{规范化名: 文件mtime}；目录不可用时返回空 dict（表示不过滤）"""
-    roots = []
-    if source == "comfyui":
-        if folder_paths is not None:
-            try:
-                roots = list(folder_paths.get_folder_paths("loras") or [])
-            except Exception:
-                roots = []
-            if not roots:
-                try:
-                    mdir = folder_paths.models_dir
-                    if mdir:
-                        roots = [os.path.join(mdir, "loras")]
-                except Exception:
-                    pass
-    else:
-        root = os.path.join(load_settings().get("webui_root", ""), "models", "Lora")
-        if os.path.isdir(root):
-            roots = [root]
+    """扫描磁盘 LoRA 目录：{规范化名: {mtime, folder}}；目录不可用时返回空 dict（表示不过滤）。
+    folder = 相对 loras 根的目录（'Anima/画风'，根目录为 ''），供前端按文件夹分组。
+    ComfyUI 源只用 ComfyUI 自己的 loras 根目录（排除 extra_model_paths 中挂载的 webui 等额外路径）。"""
+    roots = _lora_roots(source)
     m = {}
     for root in roots:
         if not root or not os.path.isdir(root):
             continue
         try:
             for dirpath, _dirnames, filenames in os.walk(root):
+                rel_dir = os.path.relpath(dirpath, root).replace("\\", "/")
+                if rel_dir == ".":
+                    rel_dir = ""
                 for fn in filenames:
                     if fn.lower().endswith(_LORA_EXTS):
                         base = os.path.splitext(fn)[0].strip()
                         if base:
                             try:
-                                m[base] = os.path.getmtime(os.path.join(dirpath, fn))
+                                m[base] = {"mtime": os.path.getmtime(os.path.join(dirpath, fn)),
+                                           "folder": rel_dir}
                             except Exception:
                                 pass
         except Exception:
             continue
     return m
+
+
+def _lora_roots(source):
+    """返回应扫描的 LoRA 根目录列表。
+    - comfyui：仅 ComfyUI 自己的 models/loras（不扫 extra_model_paths 挂载进来的 webui 路径）
+    - webui：SD WebUI 的 models/Lora"""
+    if source == "comfyui":
+        if folder_paths is not None:
+            try:
+                mdir = folder_paths.models_dir
+                if mdir:
+                    return [os.path.join(mdir, "loras")]
+            except Exception:
+                pass
+        return []
+    else:
+        root = os.path.join(load_settings().get("webui_root", ""), "models", "Lora")
+        return [root] if os.path.isdir(root) else []
 
 
 def stats():

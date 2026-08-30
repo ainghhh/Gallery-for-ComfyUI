@@ -234,6 +234,27 @@
   .setup .msg{font-size:12px; margin-top:10px; min-height:16px}
   .setup .msg.ok{color:#16a34a}
   .setup .msg.err{color:#dc2626}
+  /* LoRA 树形折叠筛选器 */
+  .lora-filter{position:relative; display:inline-block}
+  .lora-filter .lora-btn{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:9px 14px; font-size:13.5px; color:var(--txt); cursor:pointer; min-width:140px; max-width:220px; display:flex; align-items:center; gap:8px; font-family:inherit}
+  .lora-filter .lora-btn:hover{border-color:var(--accent)}
+  .lora-filter .lora-btn .lb-txt{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left}
+  .lora-filter .lora-btn .lb-arrow{font-size:10px; color:var(--dim); transition:transform .2s; flex:0 0 auto}
+  .lora-filter.open .lora-btn .lb-arrow{transform:rotate(180deg)}
+  .lora-tree{position:absolute; top:calc(100% + 5px); left:0; z-index:170; background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.16); min-width:230px; max-width:340px; max-height:420px; overflow-y:auto; display:none}
+  .lora-filter.open .lora-tree{display:block}
+  .lora-tree .tree-row{display:flex; align-items:center; gap:6px; padding:7px 10px; cursor:pointer; font-size:13.5px; user-select:none; border-radius:6px; margin:2px 4px}
+  .lora-tree .tree-row:hover{background:var(--accent-weak)}
+  .lora-tree .tree-row.sel{background:var(--accent); color:#fff}
+  .lora-tree .tree-row .tw{width:16px; height:16px; display:flex; align-items:center; justify-content:center; flex:0 0 16px; font-size:10px; color:var(--dim); transition:transform .18s; transform:rotate(0deg)}
+  .lora-tree .tree-row.folder .tw{transform:rotate(0)}
+  .lora-tree .tree-row.folder.expanded .tw{transform:rotate(90deg)}
+  .lora-tree .tree-row.sel .tw{color:rgba(255,255,255,.85)}
+  .lora-tree .tree-row .tn{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .lora-tree .tree-row .tc{font-size:12px; color:var(--dim); min-width:20px; text-align:right}
+  .lora-tree .tree-row.sel .tc{color:rgba(255,255,255,.85)}
+  .lora-tree .tree-empty{padding:12px; text-align:center; color:var(--dim); font-size:13px}
+  .lora-tree .tree-hint{padding:4px 10px 8px; font-size:11px; color:var(--dim); border-bottom:1px solid var(--line); margin-bottom:2px}
 </style>
 </head>
 <body data-theme="light">
@@ -250,10 +271,19 @@
     <input class="q" id="q" type="text" data-i18n-ph="searchPh" placeholder="搜索文件名 / 提示词…">
     <button class="iconbtn" id="btnAdvSearch" data-i18n="advBtn" data-i18n-title="titleAdv" title="🔍">🔍 高级</button>
     <select id="modelSel"><option value="">全部模型</option></select>
-    <select id="loraSel"><option value="">全部 LoRA</option></select>
+    <div class="lora-filter" id="loraFilter">
+      <input type="hidden" id="loraSelVal" value="">
+      <button class="lora-btn" id="loraBtn" type="button">
+        <span class="lb-txt" id="loraBtnTxt">全部 LoRA</span>
+        <span class="lb-arrow">▼</span>
+      </button>
+      <div class="lora-tree" id="loraTree"></div>
+    </div>
     <button class="iconbtn" id="btnPackLora" data-i18n="packLora" title="打包此 LoRA 全部图片（按大模型分子目录）">📦 LoRA</button>
     <button class="iconbtn" id="btnAdv" data-i18n="btnAdv2" data-i18n-title="titleFilter" title="Filter">⚙ 筛选</button>
     <button class="iconbtn" id="btnStats" data-i18n-title="titleStats" title="📊">📊</button>
+    <button class="iconbtn" id="btnRefreshComfy" data-i18n="refreshComfy" title="强制重建 ComfyUI 索引">🔄 ComfyUI</button>
+    <button class="iconbtn" id="btnRefreshWebui" data-i18n="refreshWebui" title="强制重建 WebUI 索引">🔄 WebUI</button>
     <button class="iconbtn" id="btnFav" data-i18n-title="titleFav" title="★">★</button>
     <button class="iconbtn" id="btnTheme" data-i18n-title="titleTheme" title="🌗">🌗</button>
     <button class="iconbtn" id="btnLang" data-i18n-title="titleLang" title="EN">EN</button>
@@ -502,13 +532,16 @@ const I18N = {
     modalPrompt: "正面提示词",
     lblSeed: "种子", lblSteps: "步数", lblCfg: "CFG", lblSampler: "采样器",
     lblScheduler: "调度器", lblSize: "尺寸", lblModel: "模型", lblSize2: "大小",
-    lblFav: "收藏", lblFaved: "已收藏",
+    lblFav: "收藏", lblFaved: "已收藏", loraRoot: "根目录",
     unitSteps: "步", fAll: "全部", fModel: "模型",
     advInit: "请选择 tag 或条件开始搜索", delTitle: "删除",
     createFail: "创建失败", dragToWhich: "拖入哪个收藏夹？（输入名称）", noMeta: "(无 metadata)",
     hasOutputs: "含 outputs", hasModels: "含 models",
     titleAdv: "高级搜索 / Advanced Search", titleFilter: "筛选 / Filters",
     titleStats: "统计 / Statistics", titleFav: "仅看收藏 / Favorites only",
+    titleRefresh: "刷新索引 / Refresh index",
+    refreshComfy: "🔄 ComfyUI",
+    refreshWebui: "🔄 WebUI",
     titleTheme: "切换主题 / Toggle theme", titleLang: "语言 / Language",
     titleSetup: "设置 / Settings", titleFs: "全屏观看 / Fullscreen",
     toastAdded: "✅ 已加入「", toastRemoved: "已移出「", toastCopyOk: "提示词已复制", toastImgCopyOk: "图片已复制",
@@ -549,13 +582,16 @@ const I18N = {
     modalPrompt: "Positive prompt",
     lblSeed: "Seed", lblSteps: "Steps", lblCfg: "CFG", lblSampler: "Sampler",
     lblScheduler: "Scheduler", lblSize: "Size", lblModel: "Model", lblSize2: "Size",
-    lblFav: "Favorite", lblFaved: "Favorited",
+    lblFav: "Favorite", lblFaved: "Favorited", loraRoot: "Root",
     unitSteps: " steps", fAll: "All", fModel: "Model",
     advInit: "Select tags or conditions to search", delTitle: "Delete",
     createFail: "Create failed", dragToWhich: "Drag to which folder? (enter name)", noMeta: "(no metadata)",
     hasOutputs: "has outputs", hasModels: "has models",
     titleAdv: "Advanced Search / 高级搜索", titleFilter: "Filters / 筛选",
     titleStats: "Statistics / 统计", titleFav: "Favorites only / 仅看收藏",
+    titleRefresh: "Refresh index / 刷新索引",
+    refreshComfy: "🔄 ComfyUI",
+    refreshWebui: "🔄 WebUI",
     titleTheme: "Toggle theme / 切换主题", titleLang: "Language / 语言",
     titleSetup: "Settings / 设置", titleFs: "Fullscreen / 全屏观看",
     toastAdded: "✅ Added to 「", toastRemoved: "Removed from 「", toastCopyOk: "Prompt copied", toastImgCopyOk: "Image copied",
@@ -696,7 +732,7 @@ async function load(reset){
   try{
     const p = new URLSearchParams({
       source: SRC, q: $("q").value.trim(), model: $("modelSel").value,
-      sampler: $("samplerSel").value, lora: $("loraSel").value,
+      sampler: $("samplerSel").value, lora: $("loraSelVal").value,
       steps_min: $("stepsMin").value, steps_max: $("stepsMax").value,
       cfg_min: $("cfgMin").value, cfg_max: $("cfgMax").value,
       min_w: $("minW").value, min_h: $("minH").value,
@@ -754,9 +790,9 @@ $("pgTopJump").addEventListener("keydown", e=>{ if(e.key === "Enter") goTo($("pg
 $("pageSizeSel").onchange = ()=>{ PAGE_SIZE = parseInt($("pageSizeSel").value) || 60; load(true); window.scrollTo({top:0,behavior:"smooth"}); };
 $("q").addEventListener("input", debounce(()=>load(true), 300));
 $("modelSel").onchange = ()=>load(true);
-$("loraSel").onchange = ()=>load(true);
+// LoRA 改为树形折叠面板（无 change 事件，由 buildLoraTree 内部处理点击）
 $("btnPackLora").onclick = ()=>{
-  const lo = $("loraSel").value;
+  const lo = $("loraSelVal").value;
   if(!lo){ showToast("请先在上方选择一个 LoRA"); return; }
   packImages({query: mainQuery(), by_model: true, name: lo});
 };
@@ -767,7 +803,7 @@ $("densitySel").onchange = ()=>$("grid").className = "grid " + $("densitySel").v
 $("btnAdv").onclick = ()=>{ $("adv").classList.toggle("show"); $("btnAdv").classList.toggle("active"); };
 $("btnReset").onclick = ()=>{
   ["stepsMin","stepsMax","cfgMin","cfgMax","minW","minH"].forEach(id=>$(id).value="");
-  $("samplerSel").value=""; $("modelSel").value=""; $("loraSel").value=""; $("sortSel").value="newest"; load(true);
+  $("samplerSel").value=""; $("modelSel").value=""; $("loraSelVal").value=""; $("loraBtnTxt").textContent="全部 LoRA"; $("sortSel").value="newest"; load(true);
 };
 $("btnFav").onclick = ()=>{ $("btnFav").classList.toggle("active"); load(true); };
 
@@ -786,14 +822,88 @@ async function loadSamplers(){
     r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.sampler; op.textContent = `${it.sampler}（${it.count}）`; sel.appendChild(op); });
   }catch(e){}
 }
+let LORA_ITEMS = [];
+let LORA_TREE_STATE = {};   // {nodePath: expanded(bool)}
 async function loadLoras(){
   try{
     const r = await api("/api/loras?source=" + SRC);
-    const sel = $("loraSel"); const cur = sel.value;
-    sel.innerHTML = '<option value="">全部 LoRA</option>';
-    r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.lora; op.textContent = `${it.lora}（${it.count}）`; sel.appendChild(op); });
-    sel.value = cur;
+    LORA_ITEMS = r.items || [];
+    buildLoraTree();
   }catch(e){}
+}
+function buildLoraTree(){
+  const tree = $("loraTree");
+  const cur = $("loraSelVal").value;
+  const root = {path:"", name:t("loraRoot")||"根目录", children:{}, items:[]};
+  LORA_ITEMS.forEach(it=>{
+    const folder = (it.folder||"").replace(/\\/g,"/");
+    const parts = folder ? folder.split("/").filter(Boolean) : [];
+    let node = root;
+    parts.forEach(p=>{
+      if(!node.children[p]) node.children[p] = {path:(node.path?node.path+"/":"")+p, name:p, children:{}, items:[]};
+      node = node.children[p];
+    });
+    node.items.push(it);
+  });
+  tree.innerHTML = "";
+  // 顶部：全部 LoRA
+  const allRow = document.createElement("div");
+  allRow.className = "tree-row" + (!cur ? " sel" : "");
+  allRow.innerHTML = `<span class="tn">全部 LoRA</span>${!cur ? '<span class="tc"></span>' : ""}`;
+  allRow.onclick = (e)=>{ e.stopPropagation(); selectLora("", allRow); };
+  tree.appendChild(allRow);
+  const hint = document.createElement("div"); hint.className = "tree-hint";
+  hint.textContent = LANG === "zh" ? "文件夹默认折叠，点击展开" : "Folders collapsed; click to expand";
+  tree.appendChild(hint);
+  // 统计某子树的叶子总数（仅文件夹数，不递归数叶子子树——只展示直接数量即可）
+  const render = (node, depth)=>{
+    const keys = Object.keys(node.children).sort();
+    keys.forEach(key=>{
+      const ch = node.children[key];
+      const p = ch.path;
+      const isExpanded = !!LORA_TREE_STATE[p];
+      const row = document.createElement("div");
+      row.className = "tree-row folder" + (isExpanded ? " expanded" : "");
+      row.style.paddingLeft = (10 + depth*14) + "px";
+      const innerCount = countLoras(ch);
+      row.innerHTML = `<span class="tw">▶</span><span class="tn">${esc(ch.name)}</span><span class="tc">${innerCount}</span>`;
+      row.onclick = (e)=>{
+        e.stopPropagation();
+        LORA_TREE_STATE[p] = !!!LORA_TREE_STATE[p];
+        buildLoraTree();
+      };
+      tree.appendChild(row);
+      if(isExpanded){
+        render(ch, depth+1);
+        // 叶子 lora
+        ch.items.sort((a,b)=> (b.count - a.count || a.lora.localeCompare(b.lora))).forEach(it=>{
+          const lr = document.createElement("div");
+          lr.className = "tree-row leaf" + (cur === it.lora ? " sel" : "");
+          lr.style.paddingLeft = (10 + (depth+1)*14) + "px";
+          lr.innerHTML = `<span class="tn">${esc(it.lora)}</span><span class="tc">${it.count}</span>`;
+          lr.onclick = (e)=>{ e.stopPropagation(); selectLora(it.lora, lr); };
+          tree.appendChild(lr);
+        });
+      }
+    });
+  };
+  render(root, 0);
+  if(LORA_ITEMS.length === 0){
+    tree.innerHTML = `<div class="tree-empty">${LANG === "zh" ? "没有 LoRA 数据" : "No LoRA data"}</div>`;
+  }
+}
+function countLoras(node){
+  let n = node.items.length;
+  for(const k in node.children){ n += countLoras(node.children[k]); }
+  return n;
+}
+function selectLora(name, row){
+  $("loraSelVal").value = name;
+  $("loraBtnTxt").textContent = name || "全部 LoRA";
+  document.querySelectorAll("#loraTree .tree-row.sel").forEach(r=>r.classList.remove("sel"));
+  if(row) row.classList.add("sel");
+  $("loraFilter").classList.remove("open");
+  load(true);
 }
 async function loadStats(){
   try{
@@ -811,6 +921,70 @@ async function loadStats(){
   }catch(e){}
 }
 $("btnStats").onclick = ()=>{ $("stats").classList.toggle("show"); $("btnStats").classList.toggle("active"); if($("stats").classList.contains("show")) loadStats(); };
+
+// ---------- LoRA 树形折叠面板：开合 ----------
+$("loraBtn").onclick = (e)=>{
+  e.stopPropagation();
+  $("loraFilter").classList.toggle("open");
+};
+// 点击面板外部关闭
+document.addEventListener("click", (e)=>{
+  const filter = $("loraFilter");
+  if(filter.classList.contains("open") && !filter.contains(e.target)){
+    filter.classList.remove("open");
+  }
+});
+// 面板内点击不关闭（用 stopPropagation 控制，除非选择 lora）
+$("loraTree").onclick = (e)=> e.stopPropagation();
+
+// ---------- 一键刷新索引（区分 ComfyUI / WebUI 两个源，默认强制全量重建） ----------
+let _refreshTimer = null;
+async function refreshIndex(source, force){
+  const btnId = source === "comfyui" ? "btnRefreshComfy" : "btnRefreshWebui";
+  const btn = $(btnId);
+  btn.style.pointerEvents = "none"; btn.style.opacity = "0.5";
+  $("indexBar").hidden = false;
+  $("indexFill").style.width = "0%";
+  const srcName = source === "comfyui" ? "ComfyUI" : "WebUI";
+  $("indexText").textContent = (force ? (LANG === "zh" ? "📊 重建 " + srcName + " 索引中：" : "📊 Rebuilding " + srcName + ": ") : t("indexBuilding")) + "0%";
+  const scanParam = force ? "force=1" : "refresh=1";
+  try{
+    // 只刷新指定的 source
+    await api(`/api/scan?source=${source}&${scanParam}`);
+    // 轮询该 source 构建进度，完成后自动重载
+    if(_refreshTimer) clearInterval(_refreshTimer);
+    _refreshTimer = setInterval(async ()=>{
+      try{
+        const st = await api("/api/status");
+        const cur = st[source] || {};
+        if(!cur.ready && cur.total > 0){
+          const pct = cur.total ? Math.round(cur.scanned / cur.total * 100) : 0;
+          $("indexBar").hidden = false;
+          $("indexFill").style.width = pct + "%";
+          $("indexText").textContent = `${t("indexBuilding")}${cur.scanned}/${cur.total} (${pct}%)`;
+          return;
+        }
+        clearInterval(_refreshTimer); _refreshTimer = null;
+        $("indexBar").hidden = true;
+        $("indexFill").style.width = "0%";
+        // 完成后：若当前视图就是这个源，重载下拉与列表；否则只刷新 stats
+        if(SRC === source){ await refreshSource(); }
+        else if(SRC === "fav" && loadFavGrid){ loadFolders(); loadFavGrid(false); }
+        else { loadStats(); }
+        showToast("🔄 " + srcName + " " + (LANG === "zh" ? "索引已刷新" : "refreshed"));
+      }catch(e){ clearInterval(_refreshTimer); _refreshTimer = null; $("indexBar").hidden = true; }
+    }, 1500);
+  }catch(e){
+    clearInterval(_refreshTimer); _refreshTimer = null;
+    $("indexBar").hidden = true;
+    showToast("⚠ " + srcName + " " + (LANG === "zh" ? "刷新失败" : "refresh failed"));
+  }finally{
+    btn.style.pointerEvents = ""; btn.style.opacity = "";
+  }
+}
+$("btnRefreshComfy").onclick = ()=>refreshIndex("comfyui", true);
+$("btnRefreshWebui").onclick = ()=>refreshIndex("webui", true);
+
 
 // ---------- 默认收藏集合 ----------
 async function loadDefaultFavs(){
@@ -1396,7 +1570,7 @@ $("fsCancel").onclick = ()=>{ FS_PICK_CB = null; FS_MODE = "setup"; $("fsPicker"
 let FS_MODE = "setup"; let FS_PICK_CB = null;
 function selItems(){ return [...SEL.values()].map(k=>{ const i=k.indexOf(":"); return {source: k.slice(0,i), file: k.slice(i+1)}; }); }
 function mainQuery(){
-  return {source: SRC, q: $("q").value.trim(), model: $("modelSel").value, sampler: $("samplerSel").value, lora: $("loraSel").value,
+  return {source: SRC, q: $("q").value.trim(), model: $("modelSel").value, sampler: $("samplerSel").value, lora: $("loraSelVal").value,
     fav: $("btnFav").classList.contains("active") ? "1" : "0", sort: $("sortSel").value,
     steps_min: $("stepsMin").value, steps_max: $("stepsMax").value, cfg_min: $("cfgMin").value, cfg_max: $("cfgMax").value,
     min_w: $("minW").value, min_h: $("minH").value};
@@ -1498,13 +1672,11 @@ bindMarquee("agGrid", ()=>ADV.items, SRC);
 
 // ---------- 启动 ----------
 let BOOTED = false;
-async function boot(){
-  if(BOOTED){ await load(false); return; }
-  BOOTED = true;
-  await loadDefaultFavs(); await loadFolders();
-  await loadModels(); await loadSamplers(); await loadLoras(); await loadStats();
+// 增量刷新扫描并等待完成（显示进度条）。skipFirst=true 表示仅触发增量扫描、不重复初始化下拉。
+async function _bootScan(skipFirst){
   try{ await fetch(`${API}/api/boot`); }catch(e){}
-  await load(true);
+  if(!skipFirst) await load(true);
+  else await load(false);
   const iv = setInterval(async ()=>{
     try{
       const st = await api("/api/status");
@@ -1531,6 +1703,17 @@ async function boot(){
       await load(false);
     }catch(e){}
   }, 2000);
+}
+async function boot(){
+  if(BOOTED){
+    // 已初始化过：仍触发增量刷新，确保新图片可见（修复「启动不刷新」bug）
+    await _bootScan(true);
+    return;
+  }
+  BOOTED = true;
+  await loadDefaultFavs(); await loadFolders();
+  await loadModels(); await loadSamplers(); await loadLoras(); await loadStats();
+  await _bootScan(false);
 }
 checkSettings();
 </script>
