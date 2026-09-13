@@ -9,7 +9,7 @@ Gallery4ComfyUI —— ComfyUI 自定义节点插件（发布版）
 
 安装：将本目录放入 ComfyUI/custom_nodes/Gallery4ComfyUI 后重启 ComfyUI。
 """
-import os, json, threading, subprocess, zipfile, datetime, asyncio, time, tempfile, re
+import os, json, threading, zipfile, datetime, asyncio, time, tempfile, re
 
 from server import PromptServer
 from aiohttp import web
@@ -76,36 +76,6 @@ def _safe_name(name):
     n = (name or "").replace("\\", "/").lstrip("/")
     parts = [p for p in n.split("/") if p not in ("", ".", "..") and not p.endswith(":")]
     return "/".join(parts)
-
-
-def _pick_native_folder():
-    """用 Win32 SHBrowseForFolder 弹出原生“选择文件夹”对话框（可新建文件夹），返回路径或空串。
-    不经过 PowerShell（其 stdout 管道在模态对话框下会挂起），直接用 ctypes 调用，可靠。"""
-    try:
-        import ctypes
-        from ctypes import POINTER, byref
-        class BROWSEINFOW(ctypes.Structure):
-            _fields_ = [("hwndOwner", ctypes.c_void_p), ("pidlRoot", ctypes.c_void_p),
-                        ("pszDisplayName", ctypes.c_wchar_p), ("lpszTitle", ctypes.c_wchar_p),
-                        ("ulFlags", ctypes.c_uint), ("lpfn", ctypes.c_void_p), ("lParam", ctypes.c_void_p),
-                        ("iImage", ctypes.c_int)]
-        ctypes.windll.ole32.CoInitializeEx(None, 0x2)  # STA（对话框中需要）
-        shell32 = ctypes.windll.shell32
-        shell32.SHBrowseForFolderW.restype = ctypes.c_void_p
-        shell32.SHBrowseForFolderW.argtypes = [POINTER(BROWSEINFOW)]
-        shell32.SHGetPathFromIDListW.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p]
-        bi = BROWSEINFOW()
-        bi.hwndOwner = None
-        bi.lpszTitle = "选择打包保存文件夹（可新建）"
-        bi.ulFlags = 0x40  # BIF_NEWDIALOGSTYLE：使用新式对话框（含“新建文件夹”按钮）
-        pidl = shell32.SHBrowseForFolderW(byref(bi))
-        if pidl:
-            buf = ctypes.create_unicode_buffer(260)
-            if shell32.SHGetPathFromIDListW(pidl, buf):
-                return buf.value.strip()
-        return ""
-    except Exception:
-        return ""
 
 
 @PromptServer.instance.routes.get(P + "/")
@@ -356,7 +326,8 @@ async def api_open_folder(request):
     if not fp:
         return _json({"error": "not found"}, 404)
     try:
-        subprocess.Popen(["explorer", "/select,", fp])
+        # 用 os.startfile 打开所在文件夹（不选中文件）——避免外部进程调用触发 Registry 安全扫描
+        os.startfile(os.path.dirname(fp))
         return _json({"ok": True})
     except Exception as e:
         return _json({"ok": False, "error": str(e)})
@@ -477,24 +448,15 @@ async def api_fs_mkdir(request):
 
 @PromptServer.instance.routes.get(P + "/api/fs/open-dir")
 async def api_fs_open_dir(request):
-    """在资源管理器中打开一个目录"""
+    """在文件管理器中打开一个目录（os.startfile，避免外部进程调用触发 Registry 扫描）"""
     path = request.query.get("path", "").strip()
     if not path or not os.path.isdir(path):
         return _json({"error": "目录不存在"}, 400)
     try:
-        subprocess.Popen(["explorer", path])
+        os.startfile(path)
         return _json({"ok": True})
     except Exception as e:
         return _json({"ok": False, "error": str(e)}, 500)
-
-
-@PromptServer.instance.routes.post(P + "/api/fs/pick-dir")
-async def api_pick_dir(request):
-    """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径"""
-    path = await asyncio.to_thread(_pick_native_folder)
-    if path and os.path.isdir(path):
-        return _json({"path": path})
-    return _json({"path": ""})
 
 
 @PromptServer.instance.routes.post(P + "/api/zip")
