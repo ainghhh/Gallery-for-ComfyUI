@@ -8,7 +8,7 @@ Gallery4ComfyUI · 独立启动器
     python standalone.py [--port 8288] [--output <ComfyUI output 目录>]
 
 - 默认端口 8288（避免与 ComfyUI 的 8188 冲突）
-- 默认 output 目录 = 绘世整合包 ComfyUI 的 output（可用 --output 覆盖）
+- output 目录：--output 参数 > GALLERY_COMFY_OUTPUT 环境变量 > 当前目录下的 ComfyUI/output 或 output
 - 启动后浏览器访问 http://127.0.0.1:8288/
 """
 import os, sys, json, subprocess, zipfile, datetime, asyncio, time, tempfile, re
@@ -36,20 +36,25 @@ while i < len(argv):
 # ---------------------------------------------------------------------------
 # ComfyUI output 目录（folder_paths 替身）
 # ---------------------------------------------------------------------------
+import shutil
+# 候选顺序：--output 参数 > GALLERY_COMFY_OUTPUT 环境变量 > ./ComfyUI/output > ./output
 _CANDIDATES = [
+    COMFY_OUTPUT or "",
     os.environ.get("GALLERY_COMFY_OUTPUT", ""),
-    r"D:\ai\Stable Diffusion\ComfyUI\ComfyUI-aki-v3\ComfyUI\output",
+    os.path.join(os.getcwd(), "ComfyUI", "output"),
+    os.path.join(os.getcwd(), "output"),
 ]
-if COMFY_OUTPUT:
-    _CANDIDATES.insert(0, COMFY_OUTPUT)
 COMFY_OUTPUT = next((p for p in _CANDIDATES if p and os.path.isdir(p)), "")
 if not COMFY_OUTPUT:
     print("[!] 未找到 ComfyUI output 目录，请用 --output 指定：")
-    print("    python standalone.py --output D:\\path\\to\\ComfyUI\\output")
+    print("    python standalone.py --output <ComfyUI output 目录>")
     sys.exit(1)
+# models 目录：output 的上级目录下的 models（常见布局）；也可用 GALLERY_COMFY_MODELS 指定
+_COMFY_ROOT = os.path.dirname(os.path.abspath(COMFY_OUTPUT))
+_MODELS = os.environ.get("GALLERY_COMFY_MODELS", "") or os.path.join(_COMFY_ROOT, "models")
 G.folder_paths = SimpleNamespace(
     get_output_directory=lambda: COMFY_OUTPUT,
-    models_dir=r"D:\ai\Stable Diffusion\ComfyUI\ComfyUI-aki-v3\ComfyUI\models",
+    models_dir=_MODELS,
 )
 print("[*] ComfyUI output 目录:", COMFY_OUTPUT)
 

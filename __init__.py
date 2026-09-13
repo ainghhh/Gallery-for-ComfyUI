@@ -149,6 +149,7 @@ async def api_status(request):
     return _json({
         "comfyui": G.scan_status("comfyui"),
         "webui": G.scan_status("webui"),
+        "video": G.scan_status("video"),
         "settings": G.load_settings(),
     })
 
@@ -194,6 +195,126 @@ async def api_samplers(request):
 async def api_loras(request):
     source = request.query.get("source", "comfyui")
     return _json({"items": G.loras(source)})
+
+
+@PromptServer.instance.routes.get(P + "/api/artists")
+async def api_artists(request):
+    source = request.query.get("source", "comfyui")
+    sort = request.query.get("sort", "count")
+    search = request.query.get("search", "")
+    page = _int(request.query.get("page"), 1) or 1
+    page_size = _int(request.query.get("page_size"), 0) or 0
+    try:
+        r = G.artists(source, sort=sort, search=search, page=page, page_size=page_size)
+        return _json({"items": r["items"], "total": r["total"]})
+    except Exception as e:
+        return _json({"items": [], "total": 0, "error": str(e)})
+
+
+@PromptServer.instance.routes.get(P + "/api/artlib/facets")
+async def api_artlib_facets(request):
+    try:
+        return _json(G.artlib_facets())
+    except Exception as e:
+        return _json({"error": str(e)})
+
+
+@PromptServer.instance.routes.get(P + "/api/artlib/search")
+async def api_artlib_search(request):
+    q = request.query
+    try:
+        r = G.artlib_search(
+            q=q.get("q", ""),
+            archetype=q.get("archetype", ""),
+            origin=q.get("origin", ""),
+            subject=q.get("subject", ""),
+            theme=q.get("theme", ""),
+            technique=q.get("technique", ""),
+            composition=q.get("composition", ""),
+            rating=q.get("rating", ""),
+            min_posts=_int(q.get("min_posts"), 0) or 0,
+            sort=q.get("sort", "posts"),
+            page=_int(q.get("page"), 1) or 1,
+            page_size=_int(q.get("page_size"), 60) or 60,
+        )
+        return _json({"items": r["items"], "total": r["total"]})
+    except Exception as e:
+        return _json({"items": [], "total": 0, "error": str(e)})
+
+
+@PromptServer.instance.routes.get(P + "/api/artlib/preview")
+async def api_artlib_preview(request):
+    """画师库本地预览：读「本地索引用过该 tag 的图」作封面。names 逗号分隔。"""
+    q = request.query
+    try:
+        names = [n for n in q.get("names", "").split(",") if n.strip()]
+        r = G.artlib_preview(source=q.get("source", "comfyui"), names=names)
+        return _json(r)
+    except Exception as e:
+        return _json({})
+
+
+@PromptServer.instance.routes.get(P + "/api/artists/tags")
+async def api_artist_tags(request):
+    source = request.query.get("source", "comfyui")
+    tag = request.query.get("tag", "")
+    try:
+        mx = int(request.query.get("max", "400"))
+    except Exception:
+        mx = 400
+    try:
+        lim = int(request.query.get("limit", "40"))
+    except Exception:
+        lim = 40
+    try:
+        items = G.artist_top_tags(source, tag, max_show=mx, limit=lim)
+        return _json({"items": items})
+    except Exception as e:
+        return _json({"items": [], "error": str(e)})
+
+
+@PromptServer.instance.routes.post(P + "/api/artists/note")
+async def api_artist_note(request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    r = G.save_artist_note(data.get("tag", ""), data.get("note", ""))
+    return _json(r)
+
+
+@PromptServer.instance.routes.post(P + "/api/artists/fav")
+async def api_artist_fav(request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    r = G.save_artist_fav(data.get("tag", ""), bool(data.get("on", True)))
+    return _json(r)
+
+
+@PromptServer.instance.routes.post(P + "/api/artists/cover")
+async def api_artist_cover(request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    r = G.save_artist_cover(data.get("tag", ""), _safe_name(data.get("file", "")))
+    return _json(r)
+
+
+@PromptServer.instance.routes.post(P + "/api/artists/weight")
+async def api_artist_weight(request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    try:
+        w = float(data.get("weight", 1.0))
+    except Exception:
+        w = 1.0
+    r = G.save_artist_weight(data.get("tag", ""), w)
+    return _json(r)
 
 
 @PromptServer.instance.routes.get(P + "/api/stats")

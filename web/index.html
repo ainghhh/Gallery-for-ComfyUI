@@ -27,10 +27,11 @@
   .modal .pos::-webkit-scrollbar{width:8px}
   body{background:var(--bg); color:var(--txt); font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif; font-size:14px; transition:background .2s}
   button{font-family:inherit}
-  .topbar{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); padding:9px 16px}
+  .topbar{background:color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); padding:9px 16px}
   .tb-inner{max-width:1320px; margin:0 auto; display:flex; align-items:center; gap:9px; flex-wrap:wrap}
   .title{font-size:16px; font-weight:600; margin-right:4px}
   .title small{font-weight:400; color:var(--dim); font-size:12px; margin-left:5px}
+  .ver-tag{font-size:10px; color:var(--dim); background:var(--bg); border:1px solid var(--line); border-radius:5px; padding:1px 6px; margin-right:2px; opacity:.75}
   input, select{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:13.5px; color:var(--txt); outline:none; font-family:inherit}
   input:focus, select:focus{border-color:var(--accent)}
   .q{flex:1; min-width:180px; max-width:400px; padding:9px 13px; font-size:14px}
@@ -66,6 +67,8 @@
 .grid img{-webkit-user-drag:none;user-drag:none}
 .item.sel{outline:2px solid var(--accent); outline-offset:-2px}
   .item img{width:100%; aspect-ratio:1/1; object-fit:cover; display:block; background:#ddd}
+  .item video{width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#000}
+  .item .media-note{position:absolute; right:8px; bottom:34px; font-size:10px; color:#fff; background:rgba(0,0,0,.6); padding:1px 6px; border-radius:5px}
   .item .meta{padding:6px 8px}
   .item .fname{font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .item .sub{font-size:11.5px; color:var(--dim); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -162,6 +165,7 @@
   @media (max-width:820px){ .modal .box{grid-template-columns:1fr; height:94vh; overflow:auto} }
   .modal .imgside{background:#101014; display:flex; align-items:center; justify-content:center; position:relative; min-height:0}
   .modal .imgside img{max-width:100%; max-height:100%; object-fit:contain; padding:8px}
+  .modal .imgside video.lb-video{max-width:100%; max-height:100%; width:auto; height:auto; padding:8px; background:#000}
   .modal .imgside .imgbar{position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:10px; padding:8px 14px; background:linear-gradient(transparent, rgba(0,0,0,.65)); color:rgba(255,255,255,.9); font-size:12px}
   .modal .imgside .imgbar .ib-name{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .modal .imgside .imgbar .ib-count{color:rgba(255,255,255,.6); white-space:nowrap}
@@ -255,6 +259,166 @@
   .lora-tree .tree-row.sel .tc{color:rgba(255,255,255,.85)}
   .lora-tree .tree-empty{padding:12px; text-align:center; color:var(--dim); font-size:13px}
   .lora-tree .tree-hint{padding:4px 10px 8px; font-size:11px; color:var(--dim); border-bottom:1px solid var(--line); margin-bottom:2px}
+
+  /* ============ 画师图库 ============ */
+  .artist-layout{display:flex; gap:14px; align-items:stretch}
+  .artist-layout[hidden]{display:none}
+  .artist-col{flex:1 1 auto; min-width:0; margin-right:386px}
+  .artist-col[hidden]{display:none}
+  .artist-main{min-width:0}
+  .artist-side{position:fixed; right:14px; top:96px; bottom:14px; width:360px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; z-index:40; box-shadow:0 6px 20px rgba(0,0,0,.10)}
+  .artist-side[hidden]{display:none}
+  .artlib-toolbar{display:grid; grid-template-columns:repeat(auto-fit, minmax(136px, 1fr)); gap:8px; align-items:center}
+  .artlib-toolbar input, .artlib-toolbar select{font-size:12.5px; padding:7px 9px; width:100%; min-width:0}
+  .artlib-toolbar #alSearch{grid-column:span 2}
+  .artlib-toolbar #alTheme{grid-column:span 2}
+  .artlib-toolbar .artist-hint{grid-column:1/-1; margin:0}
+  .al-cover{display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #2b2f3a, #1b1d22)}
+  .al-ph{font-size:52px; opacity:.35}
+  .al-profile{font-size:11px; color:var(--dim); line-height:1.4; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
+  .al-chip{display:inline-block; font-size:10.5px; padding:1px 7px; border-radius:5px; background:var(--accent-weak); color:var(--accent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .al-chip-r{background:rgba(229,72,77,.14); color:#e5484d}
+  .al-chip-on{background:rgba(30,158,90,.14); color:#1e9e5a}
+  .al-chip-ero{background:rgba(247,107,180,.16); color:#e0509a; font-weight:700}
+  .al-chip-soft{background:rgba(120,130,150,.16); color:var(--dim)}
+  .ac-info .ac-sub{display:flex; flex-wrap:wrap; gap:5px; margin-top:4px}
+  .artist-toolbar{display:flex; gap:8px; margin-bottom:10px; align-items:center}
+  .artist-toolbar input{flex:1; min-width:120px}
+  .artist-toolbar select{padding:8px 10px}
+  .artist-hint{color:var(--dim); font-size:12px}
+  .grid.md.artist-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:8px}
+  .grid.md.al-grid{grid-template-columns:repeat(auto-fill,minmax(212px,1fr)); gap:10px}
+  .artist-card{background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; cursor:pointer; position:relative; transition:box-shadow .15s, transform .15s; user-select:none}
+  .artist-card:hover{box-shadow:0 6px 18px rgba(0,0,0,.12); transform:translateY(-3px); border-color:var(--accent)}
+  .ac-cover{position:relative; overflow:hidden; background:#111; aspect-ratio:1/1}
+  .ac-cover img{width:100%; height:100%; object-fit:cover; display:block}
+  .ac-info{display:flex; flex-direction:column; gap:4px; padding:8px 10px 9px; border-top:1px solid var(--line)}
+  .ac-name{font-size:14px; font-weight:800; color:var(--txt); line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-all}
+  .ac-tag{font-size:11.5px; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .ac-sub{display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin-top:2px}
+  .ac-sub .cnt{font-size:13.5px; font-weight:800; color:var(--accent)}
+  .ac-sub .cnt-local{font-size:10.5px; color:var(--dim); font-weight:600; margin-left:2px}
+  .al-name{font-size:12px; font-weight:700; color:var(--dim)}
+  .al-spec{font-size:13.5px; font-weight:800; color:var(--txt); line-height:1.35; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-all}
+  .al-chips{display:flex; flex-wrap:wrap; gap:4px}
+  .al-chips .al-chip{max-width:48%}
+  .ac-cover .ac-arrow{position:absolute; top:50%; transform:translateY(-50%); width:26px; height:26px; border:none; border-radius:50%; background:rgba(0,0,0,.5); color:#fff; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s}
+  .ac-cover:hover .ac-arrow{opacity:1}
+  .ac-cover .ac-arrow:hover{background:var(--accent)}
+  .ac-cover .ac-prev{left:6px}
+  .ac-cover .ac-next{right:6px}
+  .ac-cover .ac-idx{position:absolute; bottom:6px; right:8px; font-size:10px; color:#fff; background:rgba(0,0,0,.55); padding:1px 7px; border-radius:5px}
+  .ac-info .ac-tag{font-size:11px; color:var(--accent); background:var(--accent-weak); border-radius:5px; padding:1px 7px; margin-top:1px; display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .ac-info .ac-name b{color:var(--accent)}
+  .ac-info .ac-sub{font-size:11.5px; color:var(--dim)}
+  .ac-fav{position:absolute; top:6px; right:8px; color:var(--star); font-size:14px; text-shadow:0 1px 3px rgba(0,0,0,.6); opacity:0; transition:.15s}
+  .ac-fav.on{opacity:1; background:rgba(245,179,1,.28); border-radius:50%; padding:1px 4px}
+  .artist-card:hover .ac-fav{opacity:1}
+  .ac-weight{position:absolute; top:6px; left:8px; background:rgba(0,0,0,.6); color:#ffd76a; font-size:11px; padding:1px 7px; border-radius:5px; font-weight:700}
+  /* 右键菜单 */
+  .ctx-menu{position:fixed; z-index:300; background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.25); min-width:210px; padding:5px; display:none}
+  .ctx-menu.show{display:block}
+  .ctx-menu .ctx-item{padding:8px 12px; font-size:13px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:8px}
+  .ctx-menu .ctx-item:hover{background:var(--accent-weak)}
+  .ctx-menu .ctx-item .ic{font-size:14px}
+  .ctx-menu .ctx-sep{height:1px; background:var(--line); margin:4px 6px}
+  .ctx-menu .ctx-wtitle{font-size:12.5px; color:var(--dim); padding:6px 10px 2px}
+  .ctx-menu .ctx-wrow{display:flex; gap:6px; padding:6px 10px 10px; align-items:center}
+  .ctx-menu .ctx-wrow input{flex:1; min-width:0; padding:6px 8px; font-size:13px}
+  /* 权重栏 */
+  .aw-title{font-size:14px}
+  .aw-pie{position:relative; width:170px; height:170px; margin:4px auto}
+  .aw-pie canvas{width:170px; height:170px}
+  .aw-pie-center{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; color:var(--accent)}
+  .aw-list{flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; min-height:80px; max-height:280px}
+  .aw-item{display:flex; align-items:center; gap:8px; padding:6px 8px; border:1px solid var(--line); border-radius:9px; background:var(--bg)}
+  .aw-item img{width:38px; height:38px; object-fit:cover; border-radius:6px; flex:0 0 38px}
+  .aw-item .awi-name{flex:1; min-width:0; font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer}
+  .aw-item .awi-name:hover{color:var(--accent)}
+  .aw-item .awi-w{width:86px; display:flex; align-items:center; gap:3px}
+  .aw-item .awi-w input{width:58px; padding:4px 6px; font-size:12px; text-align:right}
+  .aw-item .awi-del{border:none; background:none; cursor:pointer; color:var(--dim); font-size:14px; padding:2px 4px}
+  .aw-item .awi-del:hover{color:#e5484d}
+  .aw-actions{display:flex; gap:8px}
+  .aw-actions .iconbtn{flex:1; justify-content:center}
+  .aw-prompt{border-top:1px solid var(--line); padding-top:8px; display:flex; flex-direction:column; gap:6px}
+  .aw-prompt-head{display:flex; align-items:center; justify-content:space-between}
+  .aw-prompt textarea{width:100%; height:86px; resize:vertical; font-size:12px; font-family:inherit; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:7px 9px; color:var(--txt)}
+  /* 画师作品弹窗 */
+  .awm-head{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line)}
+  .awm-head b{font-size:15px}
+  .awm-head .awm-count{color:var(--dim); font-size:12px}
+  .awm-box{grid-template-columns:1fr !important; width:min(1200px,94vw) !important; height:min(820px,92vh) !important}
+  .awm-body{display:flex; flex-direction:column; padding:0; height:calc(100% - 48px); min-height:0}
+  .awm-left{flex:1; min-width:0; padding:12px; overflow-y:auto; display:flex; flex-direction:column}
+  .awm-left .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .awm-left .pager{margin-top:auto; padding-top:8px}
+  .awm-tags{border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-bottom:10px; background:var(--bg); flex:0 0 auto}
+  .awm-tags-head{display:flex; align-items:center; gap:10px; font-size:13px}
+  .awm-tags-head input{padding:4px 6px; font-size:12px}
+  .awm-tags-body{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; max-height:128px; overflow-y:auto}
+  .awm-tag-chip{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 9px; border-radius:7px; background:var(--accent-weak); color:var(--accent); cursor:pointer; border:1px solid transparent}
+  .awm-tag-chip:hover{background:var(--accent); color:#fff}
+  .awm-tag-chip .n{font-size:10.5px; opacity:.75}
+  .awm-tags-empty{color:var(--dim); font-size:12px; padding:6px 0}
+  /* 画师简介弹窗（左图库 / 右简介 双栏） */
+  .ai-box{display:flex !important; flex-direction:column; width:min(1120px, 95vw) !important; height:min(780px, 92vh) !important; grid-template-columns:1fr !important; padding:0 !important}
+  .ai-box .awm-head{flex:0 0 auto}
+  .ai-head-actions{display:flex; gap:7px}
+  .ai-head-actions .iconbtn{min-width:38px; justify-content:center}
+  .ai-body{flex:1; min-height:0; display:flex; flex-direction:row; align-items:stretch}
+  .ai-left{flex:1; min-width:0; padding:12px; overflow-y:auto; display:flex; flex-direction:column; background:var(--bg); position:relative}
+  .ai-grid-wrap{flex:1; min-height:0}
+  .ai-grid-top{display:flex; align-items:baseline; gap:8px; padding:0 2px 8px}
+  .ai-grid-title{font-size:13px; font-weight:800; color:var(--txt)}
+  .ai-grid-count{font-size:11.5px; color:var(--dim)}
+  .ai-empty{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:260px; text-align:center; padding:20px; color:var(--dim)}
+  .ai-empty-ic{font-size:44px; opacity:.4}
+  .ai-empty-t{font-size:14.5px; font-weight:700; color:var(--txt)}
+  .ai-empty-s{font-size:12px; line-height:1.7; max-width:320px}
+  .ai-grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px}
+  .ai-grid .item{width:100%; aspect-ratio:1/1; overflow:hidden; border-radius:9px; border:1px solid var(--line); background:#101014}
+  .ai-grid .item img{width:100%; height:100%; object-fit:cover; display:block; cursor:pointer; transition:transform .2s}
+  .ai-grid .item:hover img{transform:scale(1.06)}
+  .ai-grid .item .ai-it-ic{position:absolute; right:6px; bottom:6px; font-size:11px; background:rgba(0,0,0,.55); color:#fff; border-radius:5px; padding:1px 6px}
+  .ai-grid-hint{font-size:13px; color:var(--dim); text-align:center; padding:24px 10px; line-height:1.7}
+  .ai-big{position:absolute; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; z-index:5}
+  .ai-big[hidden]{display:none}
+  .ai-big img{max-width:100%; max-height:calc(100% - 56px); object-fit:contain; border-radius:10px}
+  .ai-big video{max-width:100%; max-height:calc(100% - 56px)}
+  .ai-big-back{position:absolute; top:12px; left:12px; z-index:6; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:7px 14px; cursor:pointer; color:var(--txt); box-shadow:0 3px 12px rgba(0,0,0,.18)}
+  .ai-big-back:hover{border-color:var(--accent); color:var(--accent)}
+  .ai-right{width:min(420px,100%); flex:0 0 420px; padding:14px 16px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; border-left:1px solid var(--line); background:var(--card)}
+  .ai-card{background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+  .ai-card-title{font-size:13px; font-weight:800; color:var(--accent); display:flex; align-items:center; gap:7px; margin-bottom:8px}
+  .ai-card-title::before{content:""; width:4px; height:14px; border-radius:2px; background:var(--accent); display:inline-block}
+  .ai-row{display:flex; gap:10px; align-items:flex-start; font-size:12.5px; line-height:1.55; padding:3px 0}
+  .ai-k{flex:0 0 86px; color:var(--dim); font-weight:600}
+  .ai-v{flex:1; color:var(--txt); word-break:break-word}
+  .ai-v .al-chip{margin:1px 3px 1px 0}
+  .ai-pos,.ai-neg{font-size:12.5px; line-height:1.65; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:9px 11px; white-space:pre-wrap; word-break:break-word; max-height:200px; overflow-y:auto}
+  .ai-sec-title{font-size:11.5px; color:var(--dim); letter-spacing:.5px; margin:4px 0 2px}
+  .ai-img-name{font-size:13px; color:var(--accent); font-weight:600; word-break:break-all; margin-bottom:8px}
+  .ai-img-meta{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:9px 11px}
+  .ai-img-meta .param-grid{margin-top:6px}
+  .ai-spec-big{font-size:15px; font-weight:800; color:var(--txt); line-height:1.45; padding:2px 0 6px; word-break:break-word}
+  .ai-tags-flow{display:flex; flex-wrap:wrap; gap:5px}
+  @media(max-width:900px){ .ai-body{flex-direction:column} .ai-right{width:100%; flex:1; border-left:none; border-top:1px solid var(--line)} .ai-left{min-height:40vh} }
+  /* 右侧参数面板 */
+  .awm-right{width:380px; flex:0 0 380px; border-left:1px solid var(--line); padding:12px 14px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:var(--card)}
+  .awm-preview{background:#101014; border-radius:12px; min-height:200px; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative}
+  .awm-ph-empty{color:var(--dim); font-size:13px; text-align:center; padding:30px}
+  .awm-preview img{max-width:100%; max-height:300px; object-fit:contain; display:block}
+  .awm-preview video{max-width:100%; max-height:300px}
+  .awm-meta{display:flex; flex-direction:column; gap:8px; min-height:0}
+  .awm-meta-name{font-size:13px; word-break:break-all; color:var(--accent); font-weight:600}
+  .awm-sec-title{font-size:11.5px; color:var(--dim); letter-spacing:.5px; margin-top:2px}
+  .awm-pos,.awm-neg{font-size:12.5px; line-height:1.65; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:9px 11px; white-space:pre-wrap; word-break:break-word; max-height:180px; overflow-y:auto}
+  .awm-item{cursor:pointer}
+  .awm-item.sel{outline:2px solid var(--accent); outline-offset:-2px}
+  @media(min-width:901px){ .awm-body{flex-direction:row} .awm-left{border-right:1px solid var(--line)} }
+  @media(max-width:900px){ .awm-right{width:100%; border-left:none; border-top:1px solid var(--line)} .awm-preview img,.awm-preview video{max-height:220px} }
+  @media(max-width:900px){ .artist-layout{flex-direction:column} .artist-col{flex:1 1 auto; margin-right:0; width:100%} .artist-side{position:static; right:auto; top:auto; bottom:auto; width:100%; max-height:none} }
 </style>
 </head>
 <body data-theme="light">
@@ -263,9 +427,13 @@
 <div class="topbar">
   <div class="tb-inner">
     <span class="title"><span data-i18n="title">Gallery4ComfyUI</span> <small id="srcLabel" data-i18n="subComfy">ComfyUI 图片</small></span>
+    <span class="ver-tag" title="Ctrl+F5 强刷后应看到 v1.3.0">v1.3.0</span>
     <div class="srctabs">
       <button class="srctab on" data-src="comfyui" data-i18n="tabComfy">ComfyUI</button>
       <button class="srctab" data-src="webui" data-i18n="tabWebui">WebUI</button>
+      <button class="srctab" data-src="video" data-i18n="tabVideo">🎬 视频</button>
+      <button class="srctab" data-src="artist" data-i18n="tabArtist">🎨 画师</button>
+      <button class="srctab" data-src="artlib" data-i18n="tabArtlib">🌐 画师库</button>
       <button class="srctab" data-src="fav" data-i18n="tabFav">⭐ 收藏</button>
     </div>
     <input class="q" id="q" type="text" data-i18n-ph="searchPh" placeholder="搜索文件名 / 提示词…">
@@ -284,6 +452,7 @@
     <button class="iconbtn" id="btnStats" data-i18n-title="titleStats" title="📊">📊</button>
     <button class="iconbtn" id="btnRefreshComfy" data-i18n="refreshComfy" title="强制重建 ComfyUI 索引">🔄 ComfyUI</button>
     <button class="iconbtn" id="btnRefreshWebui" data-i18n="refreshWebui" title="强制重建 WebUI 索引">🔄 WebUI</button>
+    <button class="iconbtn" id="btnRefreshVideo" data-i18n="refreshVideo" title="强制重建视频索引">🔄 🎬</button>
     <button class="iconbtn" id="btnFav" data-i18n-title="titleFav" title="★">★</button>
     <button class="iconbtn" id="btnTheme" data-i18n-title="titleTheme" title="🌗">🌗</button>
     <button class="iconbtn" id="btnLang" data-i18n-title="titleLang" title="EN">EN</button>
@@ -379,6 +548,178 @@
           <div class="pg-nums" id="fpgNums"></div>
           <button class="iconbtn" id="fpgNext">›</button>
           <span class="pg-jump">跳至 <input type="number" id="fpgJump" min="1" placeholder="页码"><button class="iconbtn" id="fpgGo">GO</button></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 画师 / 画师库 共享区域（含共享右侧画师串栏） -->
+  <div id="artistArea" class="artist-layout" hidden>
+  <!-- 画师视图 -->
+  <div id="artistView" class="artist-col" hidden>
+      <div class="artist-main">
+        <div class="artist-toolbar">
+          <input id="artistSearch" type="text" data-i18n-ph="artistSearchPh" placeholder="搜索画师…">
+          <select id="artistSort">
+            <option value="count" data-i18n="artistSortCount">按图片数</option>
+            <option value="last" data-i18n="artistSortLast">按最后使用</option>
+            <option value="first" data-i18n="artistSortFirst">按首次使用</option>
+            <option value="name" data-i18n="artistSortName">按名字</option>
+            <option value="random" data-i18n="artistSortRandom">🎲 随机</option>
+          </select>
+          <span class="artist-hint" id="artistHint"></span>
+        </div>
+        <div class="grid md artist-grid" id="artistGrid"><div class="empty" data-i18n="loading">加载中…</div></div>        <div class="pager" id="artistPager">
+          <button class="iconbtn" id="artPgFirst" title="«">«</button>
+          <button class="iconbtn" id="artPgPrev" title="‹">‹</button>
+          <div class="pg-nums" id="artPgNums"></div>
+          <button class="iconbtn" id="artPgNext" title="›">›</button>
+          <button class="iconbtn" id="artPgLast" title="»">»</button>
+        </div>
+      </div>
+  </div>
+
+  <!-- 🌐 Danbooru 画师库视图（懒加载：点开才请求数据） -->
+  <div id="artlibView" class="artist-col" hidden>
+    <div class="artist-main artlib-main">
+      <div class="artist-toolbar artlib-toolbar">
+        <input id="alSearch" type="text" data-i18n-ph="alSearchPh" placeholder="搜索画师名…">
+        <select id="alArchetype" data-i18n-al="alArchetype"><option value="">全部类型</option></select>
+        <select id="alOrigin" data-i18n-al="alOrigin"><option value="">全部来源</option></select>
+        <select id="alRating" data-i18n-al="alRating"><option value="">全部向性</option></select>
+        <select id="alSubject" data-i18n-al="alSubject"><option value="">全部主体</option></select>
+        <select id="alTechnique" data-i18n-al="alTechnique"><option value="">全部技法</option></select>
+        <input id="alTheme" type="text" data-i18n-ph="alThemePh" placeholder="题材 / 版权关键词…" list="alThemeList">
+        <datalist id="alThemeList"></datalist>
+        <select id="alSort">
+          <option value="posts" data-i18n="alSortPosts">作品数 ↓</option>
+          <option value="posts_asc" data-i18n="alSortPostsAsc">作品数 ↑</option>
+          <option value="name" data-i18n="alSortName">按名字</option>
+          <option value="random" data-i18n="aSortRandom">🎲 随机</option>
+        </select>
+        <span class="artist-hint" id="alHint"></span>
+      </div>
+      <div class="grid md al-grid" id="alGrid"><div class="empty" data-i18n="alLoading">点击加载画师库…</div></div>
+      <div class="pager" id="alPager">
+        <button class="iconbtn" id="alPgFirst" title="«">«</button>
+        <button class="iconbtn" id="alPgPrev" title="‹">‹</button>
+        <div class="pg-nums" id="alPgNums"></div>
+        <button class="iconbtn" id="alPgNext" title="›">›</button>
+        <button class="iconbtn" id="alPgLast" title="»">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共享右侧画师串权重栏 -->
+  <div class="artist-side">
+    <div class="aw-title"><b data-i18n="awTitle">🎨 画师权重栏</b></div>
+    <div class="aw-pie" id="awPie"><canvas id="awPieCanvas" width="170" height="170"></canvas><div class="aw-pie-center" id="awPieTotal">0</div></div>
+    <div class="aw-list" id="awList"></div>
+    <div class="aw-actions">
+      <button class="iconbtn" id="awDice" data-i18n="awDice">🎲 随机权重</button>
+      <button class="iconbtn" id="awClear" data-i18n="awClear">🗑 清空</button>
+    </div>
+    <div class="aw-prompt">
+      <div class="aw-prompt-head"><b data-i18n="awPrompt">提示词</b><button class="iconbtn" id="awCopy" data-i18n="awCopy">📋 复制</button></div>
+      <textarea id="awPromptText" readonly></textarea>
+    </div>
+  </div>
+</div>
+
+  <!-- 画师作品弹窗 -->
+  <div class="modal" id="awModal" style="z-index:200">
+    <div class="box awm-box">
+      <div class="awm-head">
+        <b id="awmTitle">@artist</b>
+        <span class="awm-count" id="awmCount"></span>
+        <select id="awmSort" style="padding:5px 8px;font-size:12px">
+          <option value="newest" data-i18n="sNewest">最新</option>
+          <option value="random" data-i18n="sRandom">随机</option>
+          <option value="oldest" data-i18n="sOldest">最旧</option>
+        </select>
+        <button class="iconbtn" id="awmClose" style="margin-left:auto">✕</button>
+      </div>
+      <div class="awm-body">
+        <div class="awm-left">
+          <div class="awm-tags" id="awmTags" hidden>
+            <div class="awm-tags-head">
+              <b data-i18n="awTagsTitle">🏷 常用 tag</b>
+              <span class="awm-tags-max"><span id="awmTagMaxLbl"></span> <input type="number" id="awmTagMax" value="400" min="0" style="width:64px"> <span id="awmTagMaxUnit"></span></span>
+              <button class="iconbtn" id="awmTagReload" style="margin-left:auto">↻</button>
+            </div>
+            <div class="awm-tags-body" id="awmTagsBody"></div>
+          </div>
+          <div class="grid md" id="awmGrid"><div class="empty" data-i18n="loading">加载中…</div></div>
+          <div class="pager" id="awmPager">
+            <button class="iconbtn" id="awmPrev">‹</button>
+            <div class="pg-nums" id="awmPgNums"></div>
+            <button class="iconbtn" id="awmNext">›</button>
+          </div>
+        </div>
+        <div class="awm-right" id="awmRight">
+          <div class="awm-preview" id="awmPreview">
+            <div class="awm-ph-empty" id="awmPhEmpty">← <span data-i18n="awmPick">点击左侧图片查看参数</span></div>
+            <img id="awmPhImg" hidden alt="">
+            <video id="awmPhVideo" hidden controls preload="metadata"></video>
+          </div>
+          <div class="awm-meta" id="awmMeta" hidden>
+            <div class="awm-meta-name" id="awmMetaName"></div>
+            <div class="param-grid" id="awmMetaParams"></div>
+            <div class="awm-sec-title" data-i18n="awmPositive">正向提示词</div>
+            <div class="awm-pos" id="awmMetaPos"></div>
+            <div class="awm-sec-title">Negative</div>
+            <div class="awm-neg" id="awmMetaNeg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右键菜单（画师） -->
+  <div class="ctx-menu" id="artistCtx" hidden></div>
+</div>
+
+<!-- 画师简介弹窗：左小图库 → 点图大图+参数；右简介 -->
+<div class="modal" id="artInfoModal" style="z-index:200">
+  <div class="box ai-box">
+    <div class="awm-head">
+      <b id="aiName">@artist</b>
+      <span class="awm-count" id="aiTag">@tag</span>
+      <span class="al-chip al-chip-on" id="aiBadge" hidden>本地</span>
+      <div style="flex:1"></div>
+      <div class="ai-head-actions">
+        <button class="iconbtn" id="aiCopy" title="📋 复制 @tag">📋</button>
+        <button class="iconbtn" id="aiAdd" title="➕ 加入画师串" style="background:var(--accent); color:#fff; border-color:var(--accent)">➕</button>
+        <button class="iconbtn" id="aiClose">✕</button>
+      </div>
+    </div>
+    <div class="ai-body" id="aiBody">
+      <div class="ai-left" id="aiLeft">
+        <div class="ai-grid-wrap" id="aiGridWrap">
+          <div class="ai-grid-top">
+            <span class="ai-grid-title" data-i18n="aiWorks">🖼 作品库</span>
+            <span class="ai-grid-count" id="aiGridCount"></span>
+          </div>
+          <div class="ai-grid-hint" id="aiGridHint" hidden></div>
+          <div class="grid md ai-grid" id="aiGrid"><div class="empty" data-i18n="loading">加载中…</div></div>
+        </div>
+        <div class="ai-big" id="aiBig" hidden>
+          <img id="aiBigImg" alt="">
+          <video id="aiBigVideo" hidden controls preload="metadata"></video>
+          <button class="iconbtn ai-big-back" id="aiBigBack">← <span data-i18n="aiBigBack">返回图库</span></button>
+        </div>
+      </div>
+      <div class="ai-right" id="aiRight">
+        <div id="aiInfoPanel"></div>
+        <div id="aiImgPanel" hidden>
+          <div class="ai-img-meta">
+            <div class="ai-img-name" id="aiImgName"></div>
+            <div class="param-grid" id="aiImgParams"></div>
+          </div>
+          <div class="ai-sec-title" data-i18n="awmPositive">正向提示词</div>
+          <div class="ai-pos" id="aiImgPos"></div>
+          <div class="ai-sec-title">Negative</div>
+          <div class="ai-neg" id="aiImgNeg"></div>
         </div>
       </div>
     </div>
@@ -506,7 +847,18 @@
 const I18N = {
   zh: {
     title: "Gallery4ComfyUI", subComfy: "ComfyUI 图片", subWebui: "WebUI 图片", subFav: "收藏",
-    tabComfy: "ComfyUI", tabWebui: "WebUI", tabFav: "⭐ 收藏",
+    tabComfy: "ComfyUI", tabWebui: "WebUI", tabVideo: "🎬 视频", tabArtist: "🎨 画师", tabFav: "⭐ 收藏",
+    tabArtlib: "🌐 画师库",
+    alSearchPh: "搜索画师名（如 dairi）…", alThemePh: "题材/版权关键词…", alLoading: "点击加载画师库…",
+    alSortPosts: "作品数 ↓", alSortPostsAsc: "作品数 ↑", alSortName: "按名字",
+    alArchetype: "全部类型", alOrigin: "全部来源", alRating: "全部向性",
+    alSubject: "全部主体", alTechnique: "全部技法",
+    artistSearchPh: "搜索画师…", artistSortCount: "按图片数", artistSortLast: "按最后使用",
+    artistSortFirst: "按首次使用", artistSortName: "按名字", artistSortRandom: "🎲 随机",
+    aSortRandom: "🎲 随机", awTitle: "🎨 画师权重栏",
+    awDice: "🎲 随机权重", awClear: "🗑 清空", awPrompt: "提示词", awCopy: "📋 复制",
+    awTagsTitle: "🏷 常用 tag",
+    awmPick: "点击左侧图片查看参数", awmPositive: "正向提示词",
     searchPh: "搜索文件名 / 提示词…", advBtn: "🔍 高级", btnAdv2: "⚙ 筛选",
     btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
     fSampler: "采样器", fLora: "LoRA", fStepsGe: "步数 ≥", fStepsLe: "步数 ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
@@ -542,6 +894,7 @@ const I18N = {
     titleRefresh: "刷新索引 / Refresh index",
     refreshComfy: "🔄 ComfyUI",
     refreshWebui: "🔄 WebUI",
+    refreshVideo: "🔄 🎬",
     titleTheme: "切换主题 / Toggle theme", titleLang: "语言 / Language",
     titleSetup: "设置 / Settings", titleFs: "全屏观看 / Fullscreen",
     toastAdded: "✅ 已加入「", toastRemoved: "已移出「", toastCopyOk: "提示词已复制", toastImgCopyOk: "图片已复制",
@@ -553,10 +906,29 @@ const I18N = {
     fsTitle: "选择目录", fsUp: "↑ 上级目录", fsSelect: "选择此目录", fsCancel: "取消", fsNew: "📁 新建文件夹",
     fsPickDrive: "选择盘符", fsEmpty: "空目录",
     statTitle: "模型分布（", statTotal: "张）",
+    aiCopy: "复制 @tag", aiAdd: "加入画师串", aiInfo: "ℹ 简介",
+    aiNote: "备注", aiCount: "作品数", aiWeight: "默认权重", aiFav: "收藏",
+    aiLastUse: "最后使用", aiFirstUse: "首次使用", aiUsed: "本库用过",
+    aiSpecialty: "定性", aiProfile: "简介", aiArchetype: "类型", aiOrigin: "来源",
+    aiSubject: "主体", aiTheme: "题材", aiTechnique: "技法", aiComposition: "构图",
+    aiCrypto: "主要版权", aiSig: "特征签名", aiUrl: "主页", aiRating: "分级",
+    aiEroRatio: "色气度", aiSexTags: "涩涩特色", aiSoftTags: "氛围", aiDeprecated: "已废弃",
+    aiArtlib: "Danbooru 库", aiLocal: "本地用过", aiEmpty: "（无）",
+    aiBigBack: "返回图库", aiWorks: "🖼 作品库",
   },
   en: {
     title: "Gallery4ComfyUI", subComfy: "ComfyUI Images", subWebui: "WebUI Images", subFav: "Favorites",
-    tabComfy: "ComfyUI", tabWebui: "WebUI", tabFav: "⭐ Fav",
+    tabComfy: "ComfyUI", tabWebui: "WebUI", tabVideo: "🎬 Videos", tabArtist: "🎨 Artists", tabFav: "⭐ Fav",
+    tabArtlib: "🌐 Artists DB",
+    alSearchPh: "Search artist name (e.g. dairi)…", alThemePh: "Theme/copyright keyword…", alLoading: "Click to load artist DB…",
+    alSortPosts: "Posts ↓", alSortPostsAsc: "Posts ↑", alSortName: "By name",
+    alArchetype: "All types", alOrigin: "All origins", alRating: "All ratings",
+    alSubject: "All subjects", alTechnique: "All techniques",
+    artistSearchPh: "Search artists…", artistSortCount: "By image count", artistSortLast: "By last use",
+    artistSortFirst: "By first use", artistSortName: "By name", awTitle: "🎨 Artist weights",
+    awDice: "🎲 Random weights", awClear: "🗑 Clear", awPrompt: "Prompt", awCopy: "📋 Copy",
+    awTagsTitle: "🏷 Common tags",
+    awmPick: "Click an image on the left to view params", awmPositive: "Positive prompt",
     searchPh: "Search filename / prompt…", advBtn: "🔍 Advanced", btnAdv2: "⚙ Filter",
     btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
     fSampler: "Sampler", fLora: "LoRA", fStepsGe: "Steps ≥", fStepsLe: "Steps ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
@@ -592,6 +964,7 @@ const I18N = {
     titleRefresh: "Refresh index / 刷新索引",
     refreshComfy: "🔄 ComfyUI",
     refreshWebui: "🔄 WebUI",
+    refreshVideo: "🔄 🎬",
     titleTheme: "Toggle theme / 切换主题", titleLang: "Language / 语言",
     titleSetup: "Settings / 设置", titleFs: "Fullscreen / 全屏观看",
     toastAdded: "✅ Added to 「", toastRemoved: "Removed from 「", toastCopyOk: "Prompt copied", toastImgCopyOk: "Image copied",
@@ -603,6 +976,15 @@ const I18N = {
     fsTitle: "Select Folder", fsUp: "↑ Up", fsSelect: "Select this folder", fsCancel: "Cancel", fsNew: "📁 New folder",
     fsPickDrive: "Choose a drive", fsEmpty: "Empty folder",
     statTitle: "Model distribution (", statTotal: " images)",
+    aiCopy: "Copy @tag", aiAdd: "Add to chain", aiInfo: "ℹ Profile",
+    aiNote: "Note", aiCount: "Works", aiWeight: "Default weight", aiFav: "Favorite",
+    aiLastUse: "Last used", aiFirstUse: "First used", aiUsed: "Used locally",
+    aiSpecialty: "Specialty", aiProfile: "Profile", aiArchetype: "Type", aiOrigin: "Origin",
+    aiSubject: "Subject", aiTheme: "Theme", aiTechnique: "Technique", aiComposition: "Composition",
+    aiCrypto: "Top copyrights", aiSig: "Signature tags", aiUrl: "Homepage", aiRating: "Rating",
+    aiEroRatio: "Ero ratio", aiSexTags: "Fetish focus", aiSoftTags: "Vibe", aiDeprecated: "Deprecated",
+    aiArtlib: "Danbooru DB", aiLocal: "Local", aiEmpty: "(none)",
+    aiBigBack: "Back to gallery", aiWorks: "🖼 Works",
   }
 };
 let LANG = localStorage.getItem("gallery4comfyui-lang") || "zh";
@@ -631,6 +1013,9 @@ function applyLang(){
   // 动态文本按钮
   const langBtn = document.getElementById("btnLang");
   if(langBtn) langBtn.textContent = LANG === "zh" ? "EN" : "中";
+  if(typeof awmTagLabels === "function") awmTagLabels();
+  // 语言切换可能改变导航栏高度 → 重算右侧画师串栏的顶部位置
+  if(typeof syncSideTop === "function") syncSideTop();
 }
 function switchLang(){
   LANG = LANG === "zh" ? "en" : "zh";
@@ -661,6 +1046,12 @@ async function api(path, opts){
   return r.json();
 }
 function imgUrl(src, file){ return `${API}/api/image?source=${src}&file=${encodeURIComponent(file)}`; }
+// 暂停全部/指定区域内视频（关闭弹窗、切换图片时调用，避免关掉界面声音还在放）
+function pauseVideos(root){
+  (root || document).querySelectorAll("video").forEach(v=>{
+    try{ v.pause(); }catch(e){}
+  });
+}
 
 // ---------- 主题 ----------
 function applyTheme(t){ document.body.dataset.theme = t; try{ localStorage.setItem("gallery4comfyui-theme", t); }catch(e){} }
@@ -670,21 +1061,75 @@ $("btnLang").onclick = switchLang;
 applyLang();
 
 // ---------- Tab ----------
+function showView(which){
+  $("mainView").hidden = which !== "main";
+  $("favView").hidden = which !== "fav";
+  const isArtistArea = (which === "artist" || which === "artlib");
+  $("artistArea").hidden = !isArtistArea;
+  $("artistView").hidden = which !== "artist";
+  $("artlibView").hidden = which !== "artlib";
+  // 共享画师串侧栏：只在 画师 / 画师库 视图显示
+  const side = document.querySelector(".artist-side");
+  if(side) side.hidden = !isArtistArea;
+  if(isArtistArea) syncSideTop();
+}
+// 右侧画师串栏：固定在右侧；页面顶部时避开导航栏，索引构建进度条出现且未滚出视口时再往下让位，滚出后收回
+function syncSideTop(){
+  const tb = document.querySelector(".topbar");
+  const side = document.querySelector(".artist-side");
+  if(!tb || !side) return;
+  const tbH = Math.ceil(tb.getBoundingClientRect().height) || 60;
+  let top = tbH;
+  const ib = document.getElementById("indexBar");
+  if(ib && !ib.hidden){
+    const r = ib.getBoundingClientRect();
+    if(r.bottom > tbH){          // 进度条仍在导航栏下方的可视区域才避让
+      top += 8 + (r.height || 44);
+    }
+  }
+  side.style.top = Math.round(top + 10) + "px";
+}
+let _sideTopTicking = false;
+window.addEventListener("scroll", ()=>{
+  if(_sideTopTicking) return;
+  _sideTopTicking = true;
+  requestAnimationFrame(()=>{ _sideTopTicking = false; syncSideTop(); });
+}, {passive:true});
+window.addEventListener("resize", syncSideTop);
+// 进度条显隐时自动避让/收回
+{
+  const ib = document.getElementById("indexBar");
+  if(ib && window.MutationObserver){
+    new MutationObserver(syncSideTop).observe(ib, {attributes:true, attributeFilter:["hidden"]});
+  }
+}
 document.querySelectorAll(".srctab").forEach(b=>{
   b.onclick = ()=>{
     document.querySelectorAll(".srctab").forEach(x=>x.classList.remove("on"));
     b.classList.add("on");
     if(b.dataset.src === "fav"){
-      $("mainView").hidden = true; $("favView").hidden = false;
-      $("srcLabel").textContent = "收藏";
+      showView("fav");
+      $("srcLabel").textContent = LANG === "zh" ? "收藏" : "Favorites";
       loadFolders(); loadFavGrid(true);
       return;
     }
-    $("mainView").hidden = false; $("favView").hidden = true;
+    if(b.dataset.src === "artist"){
+      showView("artist");
+      $("srcLabel").textContent = LANG === "zh" ? "🎨 画师" : "🎨 Artists";
+      loadArtists();
+      return;
+    }
+    if(b.dataset.src === "artlib"){
+      showView("artlib");
+      $("srcLabel").textContent = LANG === "zh" ? "🌐 Danbooru 画师库" : "🌐 Danbooru Artists";
+      artlibEnsure();   // 懒加载：首次点开才请求
+      return;
+    }
+    showView("main");
     SEL.clear(); $("selBar").hidden = true;
     $("favGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel"));
     SRC = b.dataset.src;
-    $("srcLabel").textContent = SRC === "comfyui" ? "ComfyUI 图片" : "WebUI 图片";
+    $("srcLabel").textContent = SRC === "comfyui" ? "ComfyUI 图片" : SRC === "video" ? "🎬 视频" : "WebUI 图片";
     $("modelSel").value = ""; $("samplerSel").value = "";
     $("btnFav").classList.remove("active");
     refreshSource();
@@ -756,17 +1201,20 @@ function mkItem(it, src, items){
   d.draggable = true;
   const key = src + ":" + it.file;
   if(DEFAULT_FAVS.has(key)) d.classList.add("faved");
-  const img = document.createElement("img");
-  img.src = imgUrl(src, it.file); img.loading = "lazy";
+  const isVideo = it.type === "video" || /\.(mp4|webm|mov|mkv|avi|gif)$/i.test(it.file || "");
+  const media = isVideo ? document.createElement("video") : document.createElement("img");
+  media.src = imgUrl(src, it.file);
+  media.loading = "lazy";
+  if(isVideo){ media.muted = true; media.playsInline = true; media.preload = "metadata"; }
   const badge = document.createElement("div"); badge.className = "badge"; badge.textContent = it.model || "";
   const meta = document.createElement("div"); meta.className = "meta";
   const p2 = it.params || {};
   const fname = document.createElement("div"); fname.className = "fname"; fname.textContent = it.file;
   const sub = document.createElement("div"); sub.className = "sub";
-  sub.textContent = [p2.steps?`${p2.steps}${t("unitSteps")}`:"", p2.width&&p2.height?`${p2.width}×${p2.height}`:"", p2.sampler||""].filter(Boolean).join(" · ");
+  sub.textContent = [isVideo ? "🎬" : "", p2.steps?`${p2.steps}${t("unitSteps")}`:"", p2.width&&p2.height?`${p2.width}×${p2.height}`:"", p2.sampler||""].filter(Boolean).join(" · ");
   meta.appendChild(fname); meta.appendChild(sub);
   const fm = document.createElement("span"); fm.className = "favmark"; fm.textContent = "★";
-  d.appendChild(badge); d.appendChild(img); d.appendChild(meta); d.appendChild(fm);
+  d.appendChild(badge); d.appendChild(media); d.appendChild(meta); d.appendChild(fm);
   d.onclick = ()=>{ if(SEL.size){ toggleSel(d, it, src); updateSelBars(); return; } CUR_ITEMS = items || CUR_ITEMS; CUR_IDX = CUR_ITEMS.indexOf(it); openLightbox(CUR_IDX); };
   d.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", JSON.stringify([{source: src, file: it.file}])); });
   return d;
@@ -940,12 +1388,12 @@ $("loraTree").onclick = (e)=> e.stopPropagation();
 // ---------- 一键刷新索引（区分 ComfyUI / WebUI 两个源，默认强制全量重建） ----------
 let _refreshTimer = null;
 async function refreshIndex(source, force){
-  const btnId = source === "comfyui" ? "btnRefreshComfy" : "btnRefreshWebui";
+  const btnId = source === "comfyui" ? "btnRefreshComfy" : source === "video" ? "btnRefreshVideo" : "btnRefreshWebui";
   const btn = $(btnId);
   btn.style.pointerEvents = "none"; btn.style.opacity = "0.5";
   $("indexBar").hidden = false;
   $("indexFill").style.width = "0%";
-  const srcName = source === "comfyui" ? "ComfyUI" : "WebUI";
+  const srcName = source === "comfyui" ? "ComfyUI" : source === "video" ? "视频" : "WebUI";
   $("indexText").textContent = (force ? (LANG === "zh" ? "📊 重建 " + srcName + " 索引中：" : "📊 Rebuilding " + srcName + ": ") : t("indexBuilding")) + "0%";
   const scanParam = force ? "force=1" : "refresh=1";
   try{
@@ -984,6 +1432,7 @@ async function refreshIndex(source, force){
 }
 $("btnRefreshComfy").onclick = ()=>refreshIndex("comfyui", true);
 $("btnRefreshWebui").onclick = ()=>refreshIndex("webui", true);
+$("btnRefreshVideo").onclick = ()=>refreshIndex("video", true);
 
 
 // ---------- 默认收藏集合 ----------
@@ -1378,8 +1827,28 @@ function paramBadges(it){
 }
 function openLightbox(idx){
   const it = CUR_ITEMS[idx]; if(!it) return;
+  pauseVideos();   // 切换前先停掉上一个视频（防止声音残留）
   CUR_IDX = idx;
-  $("mimg").src = imgUrl(SRC, it.file);
+  const isVideo = it.type === "video" || /\.(mp4|webm|mov|mkv|avi|gif)$/i.test(it.file || "");
+  const imgBox = $("mimg");
+  if(isVideo){
+    // 视频：把 img 替换为可播放的 video 元素
+    if(imgBox.tagName !== "VIDEO"){
+      const v = document.createElement("video");
+      v.id = "mimg"; v.controls = true; v.autoplay = true; v.classList.add("lb-video");
+      imgBox.replaceWith(v);
+    }
+    const v = $("mimg");
+    v.src = imgUrl(SRC, it.file);
+    v.load();
+  } else {
+    if(imgBox.tagName === "VIDEO"){
+      const im = document.createElement("img");
+      im.id = "mimg"; im.alt = "";
+      imgBox.replaceWith(im);
+    }
+    $("mimg").src = imgUrl(SRC, it.file);
+  }
   $("mfile").textContent = it.file;
   $("mimgName").textContent = it.file.split("/").pop();
   $("mimgCount").textContent = `${CUR_IDX + 1} / ${CUR_ITEMS.length}`;
@@ -1434,8 +1903,8 @@ function openLightbox(idx){
   }).catch(()=>{});
   $("modal").classList.add("show");
 }
-$("close").onclick = ()=>$("modal").classList.remove("show");
-$("modal").onclick = e=>{ if(e.target === $("modal")) $("modal").classList.remove("show"); };
+$("close").onclick = ()=>{ pauseVideos(); $("modal").classList.remove("show"); };
+$("modal").onclick = e=>{ if(e.target === $("modal")){ pauseVideos(); $("modal").classList.remove("show"); } };
 $("prev").onclick = e=>{ e.stopPropagation(); if(CUR_IDX>0) openLightbox(CUR_IDX-1); };
 $("next").onclick = e=>{ e.stopPropagation(); if(CUR_IDX<CUR_ITEMS.length-1) openLightbox(CUR_IDX+1); };
 // 全屏观看：按钮进入全屏，滚轮 / 左右按钮切换图片
@@ -1462,7 +1931,7 @@ $("modal").addEventListener("wheel", e=>{
 }, {passive:false});
 document.addEventListener("keydown", e=>{
   if(!$("modal").classList.contains("show")) return;
-  if(e.key === "Escape") $("modal").classList.remove("show");
+  if(e.key === "Escape"){ pauseVideos(); $("modal").classList.remove("show"); }
   if(e.key === "ArrowLeft") openLightbox(Math.max(0, CUR_IDX-1));
   if(e.key === "ArrowRight") openLightbox(Math.min(CUR_ITEMS.length-1, CUR_IDX+1));
 });
@@ -1669,6 +2138,869 @@ function bindMarquee(gridId, getItems, src){
 }
 bindMarquee("grid", ()=>CUR_ITEMS, SRC);
 bindMarquee("agGrid", ()=>ADV.items, SRC);
+
+// ============ 画师模块 ============
+let ARTISTS = [];            // 画师列表（带 count/cover/weight）
+let ART_PAGE = 1, ART_PAGE_SIZE = 60, ART_TOTAL = 0;
+let ART_COVER_IDX = {};      // 每个画师当前封面索引（-1=默认封面）
+let ART_COVER_LIST = {};     // 每个画师的封面候选列表（按时间倒序）
+let AW_LIST = [];            // 右侧权重栏画师 [{name, display, cover, weight}]
+let AWM = {tag:"", page:1, size:60, total:0, pages:1, items:[], selFile:""};
+
+const ART_PALETTE = ["#3b6ef5","#f5a623","#1e9e5a","#e5484d","#8e5cf7","#25c2c2","#f76bb4","#7ac74f","#ff9f43","#5f7cff","#c79efc","#ffd166"];
+
+function artTag(display){ return "@" + (display||""); }
+function artSelKey(display){ return (display||"").toLowerCase(); }
+
+async function loadArtists(){
+  try{
+    const r = await api(`/api/artists?source=comfyui&sort=${$("artistSort").value}&search=${encodeURIComponent($("artistSearch").value)}&page=${ART_PAGE}&page_size=${ART_PAGE_SIZE}`);
+    ARTISTS = r.items || [];
+    ART_TOTAL = r.total || 0;
+    $("artistHint").textContent = `${LANG === "zh" ? "共" : ""} ${ART_TOTAL} ${LANG === "zh" ? "位画师" : "artists"}`;
+    renderArtists();
+    renderArtistPager();
+  }catch(e){}
+}
+function renderArtistPager(){
+  const pages = Math.max(1, Math.ceil(ART_TOTAL / ART_PAGE_SIZE));
+  const nums = $("artPgNums"); nums.innerHTML = "";
+  for(let i=1;i<=pages;i++){
+    const b = document.createElement("button"); b.className = "iconbtn" + (i===ART_PAGE ? " active" : ""); b.textContent = i;
+    b.onclick = ()=>{ ART_PAGE = i; loadArtists(); window.scrollTo({top: 0, behavior: "smooth"}); };
+    nums.appendChild(b);
+  }
+}
+$("artPgFirst").onclick = ()=>{ ART_PAGE = 1; loadArtists(); };
+$("artPgPrev").onclick = ()=>{ if(ART_PAGE>1){ ART_PAGE--; loadArtists(); } };
+$("artPgNext").onclick = ()=>{ const p = Math.ceil(ART_TOTAL/ART_PAGE_SIZE); if(ART_PAGE<p){ ART_PAGE++; loadArtists(); } };
+$("artPgLast").onclick = ()=>{ ART_PAGE = Math.max(1, Math.ceil(ART_TOTAL/ART_PAGE_SIZE)); loadArtists(); };
+function renderArtists(){
+  const grid = $("artistGrid");
+  grid.innerHTML = "";
+  if(!ARTISTS.length){ grid.innerHTML = '<div class="empty">' + (LANG === "zh" ? "没有画师 / 请先重建索引" : "No artists / rebuild index first") + '</div>'; return; }
+  ARTISTS.forEach(a=>{
+    const key = artSelKey(a.name);
+    if(!(key in ART_COVER_LIST)){
+      ART_COVER_LIST[key] = [];
+      ART_COVER_IDX[key] = 0;
+    }
+    const cover = artCurrentCover(a);
+    const coverSrc = cover ? imgUrl("comfyui", cover) : "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="#22252b"/><text x="100" y="108" font-size="60" text-anchor="middle" fill="#8a91a0">🎨</text></svg>');
+    const d = document.createElement("div");
+    d.className = "artist-card" + (a.count ? "" : " ac-placeholder"); d.dataset.key = key; d.dataset.name = a.name;
+    const inSide = AW_LIST.find(x=>artSelKey(x.name)===key);
+    const w = a.weight ?? 1;
+    const whtml = `<div class="ac-weight" title="${LANG === "zh" ? "默认权重" : "default weight"}">${LANG === "zh" ? "⚖ " : "⚖ "}${w.toFixed(2)}${inSide ? " ·★" : ""}</div>`;
+    d.innerHTML = `
+      <div class="ac-cover">
+        <img src="${coverSrc}" loading="lazy" alt="">
+        <button class="ac-arrow ac-prev">‹</button>
+        <button class="ac-arrow ac-next">›</button>
+        <span class="ac-idx">${(ART_COVER_IDX[key]||0) + 1}/${artCountMax(a)}</span>
+        <span class="ac-fav${a.fav ? " on" : ""}">★</span>
+      </div>
+      <div class="ac-info">
+        <div class="ac-name" title="${LANG === "zh" ? "定性/备注（右键可改）" : "specialty / note (right-click to edit)"}">${esc(a.note || a.name)}</div>
+        <div class="ac-tag">${esc(a.display || "@" + a.name)}</div>
+        <div class="ac-sub">
+          <span class="cnt" title="${LANG === "zh" ? (a.db_posts ? `Danbooru 收录 ${Number(a.db_posts).toLocaleString()} · 本库 ${Number(a.count||0).toLocaleString()}` : `本库作品数 ${Number(a.count||0).toLocaleString()}`) : (a.db_posts ? `Danbooru ${Number(a.db_posts).toLocaleString()} · local ${Number(a.count||0).toLocaleString()}` : `local ${Number(a.count||0).toLocaleString()}`)}">🖼 ${a.db_posts ? Number(a.db_posts).toLocaleString() : Number(a.count||0).toLocaleString()}${a.db_posts ? `<small class="cnt-local"> ·本${Number(a.count||0).toLocaleString()}</small>` : ""}</span>
+          <span>⚖ ${(a.weight??1).toFixed(2)}</span>
+        </div>
+      </div>`;
+    d.querySelector(".ac-next").onclick = (e)=>{ e.stopPropagation(); artNextCover(a, 1); };
+    d.querySelector(".ac-prev").onclick = (e)=>{ e.stopPropagation(); artNextCover(a, -1); };
+    d.onclick = ()=>{
+      // 单击复制画师 tag
+      navigator.clipboard.writeText(artTag(a.name)).then(()=>showToast("📋 " + (LANG === "zh" ? "已复制画师：" : "Copied artist tag: ") + artTag(a.name))).catch(()=>{});
+    };
+    d.ondblclick = ()=>{ artAddToSide(a); };
+    d.oncontextmenu = (e)=>{ e.preventDefault(); artShowCtx(e, a); };
+    grid.appendChild(d);
+  });
+}
+function artCountMax(a){ return Math.max(1, a.count || 1); }
+function artCurrentCover(a){
+  const key = artSelKey(a.name);
+  const list = ART_COVER_LIST[key] || [];
+  const idx = ART_COVER_IDX[key] || 0;
+  if(list.length) return list[idx % list.length];
+  return a.cover || "";
+}
+async function artNextCover(a, dir){
+  const key = artSelKey(a.name);
+  // 懒加载候选列表：首次请求该画师的全部图（仅 file）
+  if(!(ART_COVER_LIST[key]||[]).length){
+    try{
+      const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(artTag(a.name).replace("@",""))}&sort=newest&page=1&page_size=200`);
+      const files = (r.items||[]).map(x=>x.file);
+      const seen = new Set();
+      ART_COVER_LIST[key] = files.filter(f=>!seen.has(f)&&seen.add(f));
+      if(!ART_COVER_LIST[key].length) ART_COVER_LIST[key] = [a.cover].filter(Boolean);
+    }catch(e){ ART_COVER_LIST[key] = [a.cover].filter(Boolean); }
+  }
+  const list = ART_COVER_LIST[key];
+  if(!list.length) return;
+  ART_COVER_IDX[key] = ((ART_COVER_IDX[key]||0) + dir + list.length) % list.length;
+  const d = document.querySelector(`.artist-card[data-key="${CSS.escape(key)}"]`);
+  if(d){
+    d.querySelector(".ac-cover img").src = imgUrl("comfyui", list[ART_COVER_IDX[key]]);
+    d.querySelector(".ac-idx").textContent = `${(ART_COVER_IDX[key]||0)+1}/${list.length}`;
+  }
+}
+function artShowCtx(e, a){
+  const menu = $("artistCtx");
+  const key = artSelKey(a.name);
+  const cur = artCurrentCover(a);
+  const w = a.weight ?? 1;
+  menu.innerHTML = `
+    <div class="ctx-item" data-act="info"><span class="ic">ℹ</span>${t("aiInfo")}</div>
+    <div class="ctx-item" data-act="cover"><span class="ic">🖼</span>${LANG === "zh" ? "设置当前图为封面" : "Set current as cover"}</div>
+    <div class="ctx-item" data-act="works"><span class="ic">🖼</span>${LANG === "zh" ? "查看全部作品" : "View all works"}</div>
+    <div class="ctx-item" data-act="reset"><span class="ic">↺</span>${LANG === "zh" ? "重置封面为最新" : "Reset cover to newest"}</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item" data-act="note"><span class="ic">🏷</span>${LANG === "zh" ? "改备注" : "Edit note"}</div>
+    <div class="ctx-item" data-act="weight"><span class="ic">⚖</span>${LANG === "zh" ? `调整默认权重（当前 ${w.toFixed(2)}）` : `Set default weight (now ${w.toFixed(2)})`}</div>
+    <div class="ctx-item" data-act="copy"><span class="ic">📋</span>${LANG === "zh" ? "复制画师 tag" : "Copy artist tag"}</div>
+    <div class="ctx-item" data-act="copyw"><span class="ic">⚖</span>${LANG === "zh" ? "复制 tag + 权重" : "Copy tag + weight"}</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item" data-act="add"><span class="ic">➕</span>${LANG === "zh" ? "添加到权重栏" : "Add to weight bar"}</div>
+    <div class="ctx-item" data-act="fav"><span class="ic">★</span>${a.fav ? (LANG === "zh" ? "取消收藏画师" : "Unfavorite artist") : (LANG === "zh" ? "收藏画师" : "Favorite artist")}</div>`;
+  menu.classList.add("show");
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 230) + "px";
+  menu.style.top = Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 10) + "px";
+  menu._artist = a; menu._cur = cur;
+}
+// ---------- 画师简介弹窗（左小图库 → 大图+参数；右简介，美化版） ----------
+let AI = { kind:"", item:null, works:[], total:0, selFile:"" };
+function aiRow(k, v, url){
+  if(v === undefined || v === null || v === "") return "";
+  const vHtml = url ? `<a href="${esc(v)}" target="_blank" style="color:var(--accent)">${esc(v)}</a>` : esc(String(v));
+  return `<div class="ai-row"><span class="ai-k">${k}</span><span class="ai-v">${vHtml}</span></div>`;
+}
+function aiCard(title, body){
+  return `<div class="ai-card"><div class="ai-card-title">${title}</div>${body}</div>`;
+}
+function renderAiInfo(){
+  try{
+  const a = AI.item, isZh = LANG === "zh";
+  const tag = "@" + a.name;
+  let h = "";
+  if(AI.kind === "artlib"){
+    const eroPct = a.ero_ratio ? Math.round((a.ero_ratio||0)*100) + "%" : "";
+    const special = a.specialty || a.profile || a.name;
+    const cards = [];
+    cards.push(aiCard("🎯 " + t("aiSpecialty"), `<div class="ai-spec-big">${esc(special)}</div>`));
+    cards.push(aiCard("📊 " + t("aiCount"),
+      aiRow(t("aiCount"), a.posts ? a.posts.toLocaleString() + (isZh ? " 张" : " posts") : "") +
+      aiRow(t("aiRating"), a.rating || "") +
+      aiRow(t("aiEroRatio"), eroPct)));
+    if(a.sex_tags && a.sex_tags.length)
+      cards.push(aiCard("🔥 " + t("aiSexTags"), `<div class="ai-tags-flow">${a.sex_tags.slice(0,12).map(t2=>`<span class="al-chip al-chip-ero">${esc(t2)}</span>`).join("")}</div>`));
+    if(a.soft_tags && a.soft_tags.length)
+      cards.push(aiCard("✨ " + t("aiSoftTags"), `<div class="ai-tags-flow">${a.soft_tags.slice(0,10).map(t2=>`<span class="al-chip al-chip-soft">${esc(t2)}</span>`).join("")}</div>`));
+    if(a.profile && a.profile !== special)
+      cards.push(aiCard("📄 " + t("aiProfile"), `<div class="ai-v">${esc(a.profile)}</div>`));
+    cards.push(aiCard("🌐 " + t("aiArtlib"),
+      aiRow(t("aiArchetype"), a.archetype || "") +
+      aiRow(t("aiOrigin"), a.origin || "") +
+      aiRow(t("aiSubject"), a.subject || "") +
+      aiRow(t("aiTheme"), a.theme || "") +
+      aiRow(t("aiTechnique"), a.technique || "") +
+      aiRow(t("aiComposition"), a.composition || "") +
+      aiRow(t("aiCrypto"), a.crypto || "") +
+      aiRow(t("aiSig"), a.sig || "") +
+      (a.url ? aiRow(t("aiUrl"), a.url, true) : "") +
+      (a.deprecated ? aiRow(t("aiDeprecated"), isZh ? "⚠ 已废弃" : "⚠ deprecated") : "")));
+    h = cards.join("");
+  } else {
+    const w = a.weight ?? 1;
+    const lu = a.last_use ? new Date(a.last_use*1000).toLocaleString() : "";
+    const fu = a.first_use ? new Date(a.first_use*1000).toLocaleString() : "";
+    const cards = [];
+    cards.push(aiCard("🎨 " + (isZh ? "画师" : "Artist"),
+      `<div class="ai-spec-big">${esc(a.note || a.name)}</div>` +
+      aiRow(t("aiWeight"), w.toFixed(2)) +
+      aiRow(t("aiUsed"), a.used ? (isZh ? "✅ 本库用过" : "✅ used locally") : (isZh ? "❌ 本库未用过（占位）" : "❌ not used yet")) +
+      aiRow(t("aiFav"), a.fav ? (isZh ? "★ 已收藏" : "★ favorited") : (isZh ? "☆ 未收藏" : "☆ not favorited"))));
+    cards.push(aiCard("📊 " + t("aiCount"),
+      aiRow(t("aiCount"), (a.db_posts ? Number(a.db_posts).toLocaleString() + (isZh ? " 张（Danbooru 收录）" : " (Danbooru)") : "") + (a.count ? (a.db_posts ? ` · ${isZh ? "本库 " : "local "}${Number(a.count).toLocaleString()}` : Number(a.count).toLocaleString() + (isZh ? " 张" : " imgs")) : "")) +
+      aiRow(t("aiLastUse"), lu) +
+      aiRow(t("aiFirstUse"), fu) +
+      ((a.cover || "") ? aiRow(isZh ? "封面" : "Cover", a.cover) : "")));
+    if(a.note) cards.push(aiCard("🏷 " + t("aiNote"), `<div class="ai-v">${esc(a.note)}</div>`));
+    h = cards.join("");
+  }
+  $("aiInfoPanel").innerHTML = h;
+  $("aiInfoPanel").hidden = false;
+  $("aiImgPanel").hidden = true;
+  }catch(e){
+    const info = $("aiInfoPanel");
+    if(info) info.innerHTML = `<div class="ai-card"><div class="ai-spec-big">${esc(AI.item ? (AI.item.note || AI.item.name) : "")}</div></div>`;
+    console.error("renderAiInfo:", e);
+  }
+}
+// 左侧小图库：加载本地索引中该画师的作品
+async function aiLoadWorks(){
+  const grid = $("aiGrid"); grid.innerHTML = '<div class="empty">' + t("loading") + '</div>';
+  $("aiGridHint").hidden = true;
+  try{
+    const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(AI.item.name)}&sort=newest&page=1&page_size=200`);
+    AI.works = r.items || []; AI.total = r.total || 0;
+  }catch(e){
+    AI.works = [];
+  }
+  // 兜底：查询失败或本地没有 → 至少显示封面/预览图（画师模块画师必有 cover）
+  if(!AI.works.length){
+    const k = artSelKey(AI.item.name);
+    const fb = AI.kind === "artlib" ? (AL_PREVIEWS[k] || "") : (AI.item.cover || "");
+    if(fb) AI.works = [{file: fb}];
+  }
+  renderAiGrid();
+}
+function renderAiGrid(){
+  const grid = $("aiGrid");
+  if(!grid) return;
+  grid.innerHTML = "";
+  try{
+  if(!AI.works.length){
+    const hint = $("aiGridHint");
+    if(hint){
+      hint.hidden = false;
+      hint.innerHTML = `
+      <div class="ai-empty">
+        <div class="ai-empty-ic">🎨</div>
+        <div class="ai-empty-t">${LANG === "zh" ? "这位画师在本地还没有作品" : "No local works yet"}</div>
+        <div class="ai-empty-s">${LANG === "zh" ? "在 ComfyUI 里用过这个 @tag 出图后，「作品库」会自动收集这里" : "Use @tag in ComfyUI and works will appear here"}</div>
+      </div>`;
+    }
+    return;
+  }
+  const hint = $("aiGridHint");
+  if(hint) hint.hidden = true;
+  AI.works.forEach(it=>{
+    const d = document.createElement("div");
+    d.className = "item";
+    const isVideo = it.type === "video" || /\.(mp4|webm|mov|mkv|avi|gif)$/i.test(it.file||"");
+    d.style.position = "relative";
+    d.innerHTML = `<img src="${imgUrl("comfyui", it.file)}" loading="lazy" alt="">${isVideo ? '<span class="ai-it-ic">🎬</span>' : ""}`;
+    d.onclick = ()=>{ aiOpenBig(it); };
+    grid.appendChild(d);
+  });
+  const n = $("aiGridCount");
+  if(n) n.textContent = (LANG === "zh" ? "共" : "") + " " + AI.works.length + (AI.total > AI.works.length ? " / " + AI.total : "") + (LANG === "zh" ? " 张" : " imgs");
+  }catch(e){ console.error("renderAiGrid:", e); }
+}
+function aiOpenBig(it){
+  try{
+  AI.selFile = it.file;
+  $("aiGridWrap").hidden = true;
+  $("aiBig").hidden = false;
+  const isVideo = it.type === "video" || /\.(mp4|webm|mov|mkv|avi|gif)$/i.test(it.file||"");
+  const img = $("aiBigImg"), vid = $("aiBigVideo");
+  img.hidden = isVideo; vid.hidden = !isVideo;
+  if(isVideo){ vid.src = imgUrl("comfyui", it.file); vid.load(); }
+  else { img.src = imgUrl("comfyui", it.file); vid.removeAttribute("src"); }
+  // 右侧切到图片参数
+  $("aiInfoPanel").hidden = true;
+  $("aiImgPanel").hidden = false;
+  $("aiImgName").textContent = it.file.split("/").pop();
+  const p2 = it.params || {};
+  const badges = [
+    ["Step", p2.steps], ["CFG", p2.cfg], ["Sampler", p2.sampler||p2.sampler_name],
+    ["Size", p2.width&&p2.height ? `${p2.width}×${p2.height}` : ""],
+    ["Seed", p2.seed ?? p2.noise_seed], ["Model", it.model],
+  ].filter(x=>x[1] !== undefined && x[1] !== "" && x[1] !== null);
+  $("aiImgParams").innerHTML = badges.map(b=>`<div class="pbadge"><div class="pl">${esc(b[0])}</div><div class="pv">${esc(String(b[1]))}</div></div>`).join("");
+  $("aiImgPos").textContent = it.positive || "";
+  $("aiImgNeg").textContent = it.negative || "";
+  }catch(e){ console.error("aiOpenBig:", e); }
+}
+function showArtInfo(a, kind){
+  AI = { kind, item: a, works: [], total: 0, selFile: "" };
+  try{
+    const isZh = LANG === "zh";
+    const tag = "@" + a.name;
+    const hasLocal = kind === "local" || Boolean(AL_PREVIEWS[(a.name||"").toLowerCase()] || a.cover);
+    $("aiName").textContent = kind === "artlib" ? (a.specialty || a.profile || a.name) : (a.note || a.name);
+    $("aiName").title = $("aiName").textContent;
+    $("aiTag").textContent = tag;
+    const badge = $("aiBadge");
+    if(badge){ badge.hidden = !hasLocal; badge.textContent = isZh ? "本地用过" : "local"; }
+    // 初始态：右简介 / 左图库
+    const big = $("aiBig"), gwrap = $("aiGridWrap");
+    if(big) big.hidden = true;
+    if(gwrap) gwrap.hidden = false;
+    renderAiInfo();
+    $("artInfoModal").classList.add("show");
+    aiLoadWorks();
+  }catch(e){
+    // 极端兜底：局部失败也要能打开弹窗看到基础信息
+    try{
+      $("artInfoModal").classList.add("show");
+      const info = $("aiInfoPanel");
+      if(info) info.innerHTML = `<div class="ai-card"><div class="ai-spec-big">${esc(a.note || a.name)}</div><div class="ai-v">@${esc(a.name)}</div></div>`;
+    }catch(e2){}
+    try{ if(window.__aiErrLog) window.__aiErrLog.push(e.message); }catch(e3){}
+    console.error("showArtInfo:", e);
+  }
+}
+$("aiClose").onclick = ()=>{ pauseVideos(); $("artInfoModal").classList.remove("show"); };
+$("artInfoModal").onclick = e=>{ if(e.target === $("artInfoModal")){ pauseVideos(); $("artInfoModal").classList.remove("show"); } };
+$("aiBigBack").onclick = ()=>{
+  pauseVideos();
+  AI.selFile = "";
+  $("aiBig").hidden = true;
+  $("aiGridWrap").hidden = false;
+  $("aiImgPanel").hidden = true;
+  $("aiInfoPanel").hidden = false;
+};
+$("aiCopy").onclick = ()=>{
+  const tag = "@" + (AI.item ? AI.item.name : "");
+  if(tag === "@") return;
+  navigator.clipboard.writeText(tag).then(()=>showToast("📋 " + tag));
+};
+$("aiAdd").onclick = ()=>{
+  if(!AI.item) return;
+  if(AI.kind === "artlib") artlibAddToSide(AI.item);
+  else artAddToSide(AI.item);
+};
+// 点击其他区域关闭右键菜单
+document.addEventListener("click", (e)=>{
+  const menu = $("artistCtx");
+  if(menu.classList.contains("show") && !menu.contains(e.target) && !e.target.closest(".artist-card")){
+    menu.classList.remove("show");
+  }
+}, true);
+$("artistCtx").addEventListener("click", async (e)=>{
+  const item = e.target.closest(".ctx-item"); if(!item) return;
+  const menu = $("artistCtx"); const a = menu._artist; const cur = menu._cur;
+  const act = item.dataset.act;
+  if(act === "note"){
+    // 备注编辑：菜单内展开输入表单（不关闭）
+    const n0 = a.note || "";
+    menu.innerHTML = `
+      <div class="ctx-wtitle">🏷 ${LANG === "zh" ? "画师备注" : "Artist note"}</div>
+      <div class="ctx-wrow" style="flex-direction:column;align-items:stretch">
+        <textarea id="ctxNInput" rows="2" style="flex:1;min-width:0;padding:6px 8px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--txt)">${esc(n0)}</textarea>
+        <div style="display:flex;gap:6px">
+          <button class="iconbtn" id="ctxNSave" style="flex:1;background:var(--accent);color:#fff;border-color:var(--accent)">${LANG === "zh" ? "保存" : "Save"}</button>
+          <button class="iconbtn" id="ctxNCancel">✕</button>
+        </div>
+      </div>`;
+    const inp = $("ctxNInput");
+    inp.focus();
+    const finalizeNote = async ()=>{
+      const v = inp.value.trim();
+      a.note = v;
+      try{ await api("/api/artists/note", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: a.name, note: v})}); }catch(err){}
+      const d = document.querySelector(`.artist-card[data-key="${CSS.escape(artSelKey(a.name))}"]`);
+      if(d){ const nm = d.querySelector(".ac-name"); if(nm) nm.textContent = v || a.name; }
+      menu.classList.remove("show");
+      showToast("🏷 " + (LANG === "zh" ? "备注已保存" : "Note saved"));
+    };
+    $("ctxNSave").onclick = finalizeNote;
+    $("ctxNCancel").onclick = ()=>menu.classList.remove("show");
+    inp.addEventListener("keydown", ev=>{ if(ev.key === "Enter" && !ev.shiftKey){ ev.preventDefault(); finalizeNote(); } });
+    return;
+  }
+  if(act === "weight"){
+    // 权重编辑：菜单内展开输入表单（不关闭）
+    const w0 = (a.weight ?? 1).toFixed(5);
+    menu.innerHTML = `
+      <div class="ctx-wtitle">⚖ ${LANG === "zh" ? "调整默认权重" : "Set default weight"}</div>
+      <div class="ctx-wrow">
+        <input type="number" id="ctxWInput" min="0.5" max="2" step="0.00001" value="${w0}">
+        <button class="iconbtn" id="ctxWSave" style="background:var(--accent);color:#fff;border-color:var(--accent)">${LANG === "zh" ? "保存" : "Save"}</button>
+        <button class="iconbtn" id="ctxWCancel">✕</button>
+      </div>`;
+    const inp = $("ctxWInput");
+    inp.focus(); inp.select();
+    const finalize = async ()=>{ 
+      let v = parseFloat(inp.value);
+      if(isNaN(v)) v = 1;
+      v = Math.min(2, Math.max(0.5, v));
+      v = Math.round(v * 100000) / 100000;
+      a.weight = v;
+      // 持久化默认权重
+      try{ await api("/api/artists/weight", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: a.name, weight: v})}); }catch(err){}
+      // 更新右侧栏画师串中的权重
+      const s = AW_LIST.find(x=>artSelKey(x.name)===artSelKey(a.name));
+      if(s){ s.weight = v; artRenderSide(); }
+      // 更新卡片 ⚖ 标记（保留 ★ 标记）
+      const d = document.querySelector(`.artist-card[data-key="${CSS.escape(artSelKey(a.name))}"]`);
+      if(d){
+        const inSide2 = AW_LIST.find(x=>artSelKey(x.name)===artSelKey(a.name));
+        const wk = d.querySelector(".ac-weight");
+        if(wk) wk.textContent = "⚖ " + v.toFixed(2) + (inSide2 ? " ·★" : "");
+        const sub2 = d.querySelectorAll(".ac-sub span")[1];
+        if(sub2) sub2.textContent = "⚖ " + v.toFixed(2);
+      }
+      menu.classList.remove("show");
+      showToast("⚖ " + (LANG === "zh" ? "默认权重已更新：" : "Default weight: ") + v.toFixed(5));
+    };
+    $("ctxWSave").onclick = finalize;
+    $("ctxWCancel").onclick = ()=>menu.classList.remove("show");
+    inp.addEventListener("keydown", ev=>{ if(ev.key === "Enter"){ ev.preventDefault(); finalize(); } });
+    return;
+  }
+  menu.classList.remove("show");
+  if(act === "info"){
+    showArtInfo(a, "local");
+  } else if(act === "cover"){
+    await api("/api/artists/cover", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: a.name, file: cur})});
+    showToast("🖼 " + (LANG === "zh" ? "已设为封面" : "Cover set"));
+    loadArtists();
+  } else if(act === "works"){
+    artOpenWorks(a);
+  } else if(act === "reset"){
+    ART_COVER_IDX[artSelKey(a.name)] = 0;
+    ART_COVER_LIST[artSelKey(a.name)] = [];
+    await api("/api/artists/cover", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: a.name, file: a.cover})});
+    loadArtists();
+  } else if(act === "copy"){
+    navigator.clipboard.writeText(artTag(a.name)).then(()=>showToast("📋 " + artTag(a.name)));
+  } else if(act === "copyw"){
+    const w = AW_LIST.find(x=>artSelKey(x.name)===artSelKey(a.name))?.weight ?? (a.weight ?? 1);
+    navigator.clipboard.writeText(`(${artTag(a.name)}:${w.toFixed(2)})`).then(()=>showToast("📋 " + `(${artTag(a.name)}:${w.toFixed(2)})`));
+  } else if(act === "add"){
+    artAddToSide(a);
+  } else if(act === "fav"){
+    const on = !a.fav;
+    a.fav = on;
+    try{ await api("/api/artists/fav", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: a.name, on})}); }catch(err){}
+    const d = document.querySelector(`.artist-card[data-key="${CSS.escape(artSelKey(a.name))}"]`);
+    if(d){ const f = d.querySelector(".ac-fav"); if(f) f.classList.toggle("on", on); }
+    showToast("★ " + (LANG === "zh" ? (on ? "已收藏" : "已取消收藏") : (on ? "Favorited" : "Unfavorited")) + ": " + artTag(a.name));
+  }
+});
+// 打开画师作品弹窗
+async function artOpenWorks(a){
+  AWM.tag = artTag(a.name); AWM.page = 1; AWM.items = []; AWM.selFile = "";
+  $("awmTitle").textContent = AWM.tag;
+  $("awmSort").value = "random";  // 作品浏览默认随机排序（可切换最新/最旧）
+  // 右侧面板复位
+  $("awmMeta").hidden = true; $("awmPhEmpty").hidden = false;
+  $("awmPhImg").hidden = true; $("awmPhVideo").hidden = true;
+  $("awmPhImg").removeAttribute("src"); $("awmPhVideo").removeAttribute("src");
+  awmTagLabels();
+  $("awModal").classList.add("show");  // modal 用 .show 显示（CSS display:flex）
+  await artLoadWorksPage();
+  await artLoadWorksTags(a.name);
+}
+function awmTagLabels(){
+  const isZh = LANG === "zh";
+  $("awmTagMaxLbl").textContent = isZh ? "屏蔽 >" : "Hide >";
+  $("awmTagMaxUnit").textContent = isZh ? "次" : "uses";
+}
+async function artLoadWorksTags(name){
+  try{
+    const mx = parseInt($("awmTagMax").value) || 400;
+    const r = await api(`/api/artists/tags?source=comfyui&tag=${encodeURIComponent(name)}&max=${mx}&limit=40`);
+    const items = r.items || [];
+    const box = $("awmTagsBody"); box.innerHTML = "";
+    $("awmTags").hidden = false;
+    if(!items.length){ box.innerHTML = '<div class="awm-tags-empty">' + (LANG === "zh" ? "暂无 tag 统计" : "No tag stats") + '</div>'; return; }
+    items.forEach(t=>{
+      const chip = document.createElement("span");
+      chip.className = "awm-tag-chip";
+      chip.innerHTML = `${esc(t.tag)} <span class="n">x${t.count}</span>`;
+      chip.title = LANG === "zh" ? "点击复制" : "click to copy";
+      chip.onclick = (e)=>{
+        e.stopPropagation();
+        navigator.clipboard.writeText(t.tag).then(()=>showToast("📋 " + t.tag));
+      };
+      box.appendChild(chip);
+    });
+  }catch(e){ $("awmTags").hidden = true; }
+}
+$("awmTagReload").onclick = ()=>{
+  const a = {name: AWM.tag.replace("@","")};
+  artLoadWorksTags(a.name);
+};
+async function artLoadWorksPage(){
+  try{
+    const q = AWM.tag.replace("@", "").trim();
+    const sort = $("awmSort") ? $("awmSort").value : "newest";
+    const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(q)}&sort=${sort}&page=${AWM.page}&page_size=${AWM.size}`);
+    AWM.total = r.total; AWM.pages = Math.max(1, Math.ceil(r.total / AWM.size)); AWM.items = r.items || [];
+    $("awmCount").textContent = `${AWM.page}/${AWM.pages} · ${AWM.total} ${LANG === "zh" ? "张" : "imgs"}`;
+    renderAWM();
+  }catch(e){}
+}
+function renderAWM(){
+  const grid = $("awmGrid"); grid.innerHTML = "";
+  if(!AWM.items.length){ grid.innerHTML = '<div class="empty">' + (LANG === "zh" ? "没有作品" : "No works") + '</div>'; return; }
+  AWM.items.forEach(it=>{
+    const d = document.createElement("div"); d.className = "item awm-item" + (AWM.selFile === it.file ? " sel" : "");
+    d.innerHTML = `<img src="${imgUrl("comfyui", it.file)}" loading="lazy" alt=""><div class="badge">${esc(it.model||"")}</div>`;
+    d.onclick = ()=>{ AWM.selFile = it.file; awmShowMeta(it); renderAWM(); };
+    grid.appendChild(d);
+  });
+  // 分页
+  const nums = $("awmPgNums"); nums.innerHTML = "";
+  for(let i=1;i<=AWM.pages;i++){
+    const b = document.createElement("button"); b.className = "iconbtn" + (i===AWM.page ? " active" : ""); b.textContent = i;
+    b.onclick = ()=>{ AWM.page = i; artLoadWorksPage(); }; nums.appendChild(b);
+  }
+}
+function awmShowMeta(it){
+  const isVideo = it.type === "video" || /\.(mp4|webm|mov|mkv|avi|gif)$/i.test(it.file || "");
+  $("awmPhEmpty").hidden = true;
+  const img = $("awmPhImg"), vid = $("awmPhVideo");
+  img.hidden = isVideo; vid.hidden = !isVideo;
+  if(isVideo){ vid.src = imgUrl("comfyui", it.file); vid.load(); }
+  else { img.src = imgUrl("comfyui", it.file); vid.removeAttribute("src"); }
+  // 参数
+  const meta = $("awmMeta"); meta.hidden = false;
+  $("awmMetaName").textContent = it.file.split("/").pop();
+  const p2 = it.params || {};
+  const badges = [
+    ["Step", p2.steps], ["CFG", p2.cfg], ["Sampler", p2.sampler||p2.sampler_name],
+    ["Size", p2.width&&p2.height ? `${p2.width}×${p2.height}` : ""],
+    ["Seed", p2.seed ?? p2.noise_seed], ["Model", it.model],
+  ].filter(x=>x[1] !== undefined && x[1] !== "" && x[1] !== null);
+  $("awmMetaParams").innerHTML = badges.map(b=>`<div class="pbadge"><div class="pl">${esc(b[0])}</div><div class="pv">${esc(String(b[1]))}</div></div>`).join("");
+  $("awmMetaPos").textContent = it.positive || "";
+  $("awmMetaNeg").textContent = it.negative || "";
+}
+$("awmClose").onclick = ()=>{ pauseVideos(); $("awModal").classList.remove("show"); };
+$("awModal").onclick = e=>{ if(e.target === $("awModal")){ pauseVideos(); $("awModal").classList.remove("show"); } };
+$("awmPrev").onclick = ()=>{ if(AWM.page>1){ AWM.page--; artLoadWorksPage(); } };
+$("awmNext").onclick = ()=>{ if(AWM.page<AWM.pages){ AWM.page++; artLoadWorksPage(); } };
+$("awmSort").onchange = ()=>{ AWM.page = 1; artLoadWorksPage(); };
+$("awmGrid").addEventListener("click", (e)=>{ if(e.target.closest(".item")){ /* lightbox already handles */ } });
+
+// ---------- 右侧权重栏 ----------
+function artAddToSide(a){
+  const key = artSelKey(a.name);
+  if(!AW_LIST.find(x=>artSelKey(x.name)===key)){
+    AW_LIST.push({name: a.name, display: "@"+a.name, cover: artCurrentCover(a), weight: a.weight ?? 1});
+  }
+  artRenderSide();
+}
+function artRemoveFromSide(name){
+  AW_LIST = AW_LIST.filter(x=>artSelKey(x.name)!==artSelKey(name));
+  artRenderSide();
+}
+function artRenderSide(){
+  const list = $("awList"); list.innerHTML = "";
+  AW_LIST.forEach(x=>{
+    const item = document.createElement("div"); item.className = "aw-item";
+    item.innerHTML = `
+      <img src="${x.cover ? imgUrl("comfyui", x.cover) : ""}" alt="">
+      <span class="awi-name" title="点击复制">${esc(x.display)}</span>
+      <span class="awi-w">
+        <input type="number" min="0.5" max="2" step="0.00001" value="${x.weight.toFixed(5)}">
+      </span>
+      <button class="awi-del" title="移除">✕</button>`;
+    item.querySelector(".awi-name").onclick = ()=>{
+      navigator.clipboard.writeText(x.display).then(()=>showToast("📋 " + x.display));
+    };
+    item.querySelector("input").onchange = (e)=>{
+      let v = parseFloat(e.target.value);
+      if(isNaN(v)) v = 1; v = Math.min(2, Math.max(0.5, v));
+      x.weight = v; artRenderSide(); artRenderPie();
+    };
+    item.querySelector(".awi-del").onclick = ()=>{ artRemoveFromSide(x.name); };
+    list.appendChild(item);
+  });
+  artRenderPie();
+  artRenderPrompt();
+}
+function artRenderPie(){
+  const cv = $("awPieCanvas"); const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height, cx = W/2, cy = H/2, R = W/2 - 6;
+  ctx.clearRect(0,0,W,H);
+  const total = AW_LIST.reduce((s,x)=>s+(x.weight||0), 0);
+  $("awPieTotal").textContent = AW_LIST.length ? total.toFixed(2) : "0";
+  if(!AW_LIST.length || !total){
+    ctx.strokeStyle = "#2a2d36"; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+    return;
+  }
+  let ang = -Math.PI/2;
+  AW_LIST.forEach((x,i)=>{
+    const frac = (x.weight||0)/total;
+    const col = ART_PALETTE[i % ART_PALETTE.length];
+    ctx.strokeStyle = col; ctx.lineWidth = 12;
+    ctx.beginPath(); ctx.arc(cx,cy,R,ang,ang + frac*Math.PI*2); ctx.stroke();
+    ang += frac*Math.PI*2;
+  });
+}
+function artRenderPrompt(){
+  const lines = AW_LIST.map(x=>`(${x.display}:${x.weight.toFixed(2)})`);
+  $("awPromptText").value = lines.join(", ");
+}
+$("awDice").onclick = ()=>{
+  if(!AW_LIST.length){ showToast("⚠ " + (LANG === "zh" ? "先添加画师" : "Add artists first")); return; }
+  AW_LIST.forEach(x=>{ x.weight = Math.round((0.5 + Math.random()*1.5)*100000)/100000; });
+  artRenderSide();
+  showToast("🎲 " + (LANG === "zh" ? "已随机权重 (0.5~2)" : "Random weights (0.5~2)"));
+};
+$("awClear").onclick = ()=>{ AW_LIST = []; artRenderSide(); };
+$("awCopy").onclick = ()=>{
+  const t = $("awPromptText").value;
+  if(t)navigator.clipboard.writeText(t).then(()=>showToast("📋 " + (LANG === "zh" ? "提示词已复制" : "Prompt copied")));
+};
+$("artistSearch").addEventListener("input", debounce(()=>{ ART_PAGE = 1; loadArtists(); }, 300));
+$("artistSort").onchange = ()=>{ ART_PAGE = 1; loadArtists(); };
+// 存储右侧栏到 localStorage（刷新不丢）
+function artSaveSide(){ try{ localStorage.setItem("gal4c_aw", JSON.stringify(AW_LIST)); }catch(e){} }
+function artLoadSide(){
+  try{
+    const s = localStorage.getItem("gal4c_aw");
+    if(s){ const arr = JSON.parse(s); AW_LIST = Array.isArray(arr) ? arr.map(x=>({...x, weight:Math.min(2,Math.max(0.5,parseFloat(x.weight)||1))})) : []; }
+  }catch(e){ AW_LIST = []; }
+  artRenderSide();
+}
+setInterval(artSaveSide, 2000);
+artLoadSide();
+
+// ============ 🌐 Danbooru 画师库（懒加载） ============
+let AL = { inited: false, loading: false, page: 1, size: 60, total: 0, items: [], facets: null };
+async function artlibEnsure(){
+  if(AL.inited){ return; }
+  if(AL.loading){ return; }
+  AL.loading = true;
+  $("alGrid").innerHTML = '<div class="empty">' + (LANG === "zh" ? "正在加载画师库（首次较慢）…" : "Loading artist DB (first time is slow)…") + '</div>';
+  try{
+    const f = await api("/api/artlib/facets");
+    AL.facets = f.facets || {};
+    AL.facetsTotal = f.total || 0;
+    AL.inited = true;
+    fillArtlibFacets();
+    await artlibLoad();
+  }catch(e){
+    $("alGrid").innerHTML = '<div class="empty">⚠ ' + (LANG === "zh" ? "画师库加载失败" : "Failed to load") + '</div>';
+  }finally{
+    AL.loading = false;
+  }
+}
+function fillArtlibFacets(){
+  const map = [
+    ["alArchetype", "archetype"], ["alOrigin", "origin"], ["alRating", "rating_label"],
+    ["alSubject", "main_subject"], ["alTechnique", "main_technique"],
+  ];
+  map.forEach(([elId, field])=>{
+    const sel = $(elId); if(!sel) return;
+    const cur = sel.value;
+    const firstKey = sel.dataset.i18nAl;
+    const first = firstKey ? (t(firstKey) || (sel.options[0] ? sel.options[0].textContent : "")) : (sel.options[0] ? sel.options[0].textContent : "");
+    sel.innerHTML = `<option value="">${esc(first)}</option>`;
+    (AL.facets[field] || []).forEach(v=>{
+      const op = document.createElement("option");
+      op.value = v.value; op.textContent = `${v.value}（${v.count}）`;
+      sel.appendChild(op);
+    });
+    sel.value = cur;
+  });
+  // 题材用 datalist（选项太多：518 种组合）
+  const dl = $("alThemeList");
+  if(dl && AL.facets["main_theme"]){
+    dl.innerHTML = AL.facets["main_theme"].map(v=>`<option value="${esc(v.value)}">${esc(v.value)}（${v.count}）</option>`).join("");
+  }
+}
+async function artlibLoad(){
+  const p = new URLSearchParams({
+    q: $("alSearch").value.trim(),
+    archetype: $("alArchetype").value,
+    origin: $("alOrigin").value,
+    rating: $("alRating").value,
+    subject: $("alSubject").value,
+    technique: $("alTechnique").value,
+    theme: $("alTheme").value.trim(),
+    sort: $("alSort").value,
+    page: AL.page, page_size: AL.size,
+  });
+  $("alGrid").innerHTML = '<div class="empty">' + t("loading") + '</div>';
+  try{
+    const r = await api("/api/artlib/search?" + p.toString());
+    AL.items = r.items || []; AL.total = r.total || 0;
+    $("alHint").textContent = `${LANG === "zh" ? "共" : ""} ${AL.total.toLocaleString()} ${LANG === "zh" ? "位" : ""}` + (AL.inited ? ` · DB ${AL.facetsTotal.toLocaleString()}` : "");
+    renderArtlib();
+    renderArtlibPager();
+    artlibPreviews();   // 异步补本地预览图（不阻塞列表）
+  }catch(e){ $("alGrid").innerHTML = '<div class="empty">⚠ 加载失败</div>'; }
+}
+function renderArtlib(){
+  const grid = $("alGrid"); grid.innerHTML = "";
+  if(!AL.items.length){ grid.innerHTML = '<div class="empty">' + (LANG === "zh" ? "没有匹配的画师" : "No artists") + '</div>'; return; }
+  AL.items.forEach(a=>{
+    const d = document.createElement("div");
+    const key = artSelKey(a.name);
+    d.className = "artist-card al-card"; d.dataset.name = a.name; d.dataset.key = key;
+    const tag = "@" + a.name;
+    const inSide = AW_LIST.find(x=>artSelKey(x.name)===a.name);
+    const badge = a.posts >= 1000 ? "🔥" : "";
+    const cov = alCurrentCover(a);
+    const coverHtml = cov
+      ? `<img src="${imgUrl("comfyui", cov)}" loading="lazy" alt="">`
+      : `<div class="al-ph">🎨</div>`;
+    const sexChips = (a.sex_tags || []).slice(0, 4)
+      .map(t2=>`<span class="al-chip al-chip-ero">${esc(t2)}</span>`).join("");
+    const softChips = (a.soft_tags || []).slice(0, 3)
+      .map(t2=>`<span class="al-chip al-chip-soft">${esc(t2)}</span>`).join("");
+    const spec = a.specialty || a.profile || a.name;
+    d.innerHTML = `
+      <div class="ac-cover al-cover">
+        ${coverHtml}
+        ${cov ? `<button class="ac-arrow ac-prev">‹</button><button class="ac-arrow ac-next">›</button>
+        <span class="ac-idx" id="alidx_${key.replace(/[^a-z0-9]/gi,"_")}">${(AL_COVER_IDX[key]||0)+1}/${Math.max(1,(AL_COVER_LIST[key]||[]).length)}</span>` : ""}
+      </div>
+      <div class="ac-info">
+        <div class="al-spec" title="${esc(spec)}">${esc(spec)}</div>
+        <div class="ac-tag" title="${esc(a.name)}">${esc(tag)}</div>
+        ${a.profile && a.profile !== spec ? `<div class="al-profile" title="${esc(a.profile)}">${esc(a.profile)}</div>` : ""}
+        ${sexChips ? `<div class="al-chips">${sexChips}</div>` : ""}
+        ${softChips ? `<div class="al-chips">${softChips}</div>` : ""}
+        <div class="ac-sub">
+          <span class="cnt">🖼 ${a.posts.toLocaleString()}${badge}</span>
+          ${a.rating ? `<span class="al-chip al-chip-r">${esc(a.rating)}</span>` : ""}
+          ${a.archetype ? `<span class="al-chip">${esc(a.archetype)}</span>` : ""}
+          ${inSide ? '<span class="al-chip al-chip-on">★ 已加入</span>' : ""}
+        </div>
+      </div>`;
+    if(cov){
+      d.querySelector(".ac-prev").onclick = (e)=>{ e.stopPropagation(); alNextCover(a, -1); };
+      d.querySelector(".ac-next").onclick = (e)=>{ e.stopPropagation(); alNextCover(a, 1); };
+    }
+    d.onclick = ()=>{
+      navigator.clipboard.writeText(tag).then(()=>showToast("📋 " + tag)).catch(()=>{});
+    };
+    d.ondblclick = ()=>{ artlibAddToSide(a); };
+    d.oncontextmenu = (e)=>{ e.preventDefault(); artlibCtx(e, a); };
+    grid.appendChild(d);
+  });
+}
+// 画师库封面切换（懒加载候选列表，同画师模块）
+let AL_COVER_IDX = {}, AL_COVER_LIST = {};
+function alCurrentCover(a){
+  const k = artSelKey(a.name);
+  const list = AL_COVER_LIST[k] || [];
+  const idx = AL_COVER_IDX[k] || 0;
+  if(list.length) return list[idx % list.length];
+  return AL_PREVIEWS[k] || "";
+}
+async function alNextCover(a, dir){
+  const k = artSelKey(a.name);
+  if(!(AL_COVER_LIST[k]||[]).length){
+    try{
+      const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(a.name)}&sort=newest&page=1&page_size=200`);
+      const files = (r.items||[]).map(x=>x.file);
+      const seen = new Set();
+      AL_COVER_LIST[k] = files.filter(f=>!seen.has(f)&&seen.add(f));
+      if(!AL_COVER_LIST[k].length) AL_COVER_LIST[k] = [AL_PREVIEWS[k]].filter(Boolean);
+    }catch(e){ AL_COVER_LIST[k] = [AL_PREVIEWS[k]].filter(Boolean); }
+  }
+  const list = AL_COVER_LIST[k] || [];
+  if(!list.length) return;
+  AL_COVER_IDX[k] = ((AL_COVER_IDX[k]||0) + dir + list.length) % list.length;
+  const d = document.querySelector(`.al-card[data-key="${CSS.escape(k)}"]`);
+  if(d){
+    const img = d.querySelector(".ac-cover img");
+    if(img) img.src = imgUrl("comfyui", list[AL_COVER_IDX[k]]);
+    const idxEl = d.querySelector(".ac-idx");
+    if(idxEl) idxEl.textContent = `${(AL_COVER_IDX[k]||0)+1}/${list.length}`;
+  }
+}
+async function alSaveCover(a, file, reset){
+  try{
+    await api("/api/artists/cover", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: a.name, file: reset ? "" : file})});
+    if(!reset){
+      AL_PREVIEWS[artSelKey(a.name)] = file;
+      AL_COVER_LIST[artSelKey(a.name)] = [];
+      AL_COVER_IDX[artSelKey(a.name)] = 0;
+    } else {
+      AL_COVER_LIST[artSelKey(a.name)] = [];
+      AL_COVER_IDX[artSelKey(a.name)] = 0;
+    }
+    renderArtlib();
+    showToast(reset ? "↺ " + (LANG === "zh" ? "已重置为最新图" : "Reset to newest") : "🖼 " + (LANG === "zh" ? "已设为封面" : "Cover set"));
+  }catch(e){ showToast("⚠ " + (LANG === "zh" ? "设置失败" : "Failed")); }
+}
+// 画师库预览：本地索引用过该 tag 的图（批量，失败则保持占位）
+let AL_PREVIEWS = {};
+async function artlibPreviews(){
+  try{
+    const names = AL.items.map(a=>a.name).filter(Boolean);
+    if(!names.length) return;
+    const r = await api("/api/artlib/preview?source=comfyui&names=" + encodeURIComponent(names.join(",")));
+    AL_PREVIEWS = r || {};
+    if(Object.keys(AL_PREVIEWS).length) renderArtlib();
+  }catch(e){}
+}
+function renderArtlibPager(){
+  const pages = Math.max(1, Math.ceil(AL.total / AL.size));
+  const nums = $("alPgNums"); nums.innerHTML = "";
+  // 只渲染当前页附近（避免几百个按钮）
+  const around = new Set([1, pages, AL.page-1, AL.page, AL.page+1]);
+  const list = [...around].filter(n=>n>=1 && n<=pages).sort((a,b)=>a-b);
+  let prev = 0;
+  list.forEach(n=>{
+    if(prev && n - prev > 1){ const sp = document.createElement("span"); sp.textContent = "…"; sp.style.color = "var(--dim)"; nums.appendChild(sp); }
+    const b = document.createElement("button"); b.className = "iconbtn" + (n===AL.page ? " active" : ""); b.textContent = n;
+    b.onclick = ()=>{ AL.page = n; artlibLoad(); window.scrollTo({top:0, behavior:"smooth"}); };
+    nums.appendChild(b); prev = n;
+  });
+}
+function artlibAddToSide(a){
+  const key = artSelKey(a.name);
+  if(!AW_LIST.find(x=>artSelKey(x.name)===key)){
+    AW_LIST.push({name: a.name, display: "@"+a.name, cover: "", weight: 1});
+    showToast("➕ " + (LANG === "zh" ? "已加入画师串：" : "Added: ") + "@" + a.name);
+  } else {
+    showToast("ℹ " + (LANG === "zh" ? "已在画师串中" : "Already added"));
+  }
+  artRenderSide();
+}
+function artlibCtx(e, a){
+  const menu = $("artistCtx");
+  const tag = "@" + a.name;
+  const inSide = AW_LIST.find(x=>artSelKey(x.name)===a.name);
+  menu.innerHTML = `
+    <div class="ctx-item" data-al="info"><span class="ic">ℹ</span>${t("aiInfo")}</div>
+    <div class="ctx-item" data-al="add"><span class="ic">➕</span>${LANG === "zh" ? "加入画师串" : "Add to chain"}</div>
+    <div class="ctx-item" data-al="copy"><span class="ic">📋</span>${LANG === "zh" ? "复制 @tag" : "Copy @tag"}</div>
+    <div class="ctx-item" data-al="copyw"><span class="ic">⚖</span>${LANG === "zh" ? "复制 @tag + 权重" : "Copy @tag + weight"}</div>
+    ${alCurrentCover(a) ? `<div class="ctx-sep"></div>
+    <div class="ctx-item" data-al="setcover"><span class="ic">🖼</span>${LANG === "zh" ? "设置当前图为封面" : "Set current as cover"}</div>
+    <div class="ctx-item" data-al="resetcover"><span class="ic">↺</span>${LANG === "zh" ? "重置封面为最新" : "Reset cover to newest"}</div>` : ""}
+    <div class="ctx-sep"></div>
+    <div class="ctx-item" data-al="posts"><span class="ic">📊</span>${LANG === "zh" ? "作品数" : "Posts"}: ${a.posts.toLocaleString()}</div>
+    ${a.url ? `<div class="ctx-item" data-al="open"><span class="ic">🔗</span>${LANG === "zh" ? "打开 Danbooru 主页" : "Open Danbooru page"}</div>` : ""}
+    ${inSide ? `<div class="ctx-item" data-al="del"><span class="ic">🗑</span>${LANG === "zh" ? "从画师串移除" : "Remove from chain"}</div>` : ""}`;
+  menu.classList.add("show");
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 250) + "px";
+  menu.style.top = Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 10) + "px";
+  // 用一次性处理器（避免与画师视图的处理器冲突）
+  menu.onclick = async (ev)=>{
+    const it = ev.target.closest(".ctx-item"); if(!it) return;
+    const act = it.dataset.al; if(!act) return;
+    menu.classList.remove("show");
+    if(act === "info"){ showArtInfo(a, "artlib"); }
+    else if(act === "setcover"){ alSaveCover(a, alCurrentCover(a), false); }
+    else if(act === "resetcover"){ alSaveCover(a, "", true); }
+    else if(act === "add"){ artlibAddToSide(a); }
+    else if(act === "copy"){ navigator.clipboard.writeText(tag).then(()=>showToast("📋 " + tag)); }
+    else if(act === "copyw"){
+      const w = AW_LIST.find(x=>artSelKey(x.name)===a.name)?.weight ?? 1;
+      const txt = `(${tag}:${w.toFixed(2)})`;
+      navigator.clipboard.writeText(txt).then(()=>showToast("📋 " + txt));
+    }
+    else if(act === "open"){ window.open(a.url, "_blank"); }
+    else if(act === "del"){ artRemoveFromSide(a.name); renderArtlib(); }
+  };
+}
+// 画师库筛选交互（全部改动都重置到第 1 页）
+["alArchetype","alOrigin","alRating","alSubject","alTechnique","alSort"].forEach(id=>{
+  $(id).onchange = ()=>{ AL.page = 1; artlibLoad(); };
+});
+$("alSearch").addEventListener("input", debounce(()=>{ AL.page = 1; artlibLoad(); }, 350));
+$("alTheme").addEventListener("change", ()=>{ AL.page = 1; artlibLoad(); });
+$("alPgFirst").onclick = ()=>{ AL.page = 1; artlibLoad(); };
+$("alPgPrev").onclick = ()=>{ if(AL.page>1){ AL.page--; artlibLoad(); } };
+$("alPgNext").onclick = ()=>{ const p = Math.ceil(AL.total/AL.size); if(AL.page<p){ AL.page++; artlibLoad(); } };
+$("alPgLast").onclick = ()=>{ AL.page = Math.max(1, Math.ceil(AL.total/AL.size)); artlibLoad(); };
 
 // ---------- 启动 ----------
 let BOOTED = false;
