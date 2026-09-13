@@ -1,11 +1,11 @@
 ﻿[project]
 name = "gallery4comfyui"
-version = "1.2.1"
+version = "1.2.2"
 Description = "Dual-source image gallery for ComfyUI: browse ComfyUI & SD WebUI outputs. Artist gallery, Danbooru artist DB, favorites, advanced tag search. (May contain NSFW content)"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "Gallery4ComfyUI" }]
+authors = [{ name = "ainghhh" }]
 keywords = ["comfyui", "gallery", "sd-webui", "image-browser"]
 
 [project.urls]
