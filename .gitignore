@@ -1,17 +1,16 @@
-# 运行时数据（绝不提交：含用户路径/索引/收藏）
+# 杩愯鏃舵暟鎹紙缁濅笉鎻愪氦锛氬惈鐢ㄦ埛璺緞/绱㈠紩/鏀惰棌锛?
 userdata/
 
-# Python 缓存
+# Python 缂撳瓨
 __pycache__/
 *.py[cod]
 
-# 打包产物
+# 鎵撳寘浜х墿
 *.zip
 dist/
 build/
 
-# 系统文件
+# 绯荤粺鏂囦欢
 .DS_Store
 Thumbs.db
 
-data/
