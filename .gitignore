@@ -1,11 +1,12 @@
-# ── 运行时数据（绝不提交：含用户路径 / 图片索引 / 收藏 / 画师备注）──
+# ── 运行时数据（绝不提交：含用户路径 / 图片索引 / 收藏夹 / 画师备注 / 画师串）──
 userdata/
 
 # ── 画师库数据 ──
-# 体积大（约 17 MB）且来自 Danbooru 抓取，不随仓库分发。
-# 自行生成：python tools/build_artist_db.py
-# 想带一份小样给别人用，放 sample_data/ 并设 GALLERY4_DATA_DIR 指向它。
-data/
+# 抓取的 Danbooru 公开画师数据（artists.jsonl / artlib_*.jsonl / *.csv /
+# danbooru_posts.json）**随仓库分发**，装完即用，无需自己抓。
+# 但**用户自己的数据绝不提交** —— 收藏了哪些画师、用哪些画师出图、备注 / 封面 / 权重：
+data/*用户自定义*
+data/WeiLin画师库-用户自定义.md
 
 # ── Python 缓存 ──
 __pycache__/

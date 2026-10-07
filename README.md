@@ -23,7 +23,7 @@
 - **画师 / 画师库右键「查看大图」**：以图库同一套灯箱浏览该画师的作品（参数、全屏、左右切换完全一致）。
 - **中英翻译补全**：补齐 30+ 处只有中文的界面文案，并新增**定性标签中英映射表**（82 个标签，英文界面不再显示中文分类名）。
 - **健壮性修复**：修复畸形 PNG 元数据会打死索引线程、导致该来源永远卡在「未就绪」的问题。
-- **画师库数据不再随包分发**：仓库体积从约 18 MB 降到约 1 MB；需要画师库数据请自行生成（见下文）。
+- **画师库数据随包分发**：约 19 MB 的 Danbooru 公开画师数据（名录 / 分类 / 定性 / 风格）开箱即用，装完就能看「画师库」。**不含任何用户数据**（收藏的画师、用哪些画师出图、备注 / 封面 / 权重都不在仓库里）。想自己重新抓取或换一份数据，见下文。
 
 - **Cross-page lightbox paging**: no longer capped at the current 60-image page — paging past an edge automatically loads the next/previous page, all the way to either end of the result set; the counter is now a **global index** (e.g. `61 / 18,320`).
 - **Auto-locate on close**: closing the lightbox scrolls back to the image you were viewing and briefly highlights it; if it lives on another page, the gallery switches there first.
@@ -33,7 +33,7 @@
 - **Right-click → "View large image"** in the Artist and Artist-DB tabs: browse that artist's works in the same lightbox (params, fullscreen, paging).
 - **Translation completed**: 30+ previously Chinese-only UI strings fixed, plus a new **label translation table** (82 labels) so the English UI no longer shows Chinese category names.
 - **Robustness fix**: malformed PNG metadata could kill the index thread and leave a source permanently "not ready".
-- **Artist DB data is no longer bundled**: repo size drops from ~18 MB to ~1 MB; generate the data yourself (see below).
+- **Artist DB data is bundled**: the ~19 MB Danbooru public artist dataset (roster / classification / specialty / style) works out of the box — open the Artist-DB tab and it's there. **No user data is included** (your favorited artists, which artists you generate with, notes / covers / weights are all kept out of the repo). See below to re-scrape or swap in your own copy.
 
 ---
 
@@ -159,7 +159,9 @@ The **🎨 Artists** tab auto-extracts and aggregates @artist tags from your his
 
 The **🌐 Artist DB** tab ships a searchable database of ~48k Danbooru artists (**lazy-loaded** — no data is read until you open the tab); filter by type / origin / rating / subject / technique / theme / post count, plus **random sorting**; cards show an AI-generated **specialty** line (e.g. 「巨乳萝莉 · 触手 · 束缚」) with **fetish focus** tags below; right-click opens a **profile dialog** (local work mini-library on the left — click to view large + params, full profile on the right) and can add the artist to the chain; artists with local usage automatically show local preview covers with switching and cover-setting.
 
-> **画师库数据说明 / Data Notice**: 画师库数据（画师名录、收录数、分类与定性描述）由 AI 从 Danbooru 公开数据**爬取与归纳生成，可能存在缺失或判断不准确**，仅供参考，请以 Danbooru 官方页面为准。**本仓库不附带该数据**（约 17 MB，且属抓取内容）——需要的话请自行生成：`python tools/build_artist_db.py`（约 3 请求/秒，全量约需数小时）；也可以把 `GALLERY4_DATA_DIR` 环境变量指向你自备的数据目录。仓库内 `sample_data/` 只有 20 位画师的**极小示例**，仅供预览 UI。**懒加载**：不打开「画师库」页就不会读这些文件；没有数据时该页正常显示为空，不影响图库其余功能。
+> **画师库数据说明 / Data Notice**: 画师库数据（画师名录、收录数、分类与定性描述）由 AI 从 Danbooru 公开数据**爬取与归纳生成，可能存在缺失或判断不准确**，仅供参考，请以 Danbooru 官方页面为准。该数据（约 19 MB）**随仓库分发**，装完即用；`tools/build_artist_db.py` 可自行重新抓取名录（约 3 请求/秒，全量约需数小时），`GALLERY4_DATA_DIR` 环境变量可指向你自备的数据目录。**懒加载**：不打开「画师库」页就不会读这些文件。
+>
+> **不含任何用户数据 / No user data**: 仓库里**没有**你收藏的画师（`userdata/artist_favs.json`）、你用哪些画师出图（`data/*用户自定义*`）、画师备注 / 封面 / 默认权重 / 画师串 —— 这些都在 `userdata/` 与 `data/*用户自定义*`，已被 `.gitignore` 排除。
 >
 > 英文界面下，分类/类型/题材等**定性标签**会通过内置映射表显示英文；AI 生成的**自由描述**（风格长句）仍为中文原文。
 
@@ -224,18 +226,21 @@ custom_nodes/Gallery4ComfyUI/userdata/
 ├── artist_weights.json        # 画师默认权重
 └── artist_favs.json           # 收藏的画师
 
-custom_nodes/Gallery4ComfyUI/data/        # 画师库数据（**不随仓库分发**，需自行生成）
-├── artists.jsonl                        # ← python tools/build_artist_db.py 生成
-├── sample_artists_classified.csv        # ← 可选：画师分类（类型/来源/题材/技法…）
-├── toppost_artists_classified.csv       # ← 可选
-├── artlib_specialty.jsonl               # ← 可选：定性 / 涩涩特色标签
-└── danbooru_posts.json                  # ← 可选：名字→收录数映射（画师模块显示用）
+custom_nodes/Gallery4ComfyUI/data/        # 画师库数据（**随仓库分发**，Danbooru 公开数据，开箱即用）
+├── artists.jsonl                        # Danbooru 画师名录（id / 名字 / 收录数）
+├── sample_artists_classified.csv        # 画师分类（类型/来源/题材/技法…）
+├── toppost_artists_classified.csv       # 同上（高作品数档）
+├── artlib_specialty.jsonl               # 定性 / 涩涩特色标签
+├── artlib_style.jsonl                   # 风格定性 / 擅长 / 特征 / 简介
+└── danbooru_posts.json                  # 名字→收录数映射（画师模块显示用）
 
-custom_nodes/Gallery4ComfyUI/sample_data/ # 仓库自带的极小示例（20 位画师），仅供预览 UI
+custom_nodes/Gallery4ComfyUI/sample_data/ # 极小示例（20 位画师），GALLERY4_DATA_DIR 可指向它
 ```
 
-> 生成画师库数据：`python tools/build_artist_db.py`（可选 `--min-posts 100 --out <目录>`）。
-> 数据缺失时「画师库」页会显示为空，图库其余功能不受影响。
+> **仓库里没有的东西 / Not in the repo**：`data/*用户自定义*`（你用哪些画师出图）与整个 `userdata/`
+> （收藏的画师、备注、封面、默认权重、画师串、收藏夹）—— 已被 `.gitignore` 排除，**不会随仓库分发**。
+>
+> 想自己重新抓取名录：`python tools/build_artist_db.py`（可选 `--min-posts 100 --out <目录>`）。
 
 删除插件目录即可完全卸载（索引会在下次使用时重建）。
 
