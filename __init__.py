@@ -252,6 +252,30 @@ async def api_artlib_release(request):
         return _json({"ok": False, "error": str(e)})
 
 
+@PromptServer.instance.routes.get(P + "/api/artlib/status")
+async def api_artlib_status(request):
+    """画师库数据是否已安装（含下载进度）。"""
+    try:
+        return _json(G.artlib_status())
+    except Exception as e:
+        return _json({"error": str(e)})
+
+
+@PromptServer.instance.routes.post(P + "/api/artlib/install")
+async def api_artlib_install(request):
+    """启动后台下载画师库数据（Release 附件）。"""
+    url = ""
+    try:
+        if request.can_read_body:
+            url = (await request.json() or {}).get("url", "")
+    except Exception:
+        pass
+    try:
+        return _json(G.artlib_install(url))
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)})
+
+
 @PromptServer.instance.routes.get(P + "/api/artlib/search")
 async def api_artlib_search(request):
     q = request.query

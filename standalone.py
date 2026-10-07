@@ -197,6 +197,54 @@ async def api_gallery(request):
     return _json(r)
 
 
+async def api_artlib_status(request):
+    return _json(G.artlib_status())
+
+
+async def api_artlib_install(request):
+    url = ""
+    try:
+        data = await request.json()
+        url = (data or {}).get("url", "")
+    except Exception:
+        pass
+    return _json(G.artlib_install(url))
+
+
+async def api_artlib_facets(request):
+    try:
+        G._artlib_gc(_float(request.query.get("gc"), 0) or 0)
+    except Exception:
+        pass
+    return _json(G.artlib_facets())
+
+
+async def api_artlib_search(request):
+    q = request.query
+    try:
+        G._artlib_gc(_float(q.get("gc"), 0) or 0)
+    except Exception:
+        pass
+    r = G.artlib_search(
+        q=q.get("q", ""), archetype=q.get("archetype", ""), origin=q.get("origin", ""),
+        subject=q.get("subject", ""), theme=q.get("theme", ""),
+        technique=q.get("technique", ""), composition=q.get("composition", ""),
+        rating=q.get("rating", ""), min_posts=_int(q.get("min_posts"), 0) or 0,
+        sort=q.get("sort", "posts"), page=_int(q.get("page"), 1) or 1,
+        page_size=_int(q.get("page_size"), 60) or 60)
+    return _json({"items": r["items"], "total": r["total"]})
+
+
+async def api_artlib_preview(request):
+    q = request.query
+    names = [n for n in q.get("names", "").split(",") if n.strip()]
+    return _json(G.artlib_preview(source=q.get("source", "comfyui"), names=names))
+
+
+async def api_artlib_release(request):
+    return _json(G.artlib_release())
+
+
 async def api_models(request):
     source = request.query.get("source", "comfyui")
     return _json({"items": G.models(source)})
@@ -480,6 +528,12 @@ app.router.add_get(P + "/api/status", api_status)
 app.router.add_get(P + "/api/scan", api_scan)
 app.router.add_post(P + "/api/settings", api_settings_save)
 app.router.add_get(P + "/api/settings", api_settings)
+app.router.add_get(P + "/api/artlib/status", api_artlib_status)
+app.router.add_post(P + "/api/artlib/install", api_artlib_install)
+app.router.add_get(P + "/api/artlib/facets", api_artlib_facets)
+app.router.add_get(P + "/api/artlib/search", api_artlib_search)
+app.router.add_get(P + "/api/artlib/preview", api_artlib_preview)
+app.router.add_post(P + "/api/artlib/release", api_artlib_release)
 app.router.add_get(P + "/", page_index)
 
 

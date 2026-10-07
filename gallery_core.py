@@ -1336,6 +1336,7 @@ def artist_styles():
     """{归一化键: {style, strength, features, bio, sources, checked_at, confidence}}
     来自 data/artlib_style.jsonl（逐位查证结果，增量可回滚）；模块级缓存，文件缺失则为空。"""
     global _style_cache
+    _refresh_artlib_paths()
     if _style_cache is None:
         d = {}
         try:
@@ -1371,6 +1372,7 @@ def artist_styles():
 def db_post_counts():
     """画师名(小写) → Danbooru 收录作品数（模块级缓存，只读一次）。"""
     global _db_posts_cache
+    _refresh_artlib_paths()
     if _db_posts_cache is None:
         try:
             with open(ARTLIB_POSTS_FILE, encoding="utf-8") as f:
@@ -1382,6 +1384,7 @@ def db_post_counts():
 
 def _load_artist_lib():
     """解析 WeiLin 画师库 md：{key: {"name": 无@名, "display": @名, "note": 中文备注}}"""
+    _refresh_artlib_paths()
     out = {}
     try:
         with open(ARTIST_LIB_FILE, encoding="utf-8") as f:
@@ -1830,6 +1833,26 @@ ARTLIB_JSONL = _data_file("artists.jsonl")
 ARTLIB_SAMPLE_CSV = _data_file("sample_artists_classified.csv")
 ARTLIB_TOPPOST_CSV = _data_file("toppost_artists_classified.csv")
 ARTLIB_SPECIALTY_FILE = _data_file("artlib_specialty.jsonl")
+
+
+def _refresh_artlib_paths():
+    """**每次读取前重解析**画师库数据文件路径。
+
+    这些路径原先写成模块级常量，在 import 时算一次就固定了。问题是数据现在
+    支持「网页里按需下载」——进程启动时还没数据，常量就是空字符串，用户下载完
+    之后仍然读到空路径，画师库会一直显示 0 条，且只能靠重启解决。
+    所以凡是读这些文件的地方，都先调本函数重算一次（几个 os.path.isfile，开销可忽略）。
+    """
+    global ARTLIB_JSONL, ARTLIB_SAMPLE_CSV, ARTLIB_TOPPOST_CSV, ARTLIB_SPECIALTY_FILE
+    global ARTLIB_POSTS_FILE, ARTLIB_STYLE_FILE, ARTIST_LIB_FILE
+    ARTLIB_JSONL = _data_file("artists.jsonl")
+    ARTLIB_SAMPLE_CSV = _data_file("sample_artists_classified.csv")
+    ARTLIB_TOPPOST_CSV = _data_file("toppost_artists_classified.csv")
+    ARTLIB_SPECIALTY_FILE = _data_file("artlib_specialty.jsonl")
+    ARTLIB_POSTS_FILE = _data_file("danbooru_posts.json")
+    ARTLIB_STYLE_FILE = _data_file("artlib_style.jsonl")
+    if not os.environ.get("GALLERY4_WEILIN_FILE", "").strip():
+        ARTIST_LIB_FILE = _data_file("WeiLin画师库-用户自定义.md")
 _artlib = {"loaded": False, "artists": [], "by_id": {}, "cls": {}, "spec": {}}  # 懒加载缓存
 
 # 分类字段白名单（CSV 列）
@@ -1961,14 +1984,116 @@ _ARTLIB_STAMP = {"t": 0.0}
 
 
 def artlib_release():
-    """释放画师库缓存（不用时调，回收 ~4.8 万行 artists + 分类/定性数据的内存）。"""
+    """释放画师库缓存（不用时调，回收 ~4.8 万行 artists + 分类/定性数据的内存）。
+
+    也清掉风格/收录数缓存 —— 下载安装完数据后会调本函数，不清的话新数据读不进来。
+    """
+    global _style_cache, _db_posts_cache
     _artlib.update({"loaded": False, "artists": [], "by_id": {}, "cls": {}, "spec": {}})
+    _style_cache = None
+    _db_posts_cache = None
     _ARTLIB_STAMP["t"] = 0.0
     return {"ok": True, "released": True}
 
 
-def artlib_loaded():
-    return bool(_artlib.get("loaded"))
+# ── 画师库数据：网页内按需下载安装 ──────────────────────────────
+# 数据不随仓库分发，改为从 Release 附件取（可用 GALLERY4_ARTLIB_URL 指向镜像）。
+ARTLIB_FILES = ("artists.jsonl", "artlib_specialty.jsonl", "artlib_style.jsonl",
+                "danbooru_posts.json", "sample_artists_classified.csv",
+                "toppost_artists_classified.csv")
+ARTLIB_DEFAULT_URL = ("https://github.com/ainghhh/Gallery-for-ComfyUI/"
+                      "releases/latest/download/artists-data.zip")
+ARTLIB_STATE = {"busy": False, "phase": "", "got": 0, "total": 0,
+                "error": "", "ok": False, "url": ""}
+
+
+def artlib_url():
+    return os.environ.get("GALLERY4_ARTLIB_URL", "").strip() or ARTLIB_DEFAULT_URL
+
+
+def artlib_dir():
+    """数据落地目录：GALLERY4_DATA_DIR 优先，否则插件目录 data/。"""
+    env_dir = os.environ.get("GALLERY4_DATA_DIR", "").strip()
+    return env_dir if env_dir else DATA_DIR
+
+
+def artlib_status():
+    """画师库数据安装状态（前端据此决定显示网格还是下载按钮）。"""
+    d = artlib_dir()
+    files, total = [], 0
+    for n in ARTLIB_FILES:
+        p = os.path.join(d, n)
+        if os.path.isfile(p):
+            sz = os.path.getsize(p)
+            files.append({"name": n, "bytes": sz})
+            total += sz
+    return {"installed": os.path.isfile(os.path.join(d, "artists.jsonl")),
+            "complete": len(files) == len(ARTLIB_FILES),
+            "dir": d, "files": files, "count": len(files),
+            "expect": len(ARTLIB_FILES), "bytes": total,
+            "url": artlib_url(), "state": dict(ARTLIB_STATE)}
+
+
+def _artlib_install_worker(url):
+    """后台线程：下载 zip → 解压到 data/ → 释放缓存让下次访问重读。
+
+    刻意不使用 tempfile：%TEMP% 可能被策略限制、空间不足或与目标不同盘。
+    改为直接下到目标目录，每个文件写 .part 再 os.replace 原子替换 ——
+    中途失败不会留下半个损坏的数据文件，旧的可用数据也不会被提前破坏。
+    """
+    zp = ""
+    try:
+        ARTLIB_STATE.update({"busy": True, "phase": "download", "got": 0,
+                             "total": 0, "error": "", "ok": False, "url": url})
+        import urllib.request, zipfile
+        dest = artlib_dir()
+        os.makedirs(dest, exist_ok=True)
+        zp = os.path.join(dest, ".artists-data.zip.part")
+        req = urllib.request.Request(url, headers={"User-Agent": "Gallery4ComfyUI"})
+        with urllib.request.urlopen(req, timeout=60) as r, open(zp, "wb") as f:
+            ARTLIB_STATE["total"] = int(r.headers.get("Content-Length") or 0)
+            while True:
+                chunk = r.read(262144)
+                if not chunk:
+                    break
+                f.write(chunk)
+                ARTLIB_STATE["got"] += len(chunk)
+        ARTLIB_STATE["phase"] = "extract"
+        with zipfile.ZipFile(zp) as z:
+            for m in z.namelist():
+                if m.endswith("/"):
+                    continue
+                base = os.path.basename(m)
+                if base not in ARTLIB_FILES:
+                    continue              # 白名单：zip 里夹带的其它文件一律不落盘
+                tmp = os.path.join(dest, base + ".part")
+                with z.open(m) as src, open(tmp, "wb") as out:
+                    out.write(src.read())
+                os.replace(tmp, os.path.join(dest, base))
+        artlib_release()                  # 让下次访问重新读盘
+        ARTLIB_STATE.update({"busy": False, "phase": "done", "ok": True})
+    except Exception as e:
+        ARTLIB_STATE.update({"busy": False, "phase": "error",
+                             "error": "%s: %s" % (type(e).__name__, e)})
+    finally:
+        if zp:
+            try:
+                os.remove(zp)
+            except Exception:
+                pass
+
+
+def artlib_install(url=""):
+    """启动后台下载安装（幂等：正在下就拒绝）。"""
+    if ARTLIB_STATE.get("busy"):
+        return {"ok": False, "error": "busy"}
+    u = (url or artlib_url()).strip()
+    if not u:
+        return {"ok": False, "error": "no url"}
+    threading.Thread(target=_artlib_install_worker, args=(u,), daemon=True).start()
+    return {"ok": True, "started": True, "url": u}
+
+
 
 
 def _artlib_gc(seconds):
@@ -1995,6 +2120,7 @@ def _artlib_ensure():
     if _artlib["loaded"]:
         _ARTLIB_STAMP["t"] = time.time()
         return
+    _refresh_artlib_paths()
     artists = []
     try:
         with open(ARTLIB_JSONL, encoding="utf-8") as f:
