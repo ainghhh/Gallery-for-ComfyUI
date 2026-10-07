@@ -1,16 +1,31 @@
-# 杩愯鏃舵暟鎹紙缁濅笉鎻愪氦锛氬惈鐢ㄦ埛璺緞/绱㈠紩/鏀惰棌锛?
+# ── 运行时数据（绝不提交：含用户路径 / 图片索引 / 收藏 / 画师备注）──
 userdata/
 
-# Python 缂撳瓨
+# ── 画师库数据 ──
+# 体积大（约 17 MB）且来自 Danbooru 抓取，不随仓库分发。
+# 自行生成：python tools/build_artist_db.py
+# 想带一份小样给别人用，放 sample_data/ 并设 GALLERY4_DATA_DIR 指向它。
+data/
+
+# ── Python 缓存 ──
 __pycache__/
 *.py[cod]
 
-# 鎵撳寘浜х墿
+# ── 本地备份（改文件前留的）──
+*.bak
+*.bak_*
+*.bak2_*
+*.orig
+*.rej
+
+# ── 打包产物 ──
 *.zip
 dist/
 build/
 
-# 绯荤粺鏂囦欢
+# ── 日志 ──
+*.log
+
+# ── 系统文件 ──
 .DS_Store
 Thumbs.db
-

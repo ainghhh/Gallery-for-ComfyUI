@@ -88,11 +88,58 @@ async def page_index(request):
     return web.Response(status=404, text="index.html not found")
 
 
+@PromptServer.instance.routes.get(P + "/api/artist/covers")
+async def api_artist_covers(request):
+    """画师封面图：?names=a,b,c → {归一化名: {source,file}}"""
+    try:
+        raw = request.query.get("names", "")
+        names = [x for x in raw.split(",") if x.strip()]
+        return _json({"covers": G.artist_covers(names)})
+    except Exception as e:
+        return _json({"covers": {}, "error": str(e)})
+
+
+@PromptServer.instance.routes.get(P + "/api/chains")
+async def api_chains(request):
+    """收藏的画师串列表"""
+    try:
+        return _json({"chains": G.chain_list(), "artists": G.chain_artists_flat()})
+    except Exception as e:
+        return _json({"chains": [], "artists": [], "error": str(e)})
+
+
+@PromptServer.instance.routes.post(P + "/api/chains/save")
+async def api_chains_save(request):
+    """收藏/更新画师串"""
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    try:
+        return _json(G.chain_fav_save(data or {}))
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)})
+
+
+@PromptServer.instance.routes.post(P + "/api/chains/delete")
+async def api_chains_delete(request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    try:
+        return _json(G.chain_fav_delete((data or {}).get("id", "")))
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)})
+
+
 @PromptServer.instance.routes.get(P + "/api/settings")
 async def api_settings(request):
     s = G.load_settings()
     return _json({"webui_root": s.get("webui_root", ""),
-                  "configured": bool(s.get("webui_root"))})
+                  "configured": bool(s.get("webui_root")),
+                  "artist_format": s.get("artist_format") or G.DEFAULT_ARTIST_FORMAT,
+                  "scan_mode": s.get("scan_mode") or "incremental"})
 
 
 @PromptServer.instance.routes.post(P + "/api/settings")
@@ -101,7 +148,7 @@ async def api_settings_save(request):
         data = await request.json()
     except Exception:
         data = {}
-    r = G.save_settings(data.get("webui_root", ""))
+    r = G.save_settings(data)
     return _json(r, 200 if r.get("ok") else 400)
 
 
@@ -145,6 +192,10 @@ async def api_gallery(request):
         page=_int(q.get("page"), 1),
         page_size=min(_int(q.get("page_size"), 60) or 60, 1000),
         tags=q.get("tags", ""),
+        artist=q.get("artist", ""),
+        artists_all=[x for x in q.get("chain_all", "").split(",") if x.strip()],
+        artists_any=[x for x in q.get("chain_any", "").split(",") if x.strip()],
+        artist_min=_int(q.get("artist_min")),
     )
     return _json(r)
 
@@ -174,8 +225,10 @@ async def api_artists(request):
     search = request.query.get("search", "")
     page = _int(request.query.get("page"), 1) or 1
     page_size = _int(request.query.get("page_size"), 0) or 0
+    fav_only = request.query.get("fav", "0") == "1"
     try:
-        r = G.artists(source, sort=sort, search=search, page=page, page_size=page_size)
+        r = G.artists(source, sort=sort, search=search, page=page, page_size=page_size,
+                      fav_only=fav_only)
         return _json({"items": r["items"], "total": r["total"]})
     except Exception as e:
         return _json({"items": [], "total": 0, "error": str(e)})
@@ -184,14 +237,28 @@ async def api_artists(request):
 @PromptServer.instance.routes.get(P + "/api/artlib/facets")
 async def api_artlib_facets(request):
     try:
+        G._artlib_gc(_float(request.query.get("gc"), 0) or 0)
         return _json(G.artlib_facets())
     except Exception as e:
         return _json({"error": str(e)})
 
 
+@PromptServer.instance.routes.post(P + "/api/artlib/release")
+async def api_artlib_release(request):
+    """释放画师库内存缓存（离开画师库标签页时前端调用）。"""
+    try:
+        return _json(G.artlib_release())
+    except Exception as e:
+        return _json({"ok": False, "error": str(e)})
+
+
 @PromptServer.instance.routes.get(P + "/api/artlib/search")
 async def api_artlib_search(request):
     q = request.query
+    try:
+        G._artlib_gc(_float(q.get("gc"), 0) or 0)
+    except Exception:
+        pass
     try:
         r = G.artlib_search(
             q=q.get("q", ""),
@@ -342,11 +409,12 @@ async def api_meta(request):
 
 @PromptServer.instance.routes.get(P + "/api/boot")
 async def api_boot(request):
-    """点节点按钮时调用：惰性启动图库；每次打开都触发后台增量扫描（新图片立即可见）"""
+    """进入图库：按设置 scan_mode 分流——incremental（默认）秒开+后台补新增；full（选项）才全量重建。"""
     results = {}
+    full = (G.load_settings().get("scan_mode") or "incremental") == "full"
     for src in ("comfyui", "webui"):
-        results[src] = G.start_scan(src, refresh=True)
-    return _json({"ok": True, "booted": results})
+        results[src] = G.start_scan(src, force=full, refresh=not full)
+    return _json({"ok": True, "booted": results, "scan_mode": "full" if full else "incremental"})
 
 
 @PromptServer.instance.routes.get(P + "/api/tags")

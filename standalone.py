@@ -8,10 +8,10 @@ Gallery4ComfyUI · 独立启动器
     python standalone.py [--port 8288] [--output <ComfyUI output 目录>]
 
 - 默认端口 8288（避免与 ComfyUI 的 8188 冲突）
-- output 目录：--output 参数 > GALLERY_COMFY_OUTPUT 环境变量 > 当前目录下的 ComfyUI/output 或 output
+- 默认 output 目录 = 绘世整合包 ComfyUI 的 output（可用 --output 覆盖）
 - 启动后浏览器访问 http://127.0.0.1:8288/
 """
-import os, sys, json, zipfile, datetime, asyncio, time, tempfile, re
+import os, sys, json, subprocess, zipfile, datetime, asyncio, time, tempfile, re
 from types import SimpleNamespace
 
 PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,6 +24,7 @@ import gallery_core as G
 # ---------------------------------------------------------------------------
 PORT = 8288
 COMFY_OUTPUT = None
+COMFY_MODELS = None
 argv = sys.argv[1:]
 i = 0
 while i < len(argv):
@@ -31,32 +32,40 @@ while i < len(argv):
         PORT = int(argv[i + 1]); i += 2; continue
     if argv[i] == "--output" and i + 1 < len(argv):
         COMFY_OUTPUT = argv[i + 1]; i += 2; continue
+    if argv[i] == "--models" and i + 1 < len(argv):
+        COMFY_MODELS = argv[i + 1]; i += 2; continue
+    if argv[i] in ("-h", "--help"):
+        print("用法: python standalone.py --output <ComfyUI/output> "
+              "[--models <ComfyUI/models>] [--port 8288]")
+        print("也可以用环境变量 GALLERY_COMFY_OUTPUT / GALLERY_COMFY_MODELS")
+        sys.exit(0)
     i += 1
 
 # ---------------------------------------------------------------------------
 # ComfyUI output 目录（folder_paths 替身）
 # ---------------------------------------------------------------------------
-import shutil
-# 候选顺序：--output 参数 > GALLERY_COMFY_OUTPUT 环境变量 > ./ComfyUI/output > ./output
+# 路径全部来自参数 / 环境变量，不写死任何机器上的路径
 _CANDIDATES = [
-    COMFY_OUTPUT or "",
+    COMFY_OUTPUT,
     os.environ.get("GALLERY_COMFY_OUTPUT", ""),
-    os.path.join(os.getcwd(), "ComfyUI", "output"),
-    os.path.join(os.getcwd(), "output"),
 ]
 COMFY_OUTPUT = next((p for p in _CANDIDATES if p and os.path.isdir(p)), "")
 if not COMFY_OUTPUT:
     print("[!] 未找到 ComfyUI output 目录，请用 --output 指定：")
-    print("    python standalone.py --output <ComfyUI output 目录>")
+    print("    python standalone.py --output D:\\path\\to\\ComfyUI\\output")
     sys.exit(1)
-# models 目录：output 的上级目录下的 models（常见布局）；也可用 GALLERY_COMFY_MODELS 指定
-_COMFY_ROOT = os.path.dirname(os.path.abspath(COMFY_OUTPUT))
-_MODELS = os.environ.get("GALLERY_COMFY_MODELS", "") or os.path.join(_COMFY_ROOT, "models")
+
+# models 目录：--models / GALLERY_COMFY_MODELS 优先；否则猜 output 同级的 models/
+MODELS_DIR = COMFY_MODELS or os.environ.get("GALLERY_COMFY_MODELS", "")
+if not MODELS_DIR:
+    _guess = os.path.join(os.path.dirname(os.path.abspath(COMFY_OUTPUT)), "models")
+    MODELS_DIR = _guess if os.path.isdir(_guess) else ""
 G.folder_paths = SimpleNamespace(
     get_output_directory=lambda: COMFY_OUTPUT,
-    models_dir=_MODELS,
+    models_dir=MODELS_DIR,
 )
 print("[*] ComfyUI output 目录:", COMFY_OUTPUT)
+print("[*] ComfyUI models 目录:", MODELS_DIR or "(未指定，模型筛选不可用)")
 
 # ---------------------------------------------------------------------------
 # 路由（与 ComfyUI 插件内完全一致）
@@ -89,6 +98,36 @@ def _safe_name(name):
     n = (name or "").replace("\\", "/").lstrip("/")
     parts = [p for p in n.split("/") if p not in ("", ".", "..") and not p.endswith(":")]
     return "/".join(parts)
+
+
+def _pick_native_folder():
+    """用 Win32 SHBrowseForFolder 弹出原生“选择文件夹”对话框（可新建文件夹），返回路径或空串。
+    不经过 PowerShell（其 stdout 管道在模态对话框下会挂起），直接用 ctypes 调用，可靠。"""
+    try:
+        import ctypes
+        from ctypes import POINTER, byref
+        class BROWSEINFOW(ctypes.Structure):
+            _fields_ = [("hwndOwner", ctypes.c_void_p), ("pidlRoot", ctypes.c_void_p),
+                        ("pszDisplayName", ctypes.c_wchar_p), ("lpszTitle", ctypes.c_wchar_p),
+                        ("ulFlags", ctypes.c_uint), ("lpfn", ctypes.c_void_p), ("lParam", ctypes.c_void_p),
+                        ("iImage", ctypes.c_int)]
+        ctypes.windll.ole32.CoInitializeEx(None, 0x2)  # STA
+        shell32 = ctypes.windll.shell32
+        shell32.SHBrowseForFolderW.restype = ctypes.c_void_p
+        shell32.SHBrowseForFolderW.argtypes = [POINTER(BROWSEINFOW)]
+        shell32.SHGetPathFromIDListW.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p]
+        bi = BROWSEINFOW()
+        bi.hwndOwner = None
+        bi.lpszTitle = "选择打包保存文件夹（可新建）"
+        bi.ulFlags = 0x40  # BIF_NEWDIALOGSTYLE
+        pidl = shell32.SHBrowseForFolderW(byref(bi))
+        if pidl:
+            buf = ctypes.create_unicode_buffer(260)
+            if shell32.SHGetPathFromIDListW(pidl, buf):
+                return buf.value.strip()
+        return ""
+    except Exception:
+        return ""
 
 
 app = web.Application()
@@ -206,7 +245,7 @@ async def api_open_folder(request):
     if not fp:
         return _json({"error": "not found"}, 404)
     try:
-        os.startfile(os.path.dirname(fp))
+        subprocess.Popen(["explorer", "/select,", fp])
         return _json({"ok": True})
     except Exception as e:
         return _json({"ok": False, "error": str(e)})
@@ -313,15 +352,23 @@ async def api_fs_mkdir(request):
 
 
 async def api_fs_open_dir(request):
-    """在文件管理器中打开一个目录（os.startfile，避免外部进程调用触发 Registry 扫描）"""
+    """在资源管理器中打开一个目录"""
     path = request.query.get("path", "").strip()
     if not path or not os.path.isdir(path):
         return _json({"error": "目录不存在"}, 400)
     try:
-        os.startfile(path)
+        subprocess.Popen(["explorer", path])
         return _json({"ok": True})
     except Exception as e:
         return _json({"ok": False, "error": str(e)}, 500)
+
+
+async def api_pick_dir(request):
+    """弹出 Windows 原生“选择文件夹”对话框（可新建文件夹），返回选中路径"""
+    path = await asyncio.to_thread(_pick_native_folder)
+    if path and os.path.isdir(path):
+        return _json({"path": path})
+    return _json({"path": ""})
 
 
 async def api_zip(request):
@@ -408,6 +455,7 @@ def _pack_images(data):
 app.router.add_get(P + "/api/fs/list", api_fs_list)
 app.router.add_post(P + "/api/fs/mkdir", api_fs_mkdir)
 app.router.add_get(P + "/api/fs/open-dir", api_fs_open_dir)
+app.router.add_post(P + "/api/fs/pick-dir", api_pick_dir)
 app.router.add_post(P + "/api/zip", api_zip)
 app.router.add_get(P + "/api/fs/drives", api_fs_drives)
 app.router.add_post(P + "/api/folders", api_folders_manage)

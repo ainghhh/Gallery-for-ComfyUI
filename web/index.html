@@ -266,15 +266,15 @@
   .artist-col{flex:1 1 auto; min-width:0; margin-right:386px}
   .artist-col[hidden]{display:none}
   .artist-main{min-width:0}
-  .artist-side{position:fixed; right:14px; top:96px; bottom:14px; width:360px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; z-index:40; box-shadow:0 6px 20px rgba(0,0,0,.10)}
+  .artist-side{position:fixed; right:14px; top:96px; bottom:14px; width:360px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; z-index:40; box-shadow:0 6px 20px rgba(0,0,0,.10); will-change:top}
   .artist-side[hidden]{display:none}
   .artlib-toolbar{display:grid; grid-template-columns:repeat(auto-fit, minmax(136px, 1fr)); gap:8px; align-items:center}
   .artlib-toolbar input, .artlib-toolbar select{font-size:12.5px; padding:7px 9px; width:100%; min-width:0}
   .artlib-toolbar #alSearch{grid-column:span 2}
   .artlib-toolbar #alTheme{grid-column:span 2}
   .artlib-toolbar .artist-hint{grid-column:1/-1; margin:0}
-  .al-cover{display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #2b2f3a, #1b1d22)}
-  .al-ph{font-size:52px; opacity:.35}
+  .al-cover{display:flex; align-items:center; justify-content:center; background:var(--bg)}
+  .al-ph{font-size:52px; opacity:.5; color:var(--dim)}
   .al-profile{font-size:11px; color:var(--dim); line-height:1.4; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
   .al-chip{display:inline-block; font-size:10.5px; padding:1px 7px; border-radius:5px; background:var(--accent-weak); color:var(--accent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .al-chip-r{background:rgba(229,72,77,.14); color:#e5484d}
@@ -290,7 +290,7 @@
   .grid.md.al-grid{grid-template-columns:repeat(auto-fill,minmax(212px,1fr)); gap:10px}
   .artist-card{background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; cursor:pointer; position:relative; transition:box-shadow .15s, transform .15s; user-select:none}
   .artist-card:hover{box-shadow:0 6px 18px rgba(0,0,0,.12); transform:translateY(-3px); border-color:var(--accent)}
-  .ac-cover{position:relative; overflow:hidden; background:#111; aspect-ratio:1/1}
+  .ac-cover{position:relative; overflow:hidden; background:var(--bg); aspect-ratio:1/1}
   .ac-cover img{width:100%; height:100%; object-fit:cover; display:block}
   .ac-info{display:flex; flex-direction:column; gap:4px; padding:8px 10px 9px; border-top:1px solid var(--line)}
   .ac-name{font-size:14px; font-weight:800; color:var(--txt); line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-all}
@@ -335,15 +335,35 @@
   .aw-item img{width:38px; height:38px; object-fit:cover; border-radius:6px; flex:0 0 38px}
   .aw-item .awi-name{flex:1; min-width:0; font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer}
   .aw-item .awi-name:hover{color:var(--accent)}
-  .aw-item .awi-w{width:86px; display:flex; align-items:center; gap:3px}
-  .aw-item .awi-w input{width:58px; padding:4px 6px; font-size:12px; text-align:right}
+  .aw-item .awi-w{width:auto; flex:0 0 118px; display:flex; align-items:center; gap:3px}
+  .aw-item .awi-w .wstep{flex:0 0 28px; height:28px; display:flex; align-items:center; justify-content:center; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--txt); cursor:pointer; font-size:12px; padding:0; line-height:1}
+  .aw-item .awi-w .wstep:hover{background:var(--accent-weak); color:var(--accent); border-color:var(--accent)}
+  .aw-item .awi-w input{width:54px; padding:4px 4px; font-size:12px; text-align:center; -moz-appearance:textfield; background:var(--bg); border:1px solid var(--line); border-radius:7px; color:var(--txt)}
+  .aw-item .awi-w input::-webkit-outer-spin-button, .aw-item .awi-w input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
   .aw-item .awi-del{border:none; background:none; cursor:pointer; color:var(--dim); font-size:14px; padding:2px 4px}
   .aw-item .awi-del:hover{color:#e5484d}
   .aw-actions{display:flex; gap:8px}
   .aw-actions .iconbtn{flex:1; justify-content:center}
   .aw-prompt{border-top:1px solid var(--line); padding-top:8px; display:flex; flex-direction:column; gap:6px}
-  .aw-prompt-head{display:flex; align-items:center; justify-content:space-between}
+  .aw-prompt-label{font-size:12px; font-weight:600; color:var(--dim)}
   .aw-prompt textarea{width:100%; height:86px; resize:vertical; font-size:12px; font-family:inherit; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:7px 9px; color:var(--txt)}
+  .aw-copy-btn{width:100%; padding:7px 0; font-size:12.5px; font-weight:600; text-align:center; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:8px}
+  .aw-copy-btn:hover{opacity:.88}
+  .aw-fav-btn{background:var(--card); color:var(--accent); border-color:var(--accent)}
+  .aw-chains{border-top:1px solid var(--line); padding-top:8px; display:flex; flex-direction:column; gap:6px}
+  .aw-chain-list{display:flex; flex-direction:column; gap:6px; max-height:190px; overflow-y:auto}
+  .aw-chain{display:flex; align-items:center; gap:8px; padding:5px 7px; border:1px solid var(--line); border-radius:9px; background:var(--bg)}
+  .aw-chain.on{border-color:var(--accent)}
+  .aw-chain img{width:34px; height:34px; object-fit:cover; border-radius:6px; flex:0 0 34px; background:var(--bg)}
+  .aw-chain .acn{flex:1; min-width:0; font-size:12px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer}
+  .aw-chain .acn:hover{color:var(--accent)}
+  .aw-chain .acc{font-size:10.5px; color:var(--dim); flex:0 0 auto}
+  .aw-chain .acx{border:none; background:none; color:var(--dim); cursor:pointer; font-size:13px; padding:2px 4px}
+  .aw-chain .acx:hover{color:#e5484d}
+  .fav-filter{display:flex; gap:6px; align-items:center; margin-left:auto; margin-right:8px}
+  .fav-filter button{padding:3px 10px; font-size:11.5px; border-radius:6px; border:1px solid var(--line); background:var(--card); color:var(--dim); cursor:pointer}
+  .fav-filter button.on{background:var(--accent-weak); color:var(--accent); border-color:var(--accent); font-weight:700}
+  .fav-chains h4{margin-top:14px}
   /* 画师作品弹窗 */
   .awm-head{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line)}
   .awm-head b{font-size:15px}
@@ -419,6 +439,17 @@
   @media(min-width:901px){ .awm-body{flex-direction:row} .awm-left{border-right:1px solid var(--line)} }
   @media(max-width:900px){ .awm-right{width:100%; border-left:none; border-top:1px solid var(--line)} .awm-preview img,.awm-preview video{max-height:220px} }
   @media(max-width:900px){ .artist-layout{flex-direction:column} .artist-col{flex:1 1 auto; margin-right:0; width:100%} .artist-side{position:static; right:auto; top:auto; bottom:auto; width:100%; max-height:none} }
+  /* 图库卡片上的画师行 + 灯箱内的画师收藏行 */
+  .meta .artists-row{margin-top:2px; font-size:11px; color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .lb-artists{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:2px 0 8px; padding:6px 8px; background:var(--accent-weak); border:1px solid var(--line); border-radius:var(--radius)}
+  .lb-art-label{font-size:12px; color:var(--dim); margin-right:2px}
+  .lb-art-chip{display:inline-flex; align-items:center; gap:4px; padding:2px 8px 2px 4px; border:1px solid var(--line); border-radius:999px; background:var(--card); font-size:12px; color:var(--txt); max-width:100%}
+  .lb-art-name{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px}
+  .lb-art-fav{border:0; background:transparent; cursor:pointer; padding:0 2px; font-size:13px; line-height:1; color:var(--dim)}
+  .lb-art-fav.on{color:var(--star)}
+  .lb-art-fav:hover{transform:scale(1.15)}
+  /* 关闭灯箱回到网格时，短暂高亮刚才看的那张 */
+  .item.lb-flash{outline:3px solid var(--accent); outline-offset:-3px; box-shadow:0 0 0 3px var(--accent-weak); border-radius:var(--radius)}
 </style>
 </head>
 <body data-theme="light">
@@ -427,7 +458,7 @@
 <div class="topbar">
   <div class="tb-inner">
     <span class="title"><span data-i18n="title">Gallery4ComfyUI</span> <small id="srcLabel" data-i18n="subComfy">ComfyUI 图片</small></span>
-    <span class="ver-tag" title="Ctrl+F5 强刷后应看到 v1.3.0">v1.3.0</span>
+    <span class="ver-tag" data-i18n-title="verTitle" title="Ctrl+F5 强刷后应看到 v1.3.0">v1.3.0</span>
     <div class="srctabs">
       <button class="srctab on" data-src="comfyui" data-i18n="tabComfy">ComfyUI</button>
       <button class="srctab" data-src="webui" data-i18n="tabWebui">WebUI</button>
@@ -450,6 +481,7 @@
     <button class="iconbtn" id="btnPackLora" data-i18n="packLora" title="打包此 LoRA 全部图片（按大模型分子目录）">📦 LoRA</button>
     <button class="iconbtn" id="btnAdv" data-i18n="btnAdv2" data-i18n-title="titleFilter" title="Filter">⚙ 筛选</button>
     <button class="iconbtn" id="btnStats" data-i18n-title="titleStats" title="📊">📊</button>
+    <button class="iconbtn" id="btnQuickRefresh" data-i18n="quickRefresh" data-i18n-title="titleQuickRefresh" title="↻ 只检查新增图片（与重进页面相同）">↻ 新增</button>
     <button class="iconbtn" id="btnRefreshComfy" data-i18n="refreshComfy" title="强制重建 ComfyUI 索引">🔄 ComfyUI</button>
     <button class="iconbtn" id="btnRefreshWebui" data-i18n="refreshWebui" title="强制重建 WebUI 索引">🔄 WebUI</button>
     <button class="iconbtn" id="btnRefreshVideo" data-i18n="refreshVideo" title="强制重建视频索引">🔄 🎬</button>
@@ -460,6 +492,13 @@
     <span class="count" id="count"></span>
   </div>
   <div class="adv" id="adv">
+    <div class="f"><label data-i18n="fArtistMin">画师数 ≥</label><select id="artistMinSel">
+      <option value="" data-i18n="fArtistAny">不限</option>
+      <option value="2" data-i18n="fArtist2">2（多画师/画师串）</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select></div>
     <div class="f"><label data-i18n="fSampler">采样器</label><select id="samplerSel"><option value="">全部</option></select></div>
     <div class="f"><label data-i18n="fStepsGe">步数 ≥</label><input type="number" id="stepsMin" placeholder="—"></div>
     <div class="f"><label data-i18n="fStepsLe">步数 ≤</label><input type="number" id="stepsMax" placeholder="—"></div>
@@ -527,12 +566,19 @@
         <h4 data-i18n="favTitle">收藏夹</h4>
         <button class="iconbtn" id="btnNewFolder" data-i18n="favNew" style="width:100%; margin-bottom:8px">＋ 新建收藏夹</button>
         <div id="folderList"></div>
+        <h4 class="fav-chains" data-i18n="chainTitle">画师串收藏</h4>
+        <div id="favChainList"></div>
       </div>
       <div class="fav-content">
         <div class="fav-toolbar">
           <span class="ftname" id="ftName">默认收藏</span>
           <span class="fav-hint" data-i18n="favHint">拖动图片到左侧收藏夹 · 按住空白处拉框多选</span>
           <span class="count" id="favCount"></span>
+          <span class="fav-filter">
+            <button id="favFilterAll" class="on" data-i18n="favFilterAll">全部</button>
+            <button id="favFilterArtist" data-i18n="favFilterArtist">只看画师</button>
+            <button id="favFilterChain" data-i18n="favFilterChain">只看画师串</button>
+          </span>
         </div>
         <div class="selbar" id="selBar" hidden>
           <span id="selCount" data-i18n="favSelCount">已选 0 张</span>
@@ -547,7 +593,7 @@
           <button class="iconbtn" id="fpgPrev">‹</button>
           <div class="pg-nums" id="fpgNums"></div>
           <button class="iconbtn" id="fpgNext">›</button>
-          <span class="pg-jump">跳至 <input type="number" id="fpgJump" min="1" placeholder="页码"><button class="iconbtn" id="fpgGo">GO</button></span>
+          <span class="pg-jump"><span data-i18n="pgJump">跳至</span> <input type="number" id="fpgJump" min="1" data-i18n-ph="pageNumPh" placeholder="页码"><button class="iconbtn" id="fpgGo">GO</button></span>
         </div>
       </div>
     </div>
@@ -568,6 +614,7 @@
             <option value="random" data-i18n="artistSortRandom">🎲 随机</option>
           </select>
           <span class="artist-hint" id="artistHint"></span>
+          <button class="iconbtn" id="artistFavOnly" data-i18n-title="titleFav" title="★ 只看收藏画师">★ <span data-i18n="artistFavOnlyTxt">只看收藏</span></button>
         </div>
         <div class="grid md artist-grid" id="artistGrid"><div class="empty" data-i18n="loading">加载中…</div></div>        <div class="pager" id="artistPager">
           <button class="iconbtn" id="artPgFirst" title="«">«</button>
@@ -620,8 +667,14 @@
       <button class="iconbtn" id="awClear" data-i18n="awClear">🗑 清空</button>
     </div>
     <div class="aw-prompt">
-      <div class="aw-prompt-head"><b data-i18n="awPrompt">提示词</b><button class="iconbtn" id="awCopy" data-i18n="awCopy">📋 复制</button></div>
+      <b class="aw-prompt-label" data-i18n="awPrompt">提示词</b>
       <textarea id="awPromptText" readonly></textarea>
+      <button class="aw-copy-btn" id="awCopy" data-i18n="awCopy">复制</button>
+      <button class="aw-copy-btn aw-fav-btn" id="awFavChain" data-i18n="chainFav">★ 收藏这个画师串</button>
+    </div>
+    <div class="aw-chains">
+      <b class="aw-prompt-label" data-i18n="chainTitle">画师串收藏</b>
+      <div class="aw-chain-list" id="awChainList"></div>
     </div>
   </div>
 </div>
@@ -688,8 +741,8 @@
       <span class="al-chip al-chip-on" id="aiBadge" hidden>本地</span>
       <div style="flex:1"></div>
       <div class="ai-head-actions">
-        <button class="iconbtn" id="aiCopy" title="📋 复制 @tag">📋</button>
-        <button class="iconbtn" id="aiAdd" title="➕ 加入画师串" style="background:var(--accent); color:#fff; border-color:var(--accent)">➕</button>
+        <button class="iconbtn" id="aiCopy" data-i18n-title="aiCopy" title="📋 复制 @tag">📋</button>
+        <button class="iconbtn" id="aiAdd" data-i18n-title="aiAdd" title="➕ 加入画师串" style="background:var(--accent); color:#fff; border-color:var(--accent)">➕</button>
         <button class="iconbtn" id="aiClose">✕</button>
       </div>
     </div>
@@ -728,7 +781,7 @@
 
 <!-- 高级搜索 -->
 <div class="advsearch" id="advSearch">
-  <button class="foldbtn" id="advFold" title="折叠/展开左侧">◀</button>
+  <button class="foldbtn" id="advFold" data-i18n-title="advFoldTitle" title="折叠/展开左侧">◀</button>
   <div class="adv-left" id="advLeft">
     <div class="adv-left-inner">
       <h3><span data-i18n="advTitle">🔍 高级搜索</span> <span style="float:right; font-size:11px; color:var(--dim); cursor:pointer" id="advCloseBtn" data-i18n="advClose">✕ 关闭</span></h3>
@@ -765,7 +818,7 @@
       <button class="iconbtn" id="agPrev">‹</button>
       <div class="pg-nums" id="agNums"></div>
       <button class="iconbtn" id="agNext">›</button>
-      <span class="pg-jump">跳至 <input type="number" id="agJump" min="1" placeholder="页码"><button class="iconbtn" id="agGo">GO</button></span>
+      <span class="pg-jump"><span data-i18n="pgJump">跳至</span> <input type="number" id="agJump" min="1" data-i18n-ph="pageNumPh" placeholder="页码"><button class="iconbtn" id="agGo">GO</button></span>
     </div>
   </div>
 </div>
@@ -780,6 +833,25 @@
     <div class="row">
       <input id="setupPath" type="text" readonly data-i18n-ph="setupPathPh" placeholder="尚未选择目录">
       <button class="iconbtn" id="btnBrowse" data-i18n="browse">📁 浏览…</button>
+    </div>
+    <div class="row" style="flex-wrap:wrap; gap:6px">
+      <label for="setupAf" data-i18n="afLabel" style="flex:0 0 auto; font-size:12.5px; color:var(--dim); display:flex; align-items:center">画师串格式</label>
+      <select id="setupAf" style="flex:1; min-width:200px; padding:5px 8px; border-radius:6px; background:var(--card); color:var(--txt); border:1px solid var(--line)">
+        <option value="anima">Anima：@画师名（下划线转空格）</option>
+        <option value="illustrious">Illustrious：artist:画师名（权重=1 不加括号）</option>
+        <option value="noobai">NoobAI：artist:画师名（权重=1 不加括号）</option>
+        <option value="nai">NAI：artist:画师名（权重=1 不加括号）</option>
+      </select>
+    </div>
+    <div class="row" style="flex-wrap:wrap; gap:6px">
+      <span id="afPreview" style="flex:1; font-size:11.5px; color:var(--dim); word-break:break-all"></span>
+    </div>
+    <div class="row" style="flex-wrap:wrap; gap:6px">
+      <label for="setupScan" data-i18n="scanLabel" style="flex:0 0 auto; font-size:12.5px; color:var(--dim); display:flex; align-items:center">图库扫描</label>
+      <select id="setupScan" style="flex:1; min-width:200px; padding:5px 8px; border-radius:6px; background:var(--card); color:var(--txt); border:1px solid var(--line)">
+        <option value="incremental" data-i18n="scanInc">增量扫描（每次进来只看新增，快）</option>
+        <option value="full" data-i18n="scanFull">全量重建（每次最慢，索引异常时才用）</option>
+      </select>
     </div>
     <div class="row">
       <button class="iconbtn" id="btnSetupSave" data-i18n="save" style="flex:1; background:var(--accent); border-color:var(--accent); color:#fff">保存</button>
@@ -824,6 +896,7 @@
         <h3 id="mfile"></h3>
         <span class="favstate" id="mFavState">☆ 收藏</span>
       </div>
+      <div class="lb-artists" id="mArtists" hidden></div>
       <div class="param-grid" id="mparams"></div>
       <div class="sec-title" data-i18n="modalPrompt">正面提示词</div>
       <div class="pos" id="mpos"></div>
@@ -855,13 +928,15 @@ const I18N = {
     alSubject: "全部主体", alTechnique: "全部技法",
     artistSearchPh: "搜索画师…", artistSortCount: "按图片数", artistSortLast: "按最后使用",
     artistSortFirst: "按首次使用", artistSortName: "按名字", artistSortRandom: "🎲 随机",
+    artistFavOnlyTxt: "只看收藏",
     aSortRandom: "🎲 随机", awTitle: "🎨 画师权重栏",
-    awDice: "🎲 随机权重", awClear: "🗑 清空", awPrompt: "提示词", awCopy: "📋 复制",
+    awDice: "🎲 随机权重", awClear: "🗑 清空", awPrompt: "提示词", awCopy: "复制",
     awTagsTitle: "🏷 常用 tag",
     awmPick: "点击左侧图片查看参数", awmPositive: "正向提示词",
     searchPh: "搜索文件名 / 提示词…", advBtn: "🔍 高级", btnAdv2: "⚙ 筛选",
     btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
     fSampler: "采样器", fLora: "LoRA", fStepsGe: "步数 ≥", fStepsLe: "步数 ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
+    fArtistMin: "画师数 ≥", fArtistAny: "不限", fArtist2: "2（多画师/画师串）",
     fWGe: "宽 ≥", fHGe: "高 ≥", fSort: "排序", fGrid: "网格", fPerPage: "每页", fReset: "重置",
     sNewest: "最新", sOldest: "最旧", sRandom: "随机", sName: "文件名",
     gSm: "小", gMd: "中", gLg: "大",
@@ -892,6 +967,9 @@ const I18N = {
     titleAdv: "高级搜索 / Advanced Search", titleFilter: "筛选 / Filters",
     titleStats: "统计 / Statistics", titleFav: "仅看收藏 / Favorites only",
     titleRefresh: "刷新索引 / Refresh index",
+    quickRefresh: "↻ 新增",
+    titleQuickRefresh: "只检查新增图片（同重进页面）/ Check new images only (same as re-entering)",
+    toastQuickOk: "已检查新增图片",
     refreshComfy: "🔄 ComfyUI",
     refreshWebui: "🔄 WebUI",
     refreshVideo: "🔄 🎬",
@@ -900,6 +978,15 @@ const I18N = {
     toastAdded: "✅ 已加入「", toastRemoved: "已移出「", toastCopyOk: "提示词已复制", toastImgCopyOk: "图片已复制",
     toastImgCopyFail: "复制图片失败", toastFolderExists: "收藏夹已存在", toastFolderEmpty: "名称不能为空",
     setupTitle: "Stable Diffusion WebUI 设置",
+    afLabel: "画师串格式",
+    chainTitle: "画师串收藏",
+    chainFav: "★ 收藏这个画师串",
+    favFilterAll: "全部",
+    favFilterArtist: "只看画师",
+    favFilterChain: "只看画师串",
+    scanLabel: "图库扫描",
+    scanInc: "增量扫描（每次进来只看新增，快）",
+    scanFull: "全量重建（每次最慢，索引异常时才用）",
     setupDesc: "图库的「WebUI」来源需要读取 SD WebUI 的 <b>outputs</b> 目录（生成的图片）与 <b>models</b> 目录（模型）。请通过浏览按钮在文件夹中选择你的 SD WebUI 安装根目录（通常是含有 <b>outputs</b> 文件夹的那一层）。不配置也能正常使用 ComfyUI 图库，之后可随时在此修改。",
     setupPathPh: "尚未选择目录", browse: "📁 浏览…", save: "保存", skip: "跳过",
     setupSaved: "✅ 已保存", setupValid: "✅ 目录有效，已保存",
@@ -915,6 +1002,12 @@ const I18N = {
     aiEroRatio: "色气度", aiSexTags: "涩涩特色", aiSoftTags: "氛围", aiDeprecated: "已废弃",
     aiArtlib: "Danbooru 库", aiLocal: "本地用过", aiEmpty: "（无）",
     aiBigBack: "返回图库", aiWorks: "🖼 作品库",
+    loraPickFirst: "请先在上方选择一个 LoRA", loraAll: "全部 LoRA", allModels: "全部模型",
+    fsNewName: "新建文件夹名称：", fsEnterFirst: "请先进入一个目录",
+    packFail: "打包失败", unitImages: " 张",
+    advFoldTitle: "折叠/展开左侧", clickCopy: "点击复制", removeTitle: "移除",
+    alreadyAdded: "★ 已加入", loadFail: "⚠ 加载失败", pageNumPh: "页码",
+    verTitle: "Ctrl+F5 强刷后应看到 v1.3.0", favDefaultName: "默认收藏", videoWord: "视频",
   },
   en: {
     title: "Gallery4ComfyUI", subComfy: "ComfyUI Images", subWebui: "WebUI Images", subFav: "Favorites",
@@ -925,13 +1018,15 @@ const I18N = {
     alArchetype: "All types", alOrigin: "All origins", alRating: "All ratings",
     alSubject: "All subjects", alTechnique: "All techniques",
     artistSearchPh: "Search artists…", artistSortCount: "By image count", artistSortLast: "By last use",
-    artistSortFirst: "By first use", artistSortName: "By name", awTitle: "🎨 Artist weights",
-    awDice: "🎲 Random weights", awClear: "🗑 Clear", awPrompt: "Prompt", awCopy: "📋 Copy",
+    artistSortFirst: "By first use", artistSortName: "By name", artistSortRandom: "🎲 Random",
+    artistFavOnlyTxt: "Favorited", aSortRandom: "🎲 Random", awTitle: "🎨 Artist weights",
+    awDice: "🎲 Random weights", awClear: "🗑 Clear", awPrompt: "Prompt", awCopy: "Copy",
     awTagsTitle: "🏷 Common tags",
     awmPick: "Click an image on the left to view params", awmPositive: "Positive prompt",
     searchPh: "Search filename / prompt…", advBtn: "🔍 Advanced", btnAdv2: "⚙ Filter",
     btnStats: "📊", btnFavOnly: "★", btnTheme: "🌗", btnSetup: "⚙",
     fSampler: "Sampler", fLora: "LoRA", fStepsGe: "Steps ≥", fStepsLe: "Steps ≤", fCfgGe: "CFG ≥", fCfgLe: "CFG ≤",
+    fArtistMin: "Artists ≥", fArtistAny: "Any", fArtist2: "2 (multi-artist)",
     fWGe: "W ≥", fHGe: "H ≥", fSort: "Sort", fGrid: "Grid", fPerPage: "Per page", fReset: "Reset",
     sNewest: "Newest", sOldest: "Oldest", sRandom: "Random", sName: "Name",
     gSm: "Small", gMd: "Medium", gLg: "Large",
@@ -962,6 +1057,9 @@ const I18N = {
     titleAdv: "Advanced Search / 高级搜索", titleFilter: "Filters / 筛选",
     titleStats: "Statistics / 统计", titleFav: "Favorites only / 仅看收藏",
     titleRefresh: "Refresh index / 刷新索引",
+    quickRefresh: "↻ New",
+    titleQuickRefresh: "Check new images only (same as re-entering) / 只检查新增图片（同重进页面）",
+    toastQuickOk: "New images checked",
     refreshComfy: "🔄 ComfyUI",
     refreshWebui: "🔄 WebUI",
     refreshVideo: "🔄 🎬",
@@ -970,6 +1068,15 @@ const I18N = {
     toastAdded: "✅ Added to 「", toastRemoved: "Removed from 「", toastCopyOk: "Prompt copied", toastImgCopyOk: "Image copied",
     toastImgCopyFail: "Copy image failed", toastFolderExists: "Folder already exists", toastFolderEmpty: "Name cannot be empty",
     setupTitle: "Stable Diffusion WebUI Settings",
+    afLabel: "Artist string format",
+    chainTitle: "Saved chains",
+    chainFav: "★ Save this chain",
+    favFilterAll: "All",
+    favFilterArtist: "Artists only",
+    favFilterChain: "Chains only",
+    scanLabel: "Library scan",
+    scanInc: "Incremental (fast; only new files on entry)",
+    scanFull: "Full rebuild (slow; only when index is broken)",
     setupDesc: "The \"WebUI\" source needs SD WebUI's <b>outputs</b> (generated images) and <b>models</b> folders. Browse and pick your SD WebUI install root (the folder containing <b>outputs</b>). Not configuring is fine — the ComfyUI gallery works regardless; you can change this anytime.",
     setupPathPh: "No folder selected", browse: "📁 Browse…", save: "Save", skip: "Skip",
     setupSaved: "✅ Saved", setupValid: "✅ Valid folder, saved",
@@ -985,10 +1092,57 @@ const I18N = {
     aiEroRatio: "Ero ratio", aiSexTags: "Fetish focus", aiSoftTags: "Vibe", aiDeprecated: "Deprecated",
     aiArtlib: "Danbooru DB", aiLocal: "Local", aiEmpty: "(none)",
     aiBigBack: "Back to gallery", aiWorks: "🖼 Works",
+    loraPickFirst: "Select a LoRA above first", loraAll: "All LoRA", allModels: "All models",
+    fsNewName: "New folder name:", fsEnterFirst: "Enter a folder first",
+    packFail: "Pack failed", unitImages: " images",
+    advFoldTitle: "Collapse / expand left panel", clickCopy: "Click to copy", removeTitle: "Remove",
+    alreadyAdded: "★ Added", loadFail: "⚠ Failed to load", pageNumPh: "Page",
+    verTitle: "Hard-refresh (Ctrl+F5) to see v1.3.0", favDefaultName: "Favorites", videoWord: "Video",
   }
 };
 let LANG = localStorage.getItem("gallery4comfyui-lang") || "zh";
 function t(key){ return (I18N[LANG] && I18N[LANG][key]) || I18N.zh[key] || key; }
+// 「默认收藏」是收藏夹的存储键（写在 userdata/folders.json 里），翻译它会让老用户的收藏夹失效；
+// 所以只在**显示**时按语言换名。
+function favName(n){ return n === "默认收藏" ? t("favDefaultName") : n; }
+// 定性标签中英映射（数据层是中文，英文界面靠这张表换名）
+const LABEL_EN = {
+  "女性主体": "Female focus", "男性主体": "Male focus", "双人/CP": "Pair / CP",
+  "群像/多人": "Group / multiple", "非人物/静物": "Non-human / still life", "校园": "School",
+  "制服/职场": "Uniform / workplace", "女仆/侍女": "Maid", "和风": "Japanese",
+  "中式": "Chinese", "奇幻/魔法": "Fantasy / magic", "科幻/机甲": "Sci-fi / mecha",
+  "军事/枪械": "Military / guns", "战斗/动作": "Combat / action", "日常/治愈": "Slice of life / healing",
+  "恐怖/猎奇": "Horror / grotesque", "音乐/偶像": "Music / idol", "体育/运动": "Sports",
+  "自然/风景": "Nature / scenery", "都市/街景": "Urban / street", "兽耳/亚人": "Animal ears / demihuman",
+  "兽人/furry": "Furry / beastfolk", "百合/GL": "Yuri / GL", "BL/腐向": "BL / yaoi",
+  "恋爱/情感": "Romance / emotion", "泳装/内衣": "Swimwear / underwear", "裸体/暴露": "Nudity / exposure",
+  "角色扮演/异装": "Cosplay / crossdressing", "神话/宗教": "Myth / religion", "历史/复古": "Historical / retro",
+  "手足/局部": "Hands, feet / close-up", "体型特征": "Body type", "眼镜": "Glasses",
+  "线稿/速写": "Lineart / sketch", "素描/炭笔": "Pencil / charcoal", "水彩": "Watercolor",
+  "传统绘画": "Traditional media", "厚涂/数码绘": "Painterly / digital", "赛璐璐/平涂": "Cel shading / flat",
+  "像素画": "Pixel art", "3D/渲染": "3D / render", "单色/灰度": "Monochrome / greyscale",
+  "抽象/几何": "Abstract / geometric", "拼贴/混合": "Collage / mixed media", "极简/留白": "Minimal / negative space",
+  "漫画分镜": "Comic panels", "特效/后期": "Effects / post-processing", "复古/流行": "Retro / pop",
+  "光影/氛围": "Lighting / mood", "单人立绘": "Solo standing art", "肖像/半身": "Portrait / bust",
+  "场景插画": "Scene illustration", "漫画/多格": "Comic / multi-panel", "差分/变体": "Variants",
+  "表情/表演": "Expression / acting", "姿势/动态": "Pose / dynamic", "俯视/仰视": "High / low angle",
+  "设定/图解": "Reference sheet", "像素/复古画师": "Pixel / retro artist", "单色线稿派": "Monochrome lineart",
+  "3D/拟真渲染": "3D / photoreal render", "漫画/剧情向": "Comic / narrative", "场景/背景插画师": "Scenery / background artist",
+  "传统手绘媒介": "Traditional media artist", "百合专精": "Yuri specialist", "BL/腐向专精": "BL specialist",
+  "R18情色向画师": "R18 / erotic artist", "机甲/军事题材": "Mecha / military", "奇幻/魔法题材": "Fantasy / magic",
+  "兽耳/亚人专精": "Kemonomimi specialist", "日常/治愈系": "Slice-of-life / healing", "原创角色设计师": "Original character designer",
+  "同人角色专精": "Fanart / franchise specialist", "综合向插画师": "Generalist illustrator", "全年龄向": "All-ages",
+  "轻度色气": "Mildly suggestive", "情色向": "Erotic", "硬核R18": "Hardcore R18",
+  "原创为主": "Mostly original", "原创/同人混合": "Mixed original / fanart", "同人为主": "Mostly fanart",
+  "无版权标签": "No copyright tags",
+};
+// 定性标签翻译：支持单个标签、以及 " · " / "/" 拼接的复合串。
+// 命中不了的原样返回（specialty/sex_tags 是自由组合词，只能部分命中）。
+function tl(s){
+  if(LANG !== "en" || !s) return s;
+  const one = x => LABEL_EN[x] || x;
+  return String(s).split(" · ").map(part=>part.split("/").map(one).join(" / ")).join(" · ");
+}
 function applyLang(){
   document.querySelectorAll("[data-i18n]").forEach(el=>{
     const k = el.dataset.i18n;
@@ -1035,8 +1189,15 @@ const $ = id => document.getElementById(id);
 const API = "/gallery4comfyui";
 let SRC = "comfyui", PAGE = 1, PAGE_SIZE = 60, LOADING = false, TOTAL = 0, TOTAL_PAGES = 1;
 let CUR_ITEMS = [], CUR_IDX = -1, DEFAULT_FAVS = new Set(), CFG_WEBUI = false;
+// 灯箱自己持有一份「窗口 / 来源 / 下标」：这样从「画师」「画师库」右键打开大图时，
+// 不会打乱图库当前页的 CUR_ITEMS / CUR_IDX 状态。
+let LB_ITEMS = [], LB_IDX = -1, LB_SRC = "comfyui";
+// 跨页续翻：全局序号 + 分页窗口 + 当前网格上下文（详见 lbShow / lbEnsureWindow）
+let LB_CTX = null, LB_CACHE = new Map(), LB_WIN_START = 0, LB_GIDX = 0;
+let LB_TOTAL = 0, LB_PSIZE = 60, LB_LOADER = null, LB_CUR_FILE = "";
+let LB_FAV_ALL = [], lbSyncPending = null, lbSyncing = false;
 let ADV = {tags: [], page: 1, size: 60, total: 0, pages: 1, items: []};
-let FAV_FOLDER = "默认收藏", FAV_PAGE = 1, FAV_ITEMS = [], SEL = new Set(), FOLDERS = {};
+let FAV_FOLDER = "默认收藏", FAV_PAGE = 1, FAV_ITEMS = [], SEL = new Set(), FOLDERS = {}, FAV_CHAIN = "", CHAINS = [];
 
 function esc(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
@@ -1061,6 +1222,12 @@ $("btnLang").onclick = switchLang;
 applyLang();
 
 // ---------- Tab ----------
+// 右侧画师串栏弹性定位的状态。
+// 注意：这里必须用 var（不是 let）——applyLang() 在文件更早处就会同步执行，
+// 它会调用 syncSideTop()；若用 let 则因 TDZ 抛 "Cannot access before initialization"，
+// 导致整个脚本中断、画师视图点不开。
+var _sideCurTop = null;      // 当前实际像素位置（插值用）
+var _sideRaf = null;
 function showView(which){
   $("mainView").hidden = which !== "main";
   $("favView").hidden = which !== "fav";
@@ -1071,36 +1238,90 @@ function showView(which){
   // 共享画师串侧栏：只在 画师 / 画师库 视图显示
   const side = document.querySelector(".artist-side");
   if(side) side.hidden = !isArtistArea;
-  if(isArtistArea) syncSideTop();
+  // 顶栏 ★ 是上下文相关的：画师视图=「只看收藏画师」；退到图库时恢复图库的收藏筛选状态
+  const bf = $("btnFav");
+  if(bf){
+    const fo = $("artistFavOnly");
+    if(which === "artist"){
+      bf.classList.toggle("active", Boolean(fo && fo.classList.contains("active")));
+    } else if(which === "main" || which === "fav"){
+      bf.classList.toggle("active", FAV_ON_GRID);
+    }
+  }
+  if(isArtistArea) resetSideTop();
+  // 离开画师库即释放后端缓存（4.8 万行 artists + 分类/定性数据），避免长期占内存
+  if(which !== "artlib") artlibReleaseBackend();
 }
-// 右侧画师串栏：固定在右侧；页面顶部时避开导航栏，索引构建进度条出现且未滚出视口时再往下让位，滚出后收回
-function syncSideTop(){
+// 画师库内存占用控制：离开标签页主动释放；每次请求带 gc=空闲秒数（后台兜底自动回收）
+let AL_LIVE = false;
+function artlibReleaseBackend(){
+  if(!AL_LIVE) return;
+  AL_LIVE = false;
+  try{ api("/api/artlib/release", {method:"POST"}).catch(()=>{}); }catch(e){}
+}
+function artlibGcParam(){ return AL_LIVE ? "&gc=600" : ""; }
+window.addEventListener("pagehide", artlibReleaseBackend);
+// 右侧画师串栏（弹性定位）：
+//  · 顶部所有栏（顶栏 + 索引进度条）可见时 → 栏下方让位，不遮挡
+//  · 向下滚动、上面的栏滚出视口后 → 该模块顶部平滑上移，把那块空间吃掉
+//  · 用 rAF 逐帧插值（缓动），避免生硬跳变
+function sideTargetTop(){
   const tb = document.querySelector(".topbar");
-  const side = document.querySelector(".artist-side");
-  if(!tb || !side) return;
-  const tbH = Math.ceil(tb.getBoundingClientRect().height) || 60;
-  let top = tbH;
+  if(!tb) return 10;
+  // 顶栏底边在视口中的位置：滚出屏幕后变负数
+  const tbBottom = tb.getBoundingClientRect().bottom;
+  let top = Math.max(10, Math.ceil(tbBottom) + 10);
+  // 索引进度条：只要它还有一部分在视口内，就继续避让（滚动时它会自然往上移）
   const ib = document.getElementById("indexBar");
   if(ib && !ib.hidden){
     const r = ib.getBoundingClientRect();
-    if(r.bottom > tbH){          // 进度条仍在导航栏下方的可视区域才避让
-      top += 8 + (r.height || 44);
+    if(r.bottom > 0){
+      top = Math.max(top, Math.ceil(r.bottom) + 8);
     }
   }
-  side.style.top = Math.round(top + 10) + "px";
+  return top;
 }
-let _sideTopTicking = false;
+function sideTick(){
+  const side = document.querySelector(".artist-side");
+  if(!side){ _sideRaf = null; return; }
+  const target = sideTargetTop();
+  if(_sideCurTop === null) _sideCurTop = target;
+  const diff = target - _sideCurTop;
+  if(Math.abs(diff) < 0.5){
+    _sideCurTop = target;
+    side.style.top = target.toFixed(1) + "px";
+    _sideRaf = null;
+    return;
+  }
+  _sideCurTop += diff * 0.22;          // 缓动系数：越小越丝滑（0.22≈约 8 帧收敛）
+  side.style.top = _sideCurTop.toFixed(1) + "px";
+  _sideRaf = requestAnimationFrame(sideTick);
+}
+function syncSideTop(){
+  try{
+    if(_sideRaf) return;                 // 已在动画中，交给 rAF 循环
+    _sideRaf = requestAnimationFrame(sideTick);
+  }catch(e){ /* 状态未就绪（脚本早期调用）时静默忽略 */ }
+}
+// 切换视图时立即归位，避免继承上一视图的位置
+function resetSideTop(){
+  _sideCurTop = null;
+  if(_sideRaf){ cancelAnimationFrame(_sideRaf); _sideRaf = null; }
+  syncSideTop();
+}
+let _sideScrollTicking = false;
 window.addEventListener("scroll", ()=>{
-  if(_sideTopTicking) return;
-  _sideTopTicking = true;
-  requestAnimationFrame(()=>{ _sideTopTicking = false; syncSideTop(); });
+  if(_sideScrollTicking) return;
+  _sideScrollTicking = true;
+  requestAnimationFrame(()=>{ _sideScrollTicking = false; syncSideTop(); });
 }, {passive:true});
-window.addEventListener("resize", syncSideTop);
-// 进度条显隐时自动避让/收回
+window.addEventListener("resize", ()=>{ _sideCurTop = null; syncSideTop(); });
+// 进度条显隐时重新计算
 {
   const ib = document.getElementById("indexBar");
   if(ib && window.MutationObserver){
-    new MutationObserver(syncSideTop).observe(ib, {attributes:true, attributeFilter:["hidden"]});
+    new MutationObserver(()=>{ _sideCurTop = null; syncSideTop(); })
+      .observe(ib, {attributes:true, attributeFilter:["hidden"]});
   }
 }
 document.querySelectorAll(".srctab").forEach(b=>{
@@ -1110,7 +1331,7 @@ document.querySelectorAll(".srctab").forEach(b=>{
     if(b.dataset.src === "fav"){
       showView("fav");
       $("srcLabel").textContent = LANG === "zh" ? "收藏" : "Favorites";
-      loadFolders(); loadFavGrid(true);
+      loadFolders(); loadFavChains(); loadFavGrid(true);
       return;
     }
     if(b.dataset.src === "artist"){
@@ -1129,7 +1350,7 @@ document.querySelectorAll(".srctab").forEach(b=>{
     SEL.clear(); $("selBar").hidden = true;
     $("favGrid").querySelectorAll(".item.sel").forEach(d=>d.classList.remove("sel"));
     SRC = b.dataset.src;
-    $("srcLabel").textContent = SRC === "comfyui" ? "ComfyUI 图片" : SRC === "video" ? "🎬 视频" : "WebUI 图片";
+    $("srcLabel").textContent = SRC === "comfyui" ? t("subComfy") : SRC === "video" ? t("tabVideo") : t("subWebui");
     $("modelSel").value = ""; $("samplerSel").value = "";
     $("btnFav").classList.remove("active");
     refreshSource();
@@ -1163,6 +1384,36 @@ function renderPager(){
     b.onclick = ()=>goTo(item); nums.appendChild(b);
   });
 }
+// 主图库查询参数：灯箱续翻要用「同一套筛选条件」去取别的页
+function galleryParams(page){
+  const p = new URLSearchParams({
+    source: SRC, q: $("q").value.trim(), model: $("modelSel").value,
+    sampler: $("samplerSel").value, lora: $("loraSelVal").value,
+    steps_min: $("stepsMin").value, steps_max: $("stepsMax").value,
+    cfg_min: $("cfgMin").value, cfg_max: $("cfgMax").value,
+    min_w: $("minW").value, min_h: $("minH").value,
+    fav: $("btnFav").classList.contains("active") ? "1" : "0",
+    sort: $("sortSel").value, page: page, page_size: PAGE_SIZE,
+  });
+  // 画师数过滤：只看用了 ≥N 个不同画师的图（多画师 / 画师串组合）
+  const amin = $("artistMinSel");
+  if(amin && amin.value) p.set("artist_min", amin.value);
+  return p;
+}
+// 灯箱上下文：告诉灯箱「这是哪个网格、总共多少张、怎么取别的页、怎么让网格跟着翻」
+function mainLbCtx(){
+  return {
+    key: "main:" + SRC, grid: "grid", psize: PAGE_SIZE, total: TOTAL, src: SRC,
+    page: () => PAGE,
+    loader: async (q) => (await api("/api/gallery?" + galleryParams(q).toString())).items || [],
+    sync: async (q) => {
+      if(q === PAGE) return;
+      PAGE = q;
+      while(LOADING) await new Promise(r=>setTimeout(r, 60));
+      await load(false);
+    },
+  };
+}
 async function load(reset){
   if(reset){ PAGE = 1; $("grid").innerHTML = '<div class="empty">' + t("loading") + '</div>'; }
   if(LOADING) return;
@@ -1175,30 +1426,23 @@ async function load(reset){
   }
   LOADING = true; $("loading").textContent = "";
   try{
-    const p = new URLSearchParams({
-      source: SRC, q: $("q").value.trim(), model: $("modelSel").value,
-      sampler: $("samplerSel").value, lora: $("loraSelVal").value,
-      steps_min: $("stepsMin").value, steps_max: $("stepsMax").value,
-      cfg_min: $("cfgMin").value, cfg_max: $("cfgMax").value,
-      min_w: $("minW").value, min_h: $("minH").value,
-      fav: $("btnFav").classList.contains("active") ? "1" : "0",
-      sort: $("sortSel").value, page: PAGE, page_size: PAGE_SIZE,
-    });
-    const r = await api("/api/gallery?" + p.toString());
+    const r = await api("/api/gallery?" + galleryParams(PAGE).toString());
     TOTAL = r.total; TOTAL_PAGES = Math.max(1, Math.ceil(r.total / PAGE_SIZE));
     $("count").textContent = (t("countTotal") ? t("countTotal") + " " : "") + TOTAL + (t("countOf") ? " " + t("countOf") : "");
     const grid = $("grid"); grid.innerHTML = "";
     if(!r.total) grid.innerHTML = '<div class="empty">' + (r.ready ? t("noImage") : t("building")) + '</div>';
     CUR_ITEMS = r.items;
-    r.items.forEach(it=>{ grid.appendChild(mkItem(it, SRC)); });
+    const ctx = mainLbCtx();
+    r.items.forEach(it=>{ grid.appendChild(mkItem(it, SRC, r.items, ctx)); });
     renderPager();
     if(!r.ready) setTimeout(()=>load(false), 3000);
   }catch(e){ $("loading").textContent = t("loading") + " ✖"; }
   LOADING = false;
 }
-function mkItem(it, src, items){
+function mkItem(it, src, items, ctx){
   const d = document.createElement("div"); d.className = "item";
   d.draggable = true;
+  d.dataset.file = it.file || "";   // 关闭灯箱时用来在网格里定位
   const key = src + ":" + it.file;
   if(DEFAULT_FAVS.has(key)) d.classList.add("faved");
   const isVideo = it.type === "video" || /\.(mp4|webm|mov|mkv|avi|gif)$/i.test(it.file || "");
@@ -1213,9 +1457,31 @@ function mkItem(it, src, items){
   const sub = document.createElement("div"); sub.className = "sub";
   sub.textContent = [isVideo ? "🎬" : "", p2.steps?`${p2.steps}${t("unitSteps")}`:"", p2.width&&p2.height?`${p2.width}×${p2.height}`:"", p2.sampler||""].filter(Boolean).join(" · ");
   meta.appendChild(fname); meta.appendChild(sub);
+  // 画师：一张图用了多个画师时全部列出
+  const arts = Array.isArray(it.artists) ? it.artists.filter(Boolean) : [];
+  if(arts.length){
+    const ar = document.createElement("div");
+    ar.className = "artists-row";
+    ar.textContent = "🎨 " + arts.join(" · ");
+    ar.title = arts.join(" · ");
+    meta.appendChild(ar);
+  }
   const fm = document.createElement("span"); fm.className = "favmark"; fm.textContent = "★";
   d.appendChild(badge); d.appendChild(media); d.appendChild(meta); d.appendChild(fm);
-  d.onclick = ()=>{ if(SEL.size){ toggleSel(d, it, src); updateSelBars(); return; } CUR_ITEMS = items || CUR_ITEMS; CUR_IDX = CUR_ITEMS.indexOf(it); openLightbox(CUR_IDX); };
+  d.onclick = ()=>{
+    if(SEL.size){ toggleSel(d, it, src); updateSelBars(); return; }
+    const list = items || CUR_ITEMS;
+    const idx = Math.max(0, list.indexOf(it));
+    if(ctx){
+      // 全局序号 =（所在页-1）×每页张数 + 页内下标，这样灯箱能一路翻出这一页
+      lbUseCtx(ctx);
+      lbShow((ctx.page() - 1) * (ctx.psize || 60) + idx);
+    } else {
+      LB_CTX = null; LB_ITEMS = list; LB_TOTAL = list.length; LB_WIN_START = 0;
+      LB_GIDX = idx; LB_IDX = idx; LB_SRC = src;
+      openLightbox(idx);
+    }
+  };
   d.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", JSON.stringify([{source: src, file: it.file}])); });
   return d;
 }
@@ -1241,32 +1507,48 @@ $("modelSel").onchange = ()=>load(true);
 // LoRA 改为树形折叠面板（无 change 事件，由 buildLoraTree 内部处理点击）
 $("btnPackLora").onclick = ()=>{
   const lo = $("loraSelVal").value;
-  if(!lo){ showToast("请先在上方选择一个 LoRA"); return; }
+  if(!lo){ showToast(t("loraPickFirst")); return; }
   packImages({query: mainQuery(), by_model: true, name: lo});
 };
 $("samplerSel").onchange = ()=>load(true);
+$("artistMinSel").onchange = ()=>load(true);   // 画师数 ≥ N（多画师 / 画师串）
 $("sortSel").onchange = ()=>load(true);
 $("densitySel").onchange = ()=>$("grid").className = "grid " + $("densitySel").value;
 ["stepsMin","stepsMax","cfgMin","cfgMax","minW","minH"].forEach(id=>$(id).addEventListener("change", ()=>load(true)));
 $("btnAdv").onclick = ()=>{ $("adv").classList.toggle("show"); $("btnAdv").classList.toggle("active"); };
 $("btnReset").onclick = ()=>{
   ["stepsMin","stepsMax","cfgMin","cfgMax","minW","minH"].forEach(id=>$(id).value="");
-  $("samplerSel").value=""; $("modelSel").value=""; $("loraSelVal").value=""; $("loraBtnTxt").textContent="全部 LoRA"; $("sortSel").value="newest"; load(true);
+  $("samplerSel").value=""; $("modelSel").value=""; $("loraSelVal").value=""; $("loraBtnTxt").textContent=t("loraAll"); $("sortSel").value="newest"; if($("artistMinSel")) $("artistMinSel").value=""; load(true);
 };
-$("btnFav").onclick = ()=>{ $("btnFav").classList.toggle("active"); load(true); };
+let FAV_ON_GRID = false;   // 图库侧的 ★ 收藏筛选状态（供画师视图切换时恢复）
+$("btnFav").onclick = ()=>{
+  const on = !$("btnFav").classList.contains("active");
+  $("btnFav").classList.toggle("active", on);
+  // 画师视图下：顶栏 ★ 语义 = 「只看收藏画师」
+  const av = $("artistView");
+  if(av && !av.hidden){
+    const fo = $("artistFavOnly");
+    if(fo) fo.classList.toggle("active", on);
+    ART_PAGE = 1;
+    loadArtists();
+    return;
+  }
+  FAV_ON_GRID = on;
+  load(true);
+};
 
 // ---------- 下拉数据 ----------
 async function loadModels(){
   try{
     const r = await api("/api/models?source=" + SRC);
-    const sel = $("modelSel"); sel.innerHTML = '<option value="">全部模型</option>';
+    const sel = $("modelSel"); sel.innerHTML = '<option value="">' + t("allModels") + '</option>';
     r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.model; op.textContent = `${it.model}（${it.count}）`; sel.appendChild(op); });
   }catch(e){}
 }
 async function loadSamplers(){
   try{
     const r = await api("/api/samplers?source=" + SRC);
-    const sel = $("samplerSel"); sel.innerHTML = '<option value="">全部</option>';
+    const sel = $("samplerSel"); sel.innerHTML = '<option value="">' + t("fAll") + '</option>';
     r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.sampler; op.textContent = `${it.sampler}（${it.count}）`; sel.appendChild(op); });
   }catch(e){}
 }
@@ -1297,7 +1579,7 @@ function buildLoraTree(){
   // 顶部：全部 LoRA
   const allRow = document.createElement("div");
   allRow.className = "tree-row" + (!cur ? " sel" : "");
-  allRow.innerHTML = `<span class="tn">全部 LoRA</span>${!cur ? '<span class="tc"></span>' : ""}`;
+  allRow.innerHTML = `<span class="tn">${t("loraAll")}</span>${!cur ? '<span class="tc"></span>' : ""}`;
   allRow.onclick = (e)=>{ e.stopPropagation(); selectLora("", allRow); };
   tree.appendChild(allRow);
   const hint = document.createElement("div"); hint.className = "tree-hint";
@@ -1347,7 +1629,7 @@ function countLoras(node){
 }
 function selectLora(name, row){
   $("loraSelVal").value = name;
-  $("loraBtnTxt").textContent = name || "全部 LoRA";
+  $("loraBtnTxt").textContent = name || t("loraAll");
   document.querySelectorAll("#loraTree .tree-row.sel").forEach(r=>r.classList.remove("sel"));
   if(row) row.classList.add("sel");
   $("loraFilter").classList.remove("open");
@@ -1393,7 +1675,7 @@ async function refreshIndex(source, force){
   btn.style.pointerEvents = "none"; btn.style.opacity = "0.5";
   $("indexBar").hidden = false;
   $("indexFill").style.width = "0%";
-  const srcName = source === "comfyui" ? "ComfyUI" : source === "video" ? "视频" : "WebUI";
+  const srcName = source === "comfyui" ? "ComfyUI" : source === "video" ? t("videoWord") : "WebUI";
   $("indexText").textContent = (force ? (LANG === "zh" ? "📊 重建 " + srcName + " 索引中：" : "📊 Rebuilding " + srcName + ": ") : t("indexBuilding")) + "0%";
   const scanParam = force ? "force=1" : "refresh=1";
   try{
@@ -1405,11 +1687,12 @@ async function refreshIndex(source, force){
       try{
         const st = await api("/api/status");
         const cur = st[source] || {};
-        if(!cur.ready && cur.total > 0){
-          const pct = cur.total ? Math.round(cur.scanned / cur.total * 100) : 0;
+        // busy=后台仍在扫（含 force 重建期间旧数据仍 ready）：必须等它结束，否则会用旧索引渲染
+        if(cur.busy || (!cur.ready && cur.total > 0)){
+          const pct = cur.total ? Math.round((cur.scanned||0) / cur.total * 100) : 0;
           $("indexBar").hidden = false;
           $("indexFill").style.width = pct + "%";
-          $("indexText").textContent = `${t("indexBuilding")}${cur.scanned}/${cur.total} (${pct}%)`;
+          $("indexText").textContent = `${t("indexBuilding")}${cur.scanned||0}/${cur.total||0} (${pct}%)`;
           return;
         }
         clearInterval(_refreshTimer); _refreshTimer = null;
@@ -1419,6 +1702,10 @@ async function refreshIndex(source, force){
         if(SRC === source){ await refreshSource(); }
         else if(SRC === "fav" && loadFavGrid){ loadFolders(); loadFavGrid(false); }
         else { loadStats(); }
+        // 画师视图：索引变了 → 后端画师聚合缓存已失效，这里同步重载列表
+        if($("artistView") && !$("artistView").hidden){ try{ await loadArtists(); }catch(e){} }
+        // 画师库视图：列表来自 Danbooru 数据无需重载，但本地预览封面依赖索引，刷新一次
+        if($("artlibView") && !$("artlibView").hidden){ try{ artlibPreviews(); }catch(e){} }
         showToast("🔄 " + srcName + " " + (LANG === "zh" ? "索引已刷新" : "refreshed"));
       }catch(e){ clearInterval(_refreshTimer); _refreshTimer = null; $("indexBar").hidden = true; }
     }, 1500);
@@ -1433,6 +1720,61 @@ async function refreshIndex(source, force){
 $("btnRefreshComfy").onclick = ()=>refreshIndex("comfyui", true);
 $("btnRefreshWebui").onclick = ()=>refreshIndex("webui", true);
 $("btnRefreshVideo").onclick = ()=>refreshIndex("video", true);
+
+// ---------- 小刷新：只检查新增（与"重进页面"走的同一条增量路径）----------
+let _quickTimer = null;
+async function refreshViewsAfterScan(){
+  if(SRC === "fav" && loadFavGrid){ loadFolders(); await loadFavGrid(false); }
+  else { await refreshSource(); }
+  if($("artistView") && !$("artistView").hidden){ try{ await loadArtists(); }catch(e){} }
+  if($("artlibView") && !$("artlibView").hidden){ try{ artlibPreviews(); }catch(e){} }
+}
+async function quickRefresh(){
+  const btn = $("btnQuickRefresh");
+  if(btn){ btn.style.pointerEvents = "none"; btn.style.opacity = "0.5"; }
+  $("indexBar").hidden = false; $("indexFill").style.width = "0%";
+  $("indexText").textContent = LANG === "zh" ? "↻ 检查新增图片…" : "↻ Checking new images…";
+  const t0 = Date.now();
+  try{
+    // 显式 refresh=1（增量）：旧图走缓存零重解析，只解析新增/变更的文件
+    await Promise.allSettled([
+      api("/api/scan?source=comfyui&refresh=1"),
+      api("/api/scan?source=webui&refresh=1"),
+    ]);
+    if(_quickTimer) clearInterval(_quickTimer);
+    _quickTimer = setInterval(async ()=>{
+      try{
+        const st = await api("/api/status");
+        const c = st.comfyui || {}, w = st.webui || {};
+        // 只等"当前正在看的源"扫完就刷新（不用陪着另一个源（如 2.6 万张的 WebUI）干等）
+        const key = (SRC === "comfyui" || SRC === "webui" || SRC === "video") ? SRC : null;
+        const mine = key ? (st[key] || {}) : null;
+        const busy = mine ? !!mine.busy : (!!c.busy || !!w.busy);
+        const notReady = mine ? (!mine.ready && mine.total > 0)
+                              : ((!c.ready && c.total > 0) || (!w.ready && w.total > 0));
+        if((busy || notReady) && Date.now() - t0 < 300000){    // 最多等 5 分钟
+          const total = (c.total || 0) + (w.total || 0);
+          const scanned = (c.scanned || 0) + (w.scanned || 0);
+          const pct = total ? Math.round(scanned / total * 100) : 0;
+          $("indexBar").hidden = false; $("indexFill").style.width = pct + "%";
+          $("indexText").textContent = `${t("indexBuilding")}${scanned}/${total} (${pct}%)`;
+          return;
+        }
+        clearInterval(_quickTimer); _quickTimer = null;
+        $("indexBar").hidden = true; $("indexFill").style.width = "0%";
+        await refreshViewsAfterScan();
+        showToast("↻ " + t("toastQuickOk"));
+      }catch(e){ clearInterval(_quickTimer); _quickTimer = null; $("indexBar").hidden = true; }
+    }, 1200);
+  }catch(e){
+    if(_quickTimer){ clearInterval(_quickTimer); _quickTimer = null; }
+    $("indexBar").hidden = true;
+    showToast("⚠ " + (LANG === "zh" ? "检查失败" : "check failed"));
+  }finally{
+    if(btn){ btn.style.pointerEvents = ""; btn.style.opacity = ""; }
+  }
+}
+$("btnQuickRefresh").onclick = ()=>quickRefresh();
 
 
 // ---------- 默认收藏集合 ----------
@@ -1602,15 +1944,32 @@ function renderTagSel(){
     box.appendChild(c);
   });
 }
-async function advLoad(reset){
-  if(reset) ADV.page = 1;
+// 高级搜索查询参数（与主图库同理，供灯箱续翻复用）
+function advGalleryParams(page){
   const f = advParams();
-  const p = new URLSearchParams({
+  return new URLSearchParams({
     source: SRC, q: $("q").value.trim(),
     tags: ADV.tags.join(","), model: f.model, sampler: f.sampler, lora: f.lora,
     steps_min: f.stepsMin, steps_max: f.stepsMax, cfg_min: f.cfgMin, cfg_max: f.cfgMax,
-    min_w: f.minW, min_h: f.minH, sort: f.sort, page: ADV.page, page_size: f.size || 60,
+    min_w: f.minW, min_h: f.minH, sort: f.sort, page: page, page_size: f.size || 60,
   });
+}
+function advLbCtx(){
+  return {
+    key: "adv:" + SRC, grid: "agGrid", psize: ADV.size || 60, total: ADV.total, src: SRC,
+    page: () => ADV.page,
+    loader: async (q) => (await api("/api/gallery?" + advGalleryParams(q).toString())).items || [],
+    sync: async (q) => {
+      if(q === ADV.page) return;
+      ADV.page = q;
+      await advLoad(false);
+    },
+  };
+}
+async function advLoad(reset){
+  if(reset) ADV.page = 1;
+  const f = advParams();
+  const p = advGalleryParams(ADV.page);
   $("agLoading").textContent = t("loading");
   try{
     const r = await api("/api/gallery?" + p.toString());
@@ -1620,8 +1979,9 @@ async function advLoad(reset){
     CUR_ITEMS = r.items;
     const grid = $("agGrid"); grid.innerHTML = "";
     if(!r.total) grid.innerHTML = '<div class="empty">' + t("noResult") + '</div>';
+    const ctx = advLbCtx();
     r.items.forEach(it=>{
-      try{ grid.appendChild(mkItem(it, SRC)); }catch(err){}
+      try{ grid.appendChild(mkItem(it, SRC, r.items, ctx)); }catch(err){}
     });
     renderAdvPager();
     $("agLoading").textContent = (t("countTotal") ? t("countTotal") + " " : "") + r.total + (t("countOf") ? " " + t("countOf") : "");
@@ -1660,7 +2020,7 @@ async function loadFolders(){
     Object.keys(FOLDERS).forEach(name=>{
       const d = document.createElement("div");
       d.className = "folder" + (name === FAV_FOLDER ? " on" : "");
-      d.innerHTML = `<span class="fn">${esc(name)}</span><span class="fc">${FOLDERS[name]}</span><span class="fdel" title="删除 / Delete">✕</span>`;
+      d.innerHTML = `<span class="fn">${esc(favName(name))}</span><span class="fc">${FOLDERS[name]}</span><span class="fdel" title="${t("delTitle")}">✕</span>`;
       d.onclick = ()=>{ FAV_FOLDER = name; loadFolders(); loadFavGrid(true); };
       d.querySelector(".fdel").onclick = async e=>{
         e.stopPropagation();
@@ -1689,22 +2049,63 @@ async function loadFolders(){
   }catch(e){}
 }
 let FAV_PAGE_SIZE = 60, FAV_LOADING = false;
+// 收藏页是「先全量取回再前端分页」，所以 loader 直接切片
+function favLbCtx(){
+  return {
+    key: "fav:" + FAV_FOLDER + ":" + FAV_CHAIN + ":" + FAV_FILTER,
+    grid: "favGrid", psize: FAV_PAGE_SIZE, total: LB_FAV_ALL.length, src: "comfyui",
+    page: () => FAV_PAGE,
+    loader: async (q) => LB_FAV_ALL.slice((q-1)*FAV_PAGE_SIZE, q*FAV_PAGE_SIZE),
+    sync: async (q) => { if(q === FAV_PAGE) return; FAV_PAGE = q; await loadFavGrid(false); },
+  };
+}
 async function loadFavGrid(reset){
   if(reset) FAV_PAGE = 1;
   if(FAV_LOADING) return;
   FAV_LOADING = true;
   try{
-    const r = await api(`/api/folders/images?folder=${encodeURIComponent(FAV_FOLDER)}`);
-    const total = r.items.length;
+    let items = [];
+    let title = FAV_FOLDER;
+    const chain = FAV_CHAIN ? CHAINS.find(c=>c.id === FAV_CHAIN) : null;
+    if(chain){
+      // 画师串模式：该串成员画师的本地图片（封面即来自这里）
+      const names = (chain.artists || []).map(n=>n.toLowerCase().replace(/ /g, "_"));
+      const seen = {};
+      for(const src of ["comfyui", "webui"]){
+        for(const nm of names){
+          if(!nm || seen[nm]) continue;
+          try{
+            const rr = await api(`/api/artists/tags?source=${src}&tag=${encodeURIComponent(nm)}&limit=8&page=1`);
+            (rr.items || []).forEach(it=>{
+              const k = (it.source || src) + ":" + it.file;
+              if(!seen[k]){ seen[k] = 1; items.push(it); }
+            });
+          }catch(e){}
+        }
+      }
+      title = "🎨 " + chain.name;
+    } else {
+      const r = await api(`/api/folders/images?folder=${encodeURIComponent(FAV_FOLDER)}`);
+      items = r.items || [];
+    }
+    if(FAV_FILTER === "artist"){
+      // 只看画师：排除画师串来源的条目（保留收藏夹里与画师相关的图）
+      items = items.filter(it=>it.source !== "chain");
+    } else if(FAV_FILTER === "chain"){
+      items = items.filter(it=>it.source === "chain" || Boolean(chain));
+    }
+    const total = items.length;
     const pages = Math.max(1, Math.ceil(total / FAV_PAGE_SIZE));
     if(FAV_PAGE > pages) FAV_PAGE = pages;
-    const slice = r.items.slice((FAV_PAGE-1)*FAV_PAGE_SIZE, FAV_PAGE*FAV_PAGE_SIZE);
-    $("ftName").textContent = FAV_FOLDER;
+    const slice = items.slice((FAV_PAGE-1)*FAV_PAGE_SIZE, FAV_PAGE*FAV_PAGE_SIZE);
+    $("ftName").textContent = title || "";
     $("favCount").textContent = (t("countTotal") ? t("countTotal") + " " : "") + total + (t("countOf") ? " " + t("countOf") : "");
     const grid = $("favGrid"); grid.innerHTML = "";
-    if(!slice.length) grid.innerHTML = '<div class="empty">' + t("favEmpty") + '</div>';
+    if(!slice.length) grid.innerHTML = '<div class="empty">' + (chain ? (LANG === "zh" ? "该画师串成员暂无本地图片" : "No local images for this chain") : t("favEmpty")) + '</div>';
     FAV_ITEMS = slice;
-    slice.forEach(it=>{ grid.appendChild(mkItem(it, it.source, FAV_ITEMS)); });
+    LB_FAV_ALL = items;
+    const ctx = favLbCtx();
+    slice.forEach(it=>{ grid.appendChild(mkItem(it, it.source, FAV_ITEMS, ctx)); });
     renderFavPager(pages);
   }catch(e){}
   FAV_LOADING = false;
@@ -1825,10 +2226,180 @@ function paramBadges(it){
              .map(d=>`<div class="pbadge"><div class="pl">${esc(d[0])}</div><div class="pv" title="${esc(d[1])}">${esc(d[1])}</div></div>`)
              .join("");
 }
+// ───────────────────── 灯箱分页引擎（跨页续翻） ─────────────────────
+// 灯箱不再被「当前这一页」框住：它记住跨页的全局序号，翻到窗口边缘就自动去取
+// 上一页 / 下一页接上，可以一路翻到整个结果集的首尾。
+// 同时底层网格会静默跟随切页；关闭时再切到该页、滚动定位并短暂高亮那张图。
+function lbUseCtx(ctx){
+  if(!ctx) return;
+  const changed = !LB_CTX || LB_CTX.key !== ctx.key;
+  LB_CTX = ctx;
+  LB_PSIZE = ctx.psize || 60;
+  LB_TOTAL = ctx.total || 0;
+  LB_LOADER = ctx.loader || null;
+  if(changed) LB_CACHE = new Map();   // 换网格就丢掉旧页缓存
+}
+function lbSrcOf(it){ return (it && it.source) || LB_SRC; }
+// 保证全局第 g 张所在的「连续页窗口」已加载好（只缓存当前页 ±1 页，内存有界）
+async function lbEnsureWindow(g){
+  const ps = LB_PSIZE;
+  const lastPage = Math.max(1, Math.ceil(LB_TOTAL / ps));
+  const p = Math.floor(g / ps) + 1;
+  const lo = Math.max(1, p - 1), hi = Math.min(lastPage, p + 1);
+  const missing = [];
+  for(let q = lo; q <= hi; q++) if(!LB_CACHE.has(q)) missing.push(q);
+  if(missing.length && LB_LOADER){
+    try{
+      const res = await Promise.all(missing.map(q=>LB_LOADER(q)));
+      res.forEach((items, i)=>{ LB_CACHE.set(missing[i], Array.isArray(items) ? items : []); });
+    }catch(e){ showToast("✖ " + (e.message || e)); return false; }
+  }
+  // 以 p 为中心向两侧扩展出连续区间
+  let a = p, b = p;
+  while(a > 1 && LB_CACHE.has(a - 1)) a--;
+  while(b < lastPage && LB_CACHE.has(b + 1)) b++;
+  let win = [];
+  for(let q = a; q <= b; q++) win = win.concat(LB_CACHE.get(q) || []);
+  LB_ITEMS = win;
+  LB_WIN_START = (a - 1) * ps;
+  return true;
+}
+async function lbShow(g){
+  if(!LB_CTX) return;
+  g = Math.max(0, Math.min(g, Math.max(0, LB_TOTAL - 1)));
+  if(!(await lbEnsureWindow(g))) return;
+  LB_GIDX = g;
+  LB_IDX = g - LB_WIN_START;
+  LB_SRC = LB_CTX.src || LB_SRC;
+  openLightbox(LB_IDX);
+  lbSyncGrid(g);
+}
+async function lbStep(d){
+  if(!LB_CTX) return;
+  const g = LB_GIDX + d;
+  if(g < 0 || g >= LB_TOTAL) return;
+  await lbShow(g);
+}
+// 网格跟随切页：连续快翻时合并成一次，同一时刻只跑一个，且不阻塞大图切换
+function lbSyncGrid(g){
+  if(!LB_CTX || !LB_CTX.sync) return;
+  const page = Math.floor(g / LB_PSIZE) + 1;
+  if(page === LB_CTX.page()) return;
+  lbSyncPending = page;
+  if(lbSyncing) return;
+  lbSyncing = true;
+  (async ()=>{
+    try{
+      while(lbSyncPending !== null){
+        const p = lbSyncPending; lbSyncPending = null;
+        await LB_CTX.sync(p);
+      }
+    }catch(e){}
+    finally{ lbSyncing = false; }
+  })();
+}
+// 关闭：网格切到当前图所在页 -> 滚动过去 -> 短暂高亮
+async function lbClose(){
+  pauseVideos();
+  $("modal").classList.remove("show");
+  const ctx = LB_CTX;
+  if(!ctx || !ctx.grid) return;
+  const page = Math.floor(LB_GIDX / LB_PSIZE) + 1;
+  try{
+    while(lbSyncing) await new Promise(r=>setTimeout(r, 40));
+    if(ctx.sync) await ctx.sync(page);
+    const file = LB_CUR_FILE;
+    if(!file) return;
+    const sel = `#${ctx.grid} .item[data-file="${CSS.escape(file)}"]`;
+    let el = document.querySelector(sel);
+    if(!el){   // 网格刚重绘，给一帧时间再找
+      await new Promise(r=>setTimeout(r, 120));
+      el = document.querySelector(sel);
+    }
+    if(el){
+      el.scrollIntoView({block:"center", behavior:"smooth"});
+      el.classList.add("lb-flash");
+      setTimeout(()=>el.classList.remove("lb-flash"), 1600);
+    }
+  }catch(e){}
+}
+// 画师收藏集合：懒加载一次全量收藏，避免每张图都发请求
+let ARTIST_FAV_SET = null;
+async function artistFavSet(){
+  if(ARTIST_FAV_SET) return ARTIST_FAV_SET;
+  ARTIST_FAV_SET = new Set();
+  try{
+    const r = await api("/api/artists?source=comfyui&fav=1");
+    (r.items || []).forEach(x=>{ if(x && x.name) ARTIST_FAV_SET.add(artSelKey(x.name)); });
+  }catch(e){}
+  return ARTIST_FAV_SET;
+}
+// 灯箱里的画师行：多画师时全部列出，★ 可直接收藏 / 取消收藏
+async function renderLbArtists(it){
+  const box = $("mArtists"); if(!box) return;
+  const arts = (it && Array.isArray(it.artists)) ? it.artists.filter(Boolean) : [];
+  box.innerHTML = "";
+  if(!arts.length){ box.hidden = true; return; }
+  box.hidden = false;
+  const lbl = document.createElement("span");
+  lbl.className = "lb-art-label";
+  lbl.textContent = LANG === "zh" ? "画师" : "Artist";
+  box.appendChild(lbl);
+  const favs = await artistFavSet();
+  if(LB_ITEMS[LB_IDX] !== it) return;   // 等待期间用户已切图
+  arts.forEach(name=>{
+    const chip = document.createElement("span");
+    chip.className = "lb-art-chip";
+    const btn = document.createElement("button");
+    btn.className = "lb-art-fav" + (favs.has(artSelKey(name)) ? " on" : "");
+    btn.textContent = "★";
+    btn.title = LANG === "zh" ? "收藏画师" : "Favorite artist";
+    const nm = document.createElement("span");
+    nm.className = "lb-art-name";
+    nm.textContent = name;
+    nm.title = name;
+    chip.appendChild(btn); chip.appendChild(nm);
+    btn.onclick = async (e)=>{
+      e.stopPropagation();
+      const on = !btn.classList.contains("on");
+      btn.classList.toggle("on", on);
+      if(on) favs.add(artSelKey(name)); else favs.delete(artSelKey(name));
+      try{ await api("/api/artists/fav", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: name, on})}); }catch(err){}
+      showToast("★ " + (LANG === "zh" ? (on ? "已收藏画师：" : "已取消收藏画师：") : (on ? "Favorited: " : "Unfavorited: ")) + name);
+      // 画师页已渲染时同步卡片上的 ★
+      const d = document.querySelector(`.artist-card[data-key="${CSS.escape(artSelKey(name))}"]`);
+      if(d){ const f = d.querySelector(".ac-fav"); if(f) f.classList.toggle("on", on); }
+      if($("artistFavOnly") && $("artistFavOnly").classList.contains("active")) loadArtists();
+    };
+    box.appendChild(chip);
+  });
+}
+// 画师 / 画师库右键「查看大图」：取该画师在本库的全部作品，交给同一个灯箱
+async function artOpenLightbox(a, startFile){
+  const name = String((a && a.name) || "").replace(/^@/, "").trim();
+  if(!name) return;
+  try{
+    const r = await api(`/api/gallery?source=comfyui&artist=${encodeURIComponent(name)}&sort=newest&page=1&page_size=1000`);
+    const items = (r.items || []).filter(x=>x && x.file);
+    if(!items.length){ showToast((LANG === "zh" ? "本库没有该画师的作品：" : "No local works for ") + name); return; }
+    let idx = 0;
+    if(startFile){ const i = items.findIndex(x=>x.file === startFile); if(i >= 0) idx = i; }
+    // 画师作品一次性取回（上限 1000），用同一套分页引擎喂给灯箱；
+    // 没有对应的网格页，所以不做跟随切页 / 关闭定位。
+    const PS = 200;
+    lbUseCtx({
+      key: "artist:" + name, grid: null, psize: PS, total: items.length, src: "comfyui",
+      page: () => 1,
+      loader: async (q) => items.slice((q-1)*PS, q*PS),
+      sync: null,
+    });
+    lbShow(idx);
+  }catch(e){ showToast("✖ " + (e.message || e)); }
+}
 function openLightbox(idx){
-  const it = CUR_ITEMS[idx]; if(!it) return;
+  const it = LB_ITEMS[idx]; if(!it) return;
   pauseVideos();   // 切换前先停掉上一个视频（防止声音残留）
-  CUR_IDX = idx;
+  LB_IDX = idx;
   const isVideo = it.type === "video" || /\.(mp4|webm|mov|mkv|avi|gif)$/i.test(it.file || "");
   const imgBox = $("mimg");
   if(isVideo){
@@ -1839,7 +2410,7 @@ function openLightbox(idx){
       imgBox.replaceWith(v);
     }
     const v = $("mimg");
-    v.src = imgUrl(SRC, it.file);
+    v.src = imgUrl(lbSrcOf(it), it.file);
     v.load();
   } else {
     if(imgBox.tagName === "VIDEO"){
@@ -1847,18 +2418,21 @@ function openLightbox(idx){
       im.id = "mimg"; im.alt = "";
       imgBox.replaceWith(im);
     }
-    $("mimg").src = imgUrl(SRC, it.file);
+    $("mimg").src = imgUrl(lbSrcOf(it), it.file);
   }
   $("mfile").textContent = it.file;
   $("mimgName").textContent = it.file.split("/").pop();
-  $("mimgCount").textContent = `${CUR_IDX + 1} / ${CUR_ITEMS.length}`;
+  LB_CUR_FILE = it.file || "";
+  // 计数改成全局序号，才看得出「一直翻」翻到哪儿了
+  $("mimgCount").textContent = `${(LB_GIDX + 1).toLocaleString()} / ${Math.max(1, LB_TOTAL).toLocaleString()}`;
+  renderLbArtists(it);   // 灯箱内显示画师（多个全列出）+ 可直接收藏
   $("mparams").innerHTML = paramBadges(it);
   $("mpos").textContent = it.positive || "";
   $("mraw").classList.remove("show");
   // 收藏夹选择：标记已包含的收藏夹 + 点击切换（加入/移出）带反馈
   const pick = $("mFavPick");
   pick.innerHTML = '<span class="fp-label">' + t("modalAddFav") + '</span>';
-  const file = it.file, src = SRC;
+  const file = it.file, src = lbSrcOf(it);
   const favBtn = $("mFavState");
   favBtn.classList.remove("on");
   favBtn.textContent = "☆ " + t("lblFav");
@@ -1870,12 +2444,12 @@ function openLightbox(idx){
       if(!target){ favBtn.classList.remove("on"); favBtn.textContent = "☆ " + t("lblFav");
         await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"},
           body: JSON.stringify({action:"remove", folder: "默认收藏", items: [{source: src, file}]})});
-        inFolders.delete("默认收藏"); showToast(t("toastRemoved") + "默认收藏」");
+        inFolders.delete("默认收藏"); showToast(t("toastRemoved") + t("favDefaultName") + "」");
       } else {
         favBtn.classList.add("on"); favBtn.textContent = "★ " + t("lblFaved");
         await api("/api/folders", {method:"POST", headers:{"Content-Type":"application/json"},
           body: JSON.stringify({action:"add", folder: "默认收藏", items: [{source: src, file}]})});
-        inFolders.add("默认收藏"); showToast(t("toastAdded") + "默认收藏」");
+        inFolders.add("默认收藏"); showToast(t("toastAdded") + t("favDefaultName") + "」");
       }
       loadFolders(); loadDefaultFavs();
     };
@@ -1903,10 +2477,10 @@ function openLightbox(idx){
   }).catch(()=>{});
   $("modal").classList.add("show");
 }
-$("close").onclick = ()=>{ pauseVideos(); $("modal").classList.remove("show"); };
-$("modal").onclick = e=>{ if(e.target === $("modal")){ pauseVideos(); $("modal").classList.remove("show"); } };
-$("prev").onclick = e=>{ e.stopPropagation(); if(CUR_IDX>0) openLightbox(CUR_IDX-1); };
-$("next").onclick = e=>{ e.stopPropagation(); if(CUR_IDX<CUR_ITEMS.length-1) openLightbox(CUR_IDX+1); };
+$("close").onclick = ()=>lbClose();
+$("modal").onclick = e=>{ if(e.target === $("modal")) lbClose(); };
+$("prev").onclick = e=>{ e.stopPropagation(); lbStep(-1); };
+$("next").onclick = e=>{ e.stopPropagation(); lbStep(1); };
 // 全屏观看：按钮进入全屏，滚轮 / 左右按钮切换图片
 $("mFs").onclick = e=>{
   e.stopPropagation();
@@ -1931,34 +2505,38 @@ $("modal").addEventListener("wheel", e=>{
 }, {passive:false});
 document.addEventListener("keydown", e=>{
   if(!$("modal").classList.contains("show")) return;
-  if(e.key === "Escape"){ pauseVideos(); $("modal").classList.remove("show"); }
-  if(e.key === "ArrowLeft") openLightbox(Math.max(0, CUR_IDX-1));
-  if(e.key === "ArrowRight") openLightbox(Math.min(CUR_ITEMS.length-1, CUR_IDX+1));
+  if(e.key === "Escape"){ lbClose(); }
+  if(e.key === "ArrowLeft") lbStep(-1);
+  if(e.key === "ArrowRight") lbStep(1);
 });
-$("mCopy").onclick = ()=>{ const it = CUR_ITEMS[CUR_IDX]; if(it) navigator.clipboard.writeText(it.positive || "").then(()=>showToast(t("toastCopyOk"))); };
+$("mCopy").onclick = ()=>{ const it = LB_ITEMS[LB_IDX]; if(it) navigator.clipboard.writeText(it.positive || "").then(()=>showToast(t("toastCopyOk"))); };
 $("mCopyImg").onclick = async ()=>{
-  const it = CUR_ITEMS[CUR_IDX]; if(!it) return;
-  try{ const blob = await fetch(imgUrl(SRC, it.file)).then(r=>r.blob());
+  const it = LB_ITEMS[LB_IDX]; if(!it) return;
+  try{ const blob = await fetch(imgUrl(lbSrcOf(it), it.file)).then(r=>r.blob());
        await navigator.clipboard.write([new ClipboardItem({"image/png": blob})]); showToast(t("toastImgCopyOk")); }catch(e){ showToast(t("toastImgCopyFail")); }
 };
 $("mDown").onclick = ()=>{
-  const it = CUR_ITEMS[CUR_IDX]; if(!it) return;
-  const a = document.createElement("a"); a.href = imgUrl(SRC, it.file); a.download = it.file.split("/").pop(); a.click();
+  const it = LB_ITEMS[LB_IDX]; if(!it) return;
+  const a = document.createElement("a"); a.href = imgUrl(lbSrcOf(it), it.file); a.download = it.file.split("/").pop(); a.click();
 };
 $("mMeta").onclick = async ()=>{
-  const it = CUR_ITEMS[CUR_IDX]; if(!it) return;
+  const it = LB_ITEMS[LB_IDX]; if(!it) return;
   const raw = $("mraw");
   if(raw.classList.contains("show")){ raw.classList.remove("show"); return; }
-  try{ const r = await api(`/api/meta?source=${SRC}&file=${encodeURIComponent(it.file)}`); raw.textContent = r.metadata || t("noMeta"); raw.classList.add("show"); }catch(e){}
+  try{ const r = await api(`/api/meta?source=${lbSrcOf(it)}&file=${encodeURIComponent(it.file)}`); raw.textContent = r.metadata || t("noMeta"); raw.classList.add("show"); }catch(e){}
 };
-$("mOpen").onclick = ()=>{ const it = CUR_ITEMS[CUR_IDX]; if(it) window.open(imgUrl(SRC, it.file), "_blank"); };
-$("mOpenFolder").onclick = async ()=>{ const it = CUR_ITEMS[CUR_IDX]; if(!it) return; const r = await api(`/api/image/open-folder?source=${SRC}&file=${encodeURIComponent(it.file)}`); if(!r.ok) showToast(r.error || t("openFolderFail")); };
+$("mOpen").onclick = ()=>{ const it = LB_ITEMS[LB_IDX]; if(it) window.open(imgUrl(lbSrcOf(it), it.file), "_blank"); };
+$("mOpenFolder").onclick = async ()=>{ const it = LB_ITEMS[LB_IDX]; if(!it) return; const r = await api(`/api/image/open-folder?source=${lbSrcOf(it)}&file=${encodeURIComponent(it.file)}`); if(!r.ok) showToast(r.error || t("openFolderFail")); };
 
 // ---------- 设置 & 目录选择 ----------
 async function checkSettings(){
   const s = await api("/api/settings");
   CFG_WEBUI = !!s.configured;
   $("setupPath").value = s.webui_root || "";
+  SET_AF = s.artist_format || "anima";
+  const sel = $("setupAf"); if(sel){ sel.value = SET_AF; }
+  updateAfPreview();
+  const selScan = $("setupScan"); if(selScan){ selScan.value = s.scan_mode || "incremental"; }
   if(!s.configured){
     $("setup").classList.add("show");
     boot();   // 未配置也先启动（ComfyUI 源可用），设置框叠在上面
@@ -1969,7 +2547,7 @@ async function checkSettings(){
 $("btnSetup").onclick = ()=>$("setup").classList.add("show");
 $("btnSetupSkip").onclick = ()=>{ CFG_WEBUI = false; $("setup").classList.remove("show"); if(!BOOTED) boot(); };
 $("btnSetupSave").onclick = async ()=>{
-  const r = await api("/api/settings", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({webui_root: $("setupPath").value})});
+  const r = await api("/api/settings", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({webui_root: $("setupPath").value, artist_format: $("setupAf").value, scan_mode: $("setupScan").value})});
   const msg = $("setupMsg");
   if(r.ok){
     CFG_WEBUI = true;
@@ -1992,7 +2570,7 @@ async function fsShowDrives(){
   }
   const r = await api("/api/fs/drives");
   const box = $("fsList"); box.innerHTML = "";
-  $("fsPath").textContent = "选择盘符";
+  $("fsPath").textContent = t("fsPickDrive");
   r.drives.forEach(d=>{
     const row = document.createElement("div"); row.className = "fs-row";
     row.innerHTML = `<span class="ic">💽</span>${d}`;
@@ -2013,7 +2591,7 @@ async function fsEnter(path){
     row.onclick = ()=>fsEnter(r.path + "\\" + d.name);
     box.appendChild(row);
   });
-  if(!(r.dirs||[]).length) box.innerHTML = '<div class="empty">空目录</div>';
+  if(!(r.dirs||[]).length) box.innerHTML = '<div class="empty">' + t("fsEmpty") + '</div>';
 }
 $("btnBrowse").onclick = ()=>{ $("fsPicker").classList.add("show"); fsShowDrives(); };
 $("fsUp").onclick = async ()=>{
@@ -2061,20 +2639,20 @@ function packImages(payload){
       let j = {}; try{ j = await r.json(); }catch(e){}
       if(r.ok && j.ok){
         const dir = j.zip ? j.zip.replace(/\\[^\\]*$/, "") : "";
-        showToast("✅ " + t("packDone") + " " + j.count + " 张 → " + j.zip, dir);
+        showToast("✅ " + t("packDone") + " " + j.count + t("unitImages") + " → " + j.zip, dir);
         if(dir){ try{ fetch(API + "/api/fs/open-dir?path=" + encodeURIComponent(dir)); }catch(e){} }
       }
-      else { showToast("❌ " + (j.error || ("打包失败 (" + r.status + ")"))); }
-    }catch(e){ showToast("❌ 打包失败（" + (e.message||e) + "）"); }
+      else { showToast("❌ " + (j.error || (t("packFail") + " (" + r.status + ")"))); }
+    }catch(e){ showToast("❌ " + t("packFail") + " (" + (e.message||e) + ")"); }
   };
   $("fsPicker").classList.add("show"); fsShowDrives();
 }
 $("fsNew").onclick = async ()=>{
-  if(!FS_PATH){ alert("请先进入一个目录"); return; }
-  const name = prompt("新建文件夹名称：");
+  if(!FS_PATH){ alert(t("fsEnterFirst")); return; }
+  const name = prompt(t("fsNewName"));
   if(!name || !name.trim()) return;
   const r = await api("/api/fs/mkdir", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({path: FS_PATH, name: name.trim()})});
-  if(r.ok){ fsEnter(FS_PATH); } else { alert(r.error || "创建失败"); }
+  if(r.ok){ fsEnter(FS_PATH); } else { alert(r.error || t("createFail")); }
 };
 function updateSelBars(){
   const n = SEL.size;
@@ -2149,18 +2727,51 @@ let AWM = {tag:"", page:1, size:60, total:0, pages:1, items:[], selFile:""};
 
 const ART_PALETTE = ["#3b6ef5","#f5a623","#1e9e5a","#e5484d","#8e5cf7","#25c2c2","#f76bb4","#7ac74f","#ff9f43","#5f7cff","#c79efc","#ffd166"];
 
-function artTag(display){ return "@" + (display||""); }
+function artTag(display){ return afBase(display); }   // 旧接口：复制基础画师 tag
 function artSelKey(display){ return (display||"").toLowerCase(); }
+// ---------------- 画师串格式（设置里切换） ----------------
+let SET_AF = "anima";
+const AF_PREFIX = { anima: "@", illustrious: "artist:", noobai: "artist:", nai: "artist:" };
+function afBase(name){
+  // Anima：@名前缀 + 下划线转空格；其它模型：artist:名前缀，不带 @
+  const n = SET_AF === "anima" ? String(name||"").replace(/_/g, " ") : (name||"");
+  return (AF_PREFIX[SET_AF] || "@") + n;
+}
+function afmt(name, weight){
+  // 权重=1 不加括号；否则 (tag:W)
+  const b = afBase(name);
+  const w = Number(weight) || 1;
+  if(Math.abs(w - 1) < 1e-6) return b;
+  return `(${b}:${w.toFixed(2)})`;
+}
+function updateAfPreview(){
+  const el = $("afPreview"); if(!el) return;
+  try{
+    el.textContent = `${afmt("fujita_kakuji", 1)}  /  ${afmt("fujita_kakuji", 1.2)}`;
+  }catch(e){ el.textContent = ""; }
+}
+$("setupAf").onchange = ()=>{ SET_AF = $("setupAf").value; updateAfPreview(); };
 
 async function loadArtists(){
   try{
-    const r = await api(`/api/artists?source=comfyui&sort=${$("artistSort").value}&search=${encodeURIComponent($("artistSearch").value)}&page=${ART_PAGE}&page_size=${ART_PAGE_SIZE}`);
+    const favOnly = $("artistFavOnly") && $("artistFavOnly").classList.contains("active") ? "1" : "0";
+    const r = await api(`/api/artists?source=comfyui&sort=${$("artistSort").value}&search=${encodeURIComponent($("artistSearch").value)}&page=${ART_PAGE}&page_size=${ART_PAGE_SIZE}&fav=${favOnly}`);
     ARTISTS = r.items || [];
     ART_TOTAL = r.total || 0;
     $("artistHint").textContent = `${LANG === "zh" ? "共" : ""} ${ART_TOTAL} ${LANG === "zh" ? "位画师" : "artists"}`;
     renderArtists();
     renderArtistPager();
   }catch(e){}
+}
+// 画师页「★ 只看收藏画师」（与顶栏 ★ 联动，二者状态始终一致）
+if($("artistFavOnly")){
+  $("artistFavOnly").onclick = ()=>{
+    $("artistFavOnly").classList.toggle("active");
+    const on = $("artistFavOnly").classList.contains("active");
+    if($("btnFav")) $("btnFav").classList.toggle("active", on);
+    ART_PAGE = 1;
+    loadArtists();
+  };
 }
 function renderArtistPager(){
   const pages = Math.max(1, Math.ceil(ART_TOTAL / ART_PAGE_SIZE));
@@ -2201,7 +2812,12 @@ function renderArtists(){
         <span class="ac-fav${a.fav ? " on" : ""}">★</span>
       </div>
       <div class="ac-info">
-        <div class="ac-name" title="${LANG === "zh" ? "定性/备注（右键可改）" : "specialty / note (right-click to edit)"}">${esc(a.note || a.name)}</div>
+        <div class="ac-name" title="${esc((a.style ? a.style : (a.note || a.name)) + (a.note && a.style ? " · " + a.note : ""))}">${esc(tl(a.style || a.note || a.name))}</div>
+        ${(()=>{
+          const st = (a.strength || []).slice(0, 3).map(s=>`<span class="al-chip">${esc(tl(s))}</span>`).join("");
+          const ft = (a.features || []).slice(0, 3).map(s=>`<span class="al-chip al-chip-ero">${esc(tl(s))}</span>`).join("");
+          return (st || ft) ? `<div class="al-chips">${st}${ft}</div>` : "";
+        })()}
         <div class="ac-tag">${esc(a.display || "@" + a.name)}</div>
         <div class="ac-sub">
           <span class="cnt" title="${LANG === "zh" ? (a.db_posts ? `Danbooru 收录 ${Number(a.db_posts).toLocaleString()} · 本库 ${Number(a.count||0).toLocaleString()}` : `本库作品数 ${Number(a.count||0).toLocaleString()}`) : (a.db_posts ? `Danbooru ${Number(a.db_posts).toLocaleString()} · local ${Number(a.count||0).toLocaleString()}` : `local ${Number(a.count||0).toLocaleString()}`)}">🖼 ${a.db_posts ? Number(a.db_posts).toLocaleString() : Number(a.count||0).toLocaleString()}${a.db_posts ? `<small class="cnt-local"> ·本${Number(a.count||0).toLocaleString()}</small>` : ""}</span>
@@ -2229,10 +2845,14 @@ function artCurrentCover(a){
 }
 async function artNextCover(a, dir){
   const key = artSelKey(a.name);
-  // 懒加载候选列表：首次请求该画师的全部图（仅 file）
+  // 懒加载候选列表：首次请求该画师的全部作品（file + 封面）
   if(!(ART_COVER_LIST[key]||[]).length){
     try{
-      const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(artTag(a.name).replace("@",""))}&sort=newest&page=1&page_size=200`);
+      // 必须用 artist= 精确过滤（与画师列表同一套算法）；
+      // 旧写法 q= 是全文搜索，会把提示词/文件名里出现该词的图也算进来，
+      // 导致「1/N」的数字和实际候选张数对不上、翻页时数量跳变（bug 现场）
+      const qs = `source=comfyui&artist=${encodeURIComponent(a.name)}&sort=newest&page=1&page_size=1000`;
+      const r = await api(`/api/gallery?${qs}`);
       const files = (r.items||[]).map(x=>x.file);
       const seen = new Set();
       ART_COVER_LIST[key] = files.filter(f=>!seen.has(f)&&seen.add(f));
@@ -2256,6 +2876,7 @@ function artShowCtx(e, a){
   menu.innerHTML = `
     <div class="ctx-item" data-act="info"><span class="ic">ℹ</span>${t("aiInfo")}</div>
     <div class="ctx-item" data-act="cover"><span class="ic">🖼</span>${LANG === "zh" ? "设置当前图为封面" : "Set current as cover"}</div>
+    <div class="ctx-item" data-act="view"><span class="ic">🔍</span>${LANG === "zh" ? "查看大图" : "View large image"}</div>
     <div class="ctx-item" data-act="works"><span class="ic">🖼</span>${LANG === "zh" ? "查看全部作品" : "View all works"}</div>
     <div class="ctx-item" data-act="reset"><span class="ic">↺</span>${LANG === "zh" ? "重置封面为最新" : "Reset cover to newest"}</div>
     <div class="ctx-sep"></div>
@@ -2284,30 +2905,41 @@ function aiCard(title, body){
 function renderAiInfo(){
   try{
   const a = AI.item, isZh = LANG === "zh";
-  const tag = "@" + a.name;
+  const tag = afBase(a.name);
   let h = "";
   if(AI.kind === "artlib"){
     const eroPct = a.ero_ratio ? Math.round((a.ero_ratio||0)*100) + "%" : "";
-    const special = a.specialty || a.profile || a.name;
+    const special = tl(a.style || a.specialty || a.profile || a.name);
     const cards = [];
-    cards.push(aiCard("🎯 " + t("aiSpecialty"), `<div class="ai-spec-big">${esc(special)}</div>`));
+    cards.push(aiCard("🎨 " + (isZh ? "风格定性" : "Style"), `<div class="ai-spec-big">${esc(special)}</div>`));
+    if((a.strength && a.strength.length) || (a.features && a.features.length)){
+      cards.push(aiCard("✨ " + (isZh ? "擅长 · 特色" : "Strengths & features"),
+        ((a.strength && a.strength.length) ? `<div class="ai-tags-flow">${a.strength.map(s=>`<span class="al-chip">${esc(tl(s))}</span>`).join("")}</div>` : "") +
+        ((a.features && a.features.length) ? `<div class="ai-tags-flow" style="margin-top:5px">${a.features.map(s=>`<span class="al-chip al-chip-ero">${esc(tl(s))}</span>`).join("")}</div>` : "")));
+    }
+    if(a.bio) cards.push(aiCard("📄 " + (isZh ? "简介" : "About"), `<div class="ai-v">${esc(a.bio)}</div>`));
+    if(a.sources && a.sources.length){
+      cards.push(aiCard("🔗 " + (isZh ? "来源" : "Sources"),
+        a.sources.map(u=>`<div class="ai-row"><span class="ai-v"><a href="${esc(u)}" target="_blank" style="color:var(--accent)">${esc(u)}</a></span></div>`).join("") +
+        (a.style_checked ? `<div class="ai-row"><span class="ai-k">${isZh ? "查证于" : "checked"}</span><span class="ai-v">${esc(a.style_checked)}</span></div>` : "")));
+    }
     cards.push(aiCard("📊 " + t("aiCount"),
       aiRow(t("aiCount"), a.posts ? a.posts.toLocaleString() + (isZh ? " 张" : " posts") : "") +
-      aiRow(t("aiRating"), a.rating || "") +
+      aiRow(t("aiRating"), tl(a.rating || "")) +
       aiRow(t("aiEroRatio"), eroPct)));
     if(a.sex_tags && a.sex_tags.length)
-      cards.push(aiCard("🔥 " + t("aiSexTags"), `<div class="ai-tags-flow">${a.sex_tags.slice(0,12).map(t2=>`<span class="al-chip al-chip-ero">${esc(t2)}</span>`).join("")}</div>`));
+      cards.push(aiCard("🔥 " + t("aiSexTags"), `<div class="ai-tags-flow">${a.sex_tags.slice(0,12).map(t2=>`<span class="al-chip al-chip-ero">${esc(tl(t2))}</span>`).join("")}</div>`));
     if(a.soft_tags && a.soft_tags.length)
-      cards.push(aiCard("✨ " + t("aiSoftTags"), `<div class="ai-tags-flow">${a.soft_tags.slice(0,10).map(t2=>`<span class="al-chip al-chip-soft">${esc(t2)}</span>`).join("")}</div>`));
+      cards.push(aiCard("✨ " + t("aiSoftTags"), `<div class="ai-tags-flow">${a.soft_tags.slice(0,10).map(t2=>`<span class="al-chip al-chip-soft">${esc(tl(t2))}</span>`).join("")}</div>`));
     if(a.profile && a.profile !== special)
       cards.push(aiCard("📄 " + t("aiProfile"), `<div class="ai-v">${esc(a.profile)}</div>`));
     cards.push(aiCard("🌐 " + t("aiArtlib"),
-      aiRow(t("aiArchetype"), a.archetype || "") +
-      aiRow(t("aiOrigin"), a.origin || "") +
-      aiRow(t("aiSubject"), a.subject || "") +
-      aiRow(t("aiTheme"), a.theme || "") +
-      aiRow(t("aiTechnique"), a.technique || "") +
-      aiRow(t("aiComposition"), a.composition || "") +
+      aiRow(t("aiArchetype"), tl(a.archetype || "")) +
+      aiRow(t("aiOrigin"), tl(a.origin || "")) +
+      aiRow(t("aiSubject"), tl(a.subject || "")) +
+      aiRow(t("aiTheme"), tl(a.theme || "")) +
+      aiRow(t("aiTechnique"), tl(a.technique || "")) +
+      aiRow(t("aiComposition"), tl(a.composition || "")) +
       aiRow(t("aiCrypto"), a.crypto || "") +
       aiRow(t("aiSig"), a.sig || "") +
       (a.url ? aiRow(t("aiUrl"), a.url, true) : "") +
@@ -2318,17 +2950,34 @@ function renderAiInfo(){
     const lu = a.last_use ? new Date(a.last_use*1000).toLocaleString() : "";
     const fu = a.first_use ? new Date(a.first_use*1000).toLocaleString() : "";
     const cards = [];
-    cards.push(aiCard("🎨 " + (isZh ? "画师" : "Artist"),
-      `<div class="ai-spec-big">${esc(a.note || a.name)}</div>` +
-      aiRow(t("aiWeight"), w.toFixed(2)) +
-      aiRow(t("aiUsed"), a.used ? (isZh ? "✅ 本库用过" : "✅ used locally") : (isZh ? "❌ 本库未用过（占位）" : "❌ not used yet")) +
-      aiRow(t("aiFav"), a.fav ? (isZh ? "★ 已收藏" : "★ favorited") : (isZh ? "☆ 未收藏" : "☆ not favorited"))));
+    // 风格定性（查证结果优先，其次备注）
+    const styleLine = tl(a.style || a.note || a.name);
+    cards.push(aiCard("🎨 " + (isZh ? "风格定性" : "Style"),
+      `<div class="ai-spec-big">${esc(styleLine)}</div>` +
+      (a.style && a.note ? aiRow(t("aiNote"), a.note) : "")));
+    // 擅长 + 特色（标签形式）
+    if((a.strength && a.strength.length) || (a.features && a.features.length)){
+      cards.push(aiCard("✨ " + (isZh ? "擅长 · 特色" : "Strengths & features"),
+        ((a.strength && a.strength.length) ? `<div class="ai-tags-flow">${a.strength.map(s=>`<span class="al-chip">${esc(tl(s))}</span>`).join("")}</div>` : "") +
+        ((a.features && a.features.length) ? `<div class="ai-tags-flow" style="margin-top:5px">${a.features.map(s=>`<span class="al-chip al-chip-ero">${esc(tl(s))}</span>`).join("")}</div>` : "")));
+    }
+    // 简介（查证撰写的 bio）
+    if(a.bio) cards.push(aiCard("📄 " + (isZh ? "简介" : "About"), `<div class="ai-v">${esc(a.bio)}</div>`));
+    // 查证来源
+    if(a.sources && a.sources.length){
+      cards.push(aiCard("🔗 " + (isZh ? "来源" : "Sources"),
+        a.sources.map(u=>`<div class="ai-row"><span class="ai-v"><a href="${esc(u)}" target="_blank" style="color:var(--accent)">${esc(u)}</a></span></div>`).join("") +
+        (a.style_checked ? `<div class="ai-row"><span class="ai-k">${isZh ? "查证于" : "checked"}</span><span class="ai-v">${esc(a.style_checked)}</span></div>` : "")));
+    }
     cards.push(aiCard("📊 " + t("aiCount"),
       aiRow(t("aiCount"), (a.db_posts ? Number(a.db_posts).toLocaleString() + (isZh ? " 张（Danbooru 收录）" : " (Danbooru)") : "") + (a.count ? (a.db_posts ? ` · ${isZh ? "本库 " : "local "}${Number(a.count).toLocaleString()}` : Number(a.count).toLocaleString() + (isZh ? " 张" : " imgs")) : "")) +
+      aiRow(t("aiWeight"), w.toFixed(2)) +
+      aiRow(t("aiUsed"), a.used ? (isZh ? "✅ 本库用过" : "✅ used locally") : (isZh ? "❌ 本库未用过（占位）" : "❌ not used yet")) +
+      aiRow(t("aiFav"), a.fav ? (isZh ? "★ 已收藏" : "★ favorited") : (isZh ? "☆ 未收藏" : "☆ not favorited")) +
       aiRow(t("aiLastUse"), lu) +
       aiRow(t("aiFirstUse"), fu) +
       ((a.cover || "") ? aiRow(isZh ? "封面" : "Cover", a.cover) : "")));
-    if(a.note) cards.push(aiCard("🏷 " + t("aiNote"), `<div class="ai-v">${esc(a.note)}</div>`));
+    if(a.note && a.style) cards.push(aiCard("🏷 " + t("aiNote"), `<div class="ai-v">${esc(a.note)}</div>`));
     h = cards.join("");
   }
   $("aiInfoPanel").innerHTML = h;
@@ -2345,7 +2994,11 @@ async function aiLoadWorks(){
   const grid = $("aiGrid"); grid.innerHTML = '<div class="empty">' + t("loading") + '</div>';
   $("aiGridHint").hidden = true;
   try{
-    const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(AI.item.name)}&sort=newest&page=1&page_size=200`);
+    // 画师精确过滤优先（q= 是全库关键词搜索，会把提示词/目录名里出现该词的图也算进来）
+    let r = await api(`/api/gallery?source=comfyui&artist=${encodeURIComponent(AI.item.name)}&sort=newest&page=1&page_size=200`);
+    if(!r.total){
+      r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(AI.item.name)}&sort=newest&page=1&page_size=200`);
+    }
     AI.works = r.items || []; AI.total = r.total || 0;
   }catch(e){
     AI.works = [];
@@ -2420,9 +3073,10 @@ function showArtInfo(a, kind){
   AI = { kind, item: a, works: [], total: 0, selFile: "" };
   try{
     const isZh = LANG === "zh";
-    const tag = "@" + a.name;
+    const tag = afBase(a.name);
     const hasLocal = kind === "local" || Boolean(AL_PREVIEWS[(a.name||"").toLowerCase()] || a.cover);
-    $("aiName").textContent = kind === "artlib" ? (a.specialty || a.profile || a.name) : (a.note || a.name);
+    const nmStyle = a.style || a.note || a.name;
+    $("aiName").textContent = kind === "artlib" ? (a.style || a.specialty || a.profile || a.name) : nmStyle;
     $("aiName").title = $("aiName").textContent;
     $("aiTag").textContent = tag;
     const badge = $("aiBadge");
@@ -2456,8 +3110,9 @@ $("aiBigBack").onclick = ()=>{
   $("aiInfoPanel").hidden = false;
 };
 $("aiCopy").onclick = ()=>{
-  const tag = "@" + (AI.item ? AI.item.name : "");
-  if(tag === "@") return;
+  const nn = (AI.item ? AI.item.name : "");
+  const tag = nn ? artTag(nn) : "";
+  if(!tag) return;
   navigator.clipboard.writeText(tag).then(()=>showToast("📋 " + tag));
 };
 $("aiAdd").onclick = ()=>{
@@ -2551,6 +3206,8 @@ $("artistCtx").addEventListener("click", async (e)=>{
     await api("/api/artists/cover", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tag: a.name, file: cur})});
     showToast("🖼 " + (LANG === "zh" ? "已设为封面" : "Cover set"));
     loadArtists();
+  } else if(act === "view"){
+    artOpenLightbox(a, cur);
   } else if(act === "works"){
     artOpenWorks(a);
   } else if(act === "reset"){
@@ -2562,7 +3219,8 @@ $("artistCtx").addEventListener("click", async (e)=>{
     navigator.clipboard.writeText(artTag(a.name)).then(()=>showToast("📋 " + artTag(a.name)));
   } else if(act === "copyw"){
     const w = AW_LIST.find(x=>artSelKey(x.name)===artSelKey(a.name))?.weight ?? (a.weight ?? 1);
-    navigator.clipboard.writeText(`(${artTag(a.name)}:${w.toFixed(2)})`).then(()=>showToast("📋 " + `(${artTag(a.name)}:${w.toFixed(2)})`));
+    const t = afmt(a.name, w);
+    navigator.clipboard.writeText(t).then(()=>showToast("📋 " + t));
   } else if(act === "add"){
     artAddToSide(a);
   } else if(act === "fav"){
@@ -2622,9 +3280,17 @@ async function artLoadWorksPage(){
   try{
     const q = AWM.tag.replace("@", "").trim();
     const sort = $("awmSort") ? $("awmSort").value : "newest";
-    const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(q)}&sort=${sort}&page=${AWM.page}&page_size=${AWM.size}`);
+    // 用 artist= 精确过滤（服务端按条目记录的画师列表匹配）；q= 是全库关键词搜索，会命中提示词/目录名导致张数虚高
+    let r = await api(`/api/gallery?source=comfyui&artist=${encodeURIComponent(q)}&sort=${sort}&page=${AWM.page}&page_size=${AWM.size}`);
+    if(!r.total && AWM.page === 1){
+      // 兜底：画师列表尚未标注 artists 字段的旧条目 → 退回关键词搜索
+      r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(q)}&sort=${sort}&page=${AWM.page}&page_size=${AWM.size}`);
+    }
     AWM.total = r.total; AWM.pages = Math.max(1, Math.ceil(r.total / AWM.size)); AWM.items = r.items || [];
-    $("awmCount").textContent = `${AWM.page}/${AWM.pages} · ${AWM.total} ${LANG === "zh" ? "张" : "imgs"}`;
+    // 列表为空时不要让计数与「没有作品」互相打脸（曾出现 1/1 · 0 张）
+    $("awmCount").textContent = AWM.total
+      ? `${AWM.page}/${AWM.pages} · ${AWM.total} ${LANG === "zh" ? "张" : "imgs"}`
+      : (LANG === "zh" ? "0 张" : "0 imgs");
     renderAWM();
   }catch(e){}
 }
@@ -2675,7 +3341,7 @@ $("awmGrid").addEventListener("click", (e)=>{ if(e.target.closest(".item")){ /* 
 function artAddToSide(a){
   const key = artSelKey(a.name);
   if(!AW_LIST.find(x=>artSelKey(x.name)===key)){
-    AW_LIST.push({name: a.name, display: "@"+a.name, cover: artCurrentCover(a), weight: a.weight ?? 1});
+    AW_LIST.push({name: a.name, display: afBase(a.name), cover: artCurrentCover(a), weight: a.weight ?? 1});
   }
   artRenderSide();
 }
@@ -2689,19 +3355,29 @@ function artRenderSide(){
     const item = document.createElement("div"); item.className = "aw-item";
     item.innerHTML = `
       <img src="${x.cover ? imgUrl("comfyui", x.cover) : ""}" alt="">
-      <span class="awi-name" title="点击复制">${esc(x.display)}</span>
+      <span class="awi-name" title="${t("clickCopy")}">${esc(afBase(x.name))}</span>
       <span class="awi-w">
+        <button class="wstep" data-d="-1" title="−">◀</button>
         <input type="number" min="0.5" max="2" step="0.00001" value="${x.weight.toFixed(5)}">
+        <button class="wstep" data-d="1" title="+">▶</button>
       </span>
-      <button class="awi-del" title="移除">✕</button>`;
+      <button class="awi-del" title="${t("removeTitle")}">✕</button>`;
     item.querySelector(".awi-name").onclick = ()=>{
-      navigator.clipboard.writeText(x.display).then(()=>showToast("📋 " + x.display));
+      const t = afmt(x.name, x.weight);
+      navigator.clipboard.writeText(t).then(()=>showToast("📋 " + t));
     };
     item.querySelector("input").onchange = (e)=>{
       let v = parseFloat(e.target.value);
       if(isNaN(v)) v = 1; v = Math.min(2, Math.max(0.5, v));
       x.weight = v; artRenderSide(); artRenderPie();
     };
+    item.querySelectorAll(".wstep").forEach(btn=>{
+      btn.onclick = ()=>{
+        const d = parseInt(btn.dataset.d, 10) || 0;
+        x.weight = Math.min(2, Math.max(0.5, Math.round((x.weight + d*0.05)*100000)/100000));
+        artRenderSide(); artRenderPie();
+      };
+    });
     item.querySelector(".awi-del").onclick = ()=>{ artRemoveFromSide(x.name); };
     list.appendChild(item);
   });
@@ -2714,8 +3390,9 @@ function artRenderPie(){
   ctx.clearRect(0,0,W,H);
   const total = AW_LIST.reduce((s,x)=>s+(x.weight||0), 0);
   $("awPieTotal").textContent = AW_LIST.length ? total.toFixed(2) : "0";
+  const ringColor = (getComputedStyle(document.documentElement).getPropertyValue("--line").trim()) || "rgba(120,130,150,.4)";
   if(!AW_LIST.length || !total){
-    ctx.strokeStyle = "#2a2d36"; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = ringColor; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
     return;
   }
   let ang = -Math.PI/2;
@@ -2728,7 +3405,7 @@ function artRenderPie(){
   });
 }
 function artRenderPrompt(){
-  const lines = AW_LIST.map(x=>`(${x.display}:${x.weight.toFixed(2)})`);
+  const lines = AW_LIST.map(x=>afmt(x.name, x.weight));
   $("awPromptText").value = lines.join(", ");
 }
 $("awDice").onclick = ()=>{
@@ -2738,6 +3415,96 @@ $("awDice").onclick = ()=>{
   showToast("🎲 " + (LANG === "zh" ? "已随机权重 (0.5~2)" : "Random weights (0.5~2)"));
 };
 $("awClear").onclick = ()=>{ AW_LIST = []; artRenderSide(); };
+// ---------- 画师串收藏 ----------
+async function loadChains(){
+  try{
+    const r = await api("/api/chains");
+    CHAINS = r.chains || [];
+  }catch(e){ CHAINS = []; }
+  renderChains();
+}
+function renderChains(){
+  const box = $("awChainList"); if(!box) return;
+  box.innerHTML = "";
+  if(!CHAINS.length){
+    box.innerHTML = '<div style="font-size:11.5px;color:var(--dim)">' + (LANG === "zh" ? "还没有收藏的画师串" : "No saved artist chains yet") + '</div>';
+    return;
+  }
+  CHAINS.forEach(c=>{
+    const cur = $("awPromptText").value.trim();
+    const d = document.createElement("div");
+    d.className = "aw-chain" + (cur && cur === (c.prompt || "").trim() ? " on" : "");
+    const cov = c.cover ? `<img src="${imgUrl(c.cover.source || "comfyui", c.cover.file)}" loading="lazy" alt="">` : `<span style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px">🎨</span>`;
+    d.innerHTML = `${cov}
+      <span class="acn" title="${esc(c.prompt || "")}">${esc(c.name)}</span>
+      <span class="acc">${(c.artists || []).length}</span>
+      <button class="acx" title="${LANG === "zh" ? "取消收藏" : "Remove"}">✕</button>`;
+    d.querySelector(".acn").onclick = ()=>{
+      try{
+        AW_LIST = (c.artists || []).map(n=>({name: n, display: afBase(n), cover: "", weight: (c.weights || {})[n] ?? 1}));
+        artRenderSide();
+        $("#awPromptText").value = c.prompt || "";
+        showToast("📋 " + (LANG === "zh" ? "已载入画师串：" : "Loaded: ") + c.name);
+      }catch(e){}
+    };
+    d.querySelector(".acx").onclick = async ()=>{
+      await api("/api/chains/delete", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id: c.id})});
+      loadChains(); loadFavChains();
+    };
+    box.appendChild(d);
+  });
+}
+$("awFavChain").onclick = async ()=>{
+  if(!AW_LIST.length){ showToast("⚠ " + (LANG === "zh" ? "画师串是空的" : "Chain is empty")); return; }
+  const def = (AW_LIST.map(x=>x.name).join(", ")).slice(0, 40) || (LANG === "zh" ? "画师串" : "chain");
+  const name = prompt(LANG === "zh" ? "收藏名称" : "Name", def);
+  if(!name || !name.trim()) return;
+  const artists = AW_LIST.map(x=>x.name);
+  const weights = {}; AW_LIST.forEach(x=>{ weights[x.name] = x.weight; });
+  const r = await api("/api/chains/save", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({name: name.trim(), prompt: $("awPromptText").value, artists, weights, added: artists})});
+  if(r.ok){
+    showToast("★ " + (LANG === "zh" ? "已收藏画师串：" : "Saved: ") + name.trim());
+    loadChains(); loadFavChains();
+    if($("favChainList") && !$("favView").hidden) loadFavGrid(true);
+  } else showToast("⚠ " + (r.error || "fail"));
+};
+async function loadFavChains(){
+  const box = $("favChainList"); if(!box) return;
+  try{
+    const r = await api("/api/chains");
+    const list = r.chains || [];
+    box.innerHTML = "";
+    if(!list.length){
+      box.innerHTML = '<div style="font-size:11.5px;color:var(--dim);padding:4px 6px">' + (LANG === "zh" ? "暂无" : "none") + '</div>';
+      return;
+    }
+    list.forEach(c=>{
+      const d = document.createElement("div");
+      d.className = "folder" + (FAV_CHAIN === c.id ? " on" : "");
+      d.innerHTML = `<span class="fn" title="${esc(c.prompt || "")}">🎨 ${esc(c.name)}</span><span class="fc">${(c.artists||[]).length}</span><span class="fdel" title="${t("delTitle")}">✕</span>`;
+      d.onclick = ()=>{ FAV_CHAIN = (FAV_CHAIN === c.id ? "" : c.id); FAV_FOLDER = ""; loadFavChains(); loadFolders(); loadFavGrid(true); };
+      d.querySelector(".fdel").onclick = async e=>{
+        e.stopPropagation();
+        await api("/api/chains/delete", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id: c.id})});
+        if(FAV_CHAIN === c.id) FAV_CHAIN = "";
+        loadFavChains(); loadChains(); loadFavGrid(true);
+      };
+      box.appendChild(d);
+    });
+  }catch(e){}
+}
+let FAV_FILTER = "all";   // all | artist | chain
+function setFavFilter(f){
+  FAV_FILTER = f;
+  $("favFilterAll").classList.toggle("on", f === "all");
+  $("favFilterArtist").classList.toggle("on", f === "artist");
+  $("favFilterChain").classList.toggle("on", f === "chain");
+  loadFavGrid(true);
+}
+$("favFilterAll").onclick = ()=>setFavFilter("all");
+$("favFilterArtist").onclick = ()=>setFavFilter("artist");
+$("favFilterChain").onclick = ()=>setFavFilter("chain");
 $("awCopy").onclick = ()=>{
   const t = $("awPromptText").value;
   if(t)navigator.clipboard.writeText(t).then(()=>showToast("📋 " + (LANG === "zh" ? "提示词已复制" : "Prompt copied")));
@@ -2764,7 +3531,8 @@ async function artlibEnsure(){
   AL.loading = true;
   $("alGrid").innerHTML = '<div class="empty">' + (LANG === "zh" ? "正在加载画师库（首次较慢）…" : "Loading artist DB (first time is slow)…") + '</div>';
   try{
-    const f = await api("/api/artlib/facets");
+    const f = await api("/api/artlib/facets" + (AL_LIVE ? "?gc=600" : ""));
+    AL_LIVE = true;
     AL.facets = f.facets || {};
     AL.facetsTotal = f.total || 0;
     AL.inited = true;
@@ -2814,13 +3582,13 @@ async function artlibLoad(){
   });
   $("alGrid").innerHTML = '<div class="empty">' + t("loading") + '</div>';
   try{
-    const r = await api("/api/artlib/search?" + p.toString());
+    const r = await api("/api/artlib/search?" + p.toString() + artlibGcParam());
     AL.items = r.items || []; AL.total = r.total || 0;
     $("alHint").textContent = `${LANG === "zh" ? "共" : ""} ${AL.total.toLocaleString()} ${LANG === "zh" ? "位" : ""}` + (AL.inited ? ` · DB ${AL.facetsTotal.toLocaleString()}` : "");
     renderArtlib();
     renderArtlibPager();
     artlibPreviews();   // 异步补本地预览图（不阻塞列表）
-  }catch(e){ $("alGrid").innerHTML = '<div class="empty">⚠ 加载失败</div>'; }
+  }catch(e){ $("alGrid").innerHTML = '<div class="empty">' + t("loadFail") + '</div>'; }
 }
 function renderArtlib(){
   const grid = $("alGrid"); grid.innerHTML = "";
@@ -2829,7 +3597,7 @@ function renderArtlib(){
     const d = document.createElement("div");
     const key = artSelKey(a.name);
     d.className = "artist-card al-card"; d.dataset.name = a.name; d.dataset.key = key;
-    const tag = "@" + a.name;
+    const tag = afBase(a.name);
     const inSide = AW_LIST.find(x=>artSelKey(x.name)===a.name);
     const badge = a.posts >= 1000 ? "🔥" : "";
     const cov = alCurrentCover(a);
@@ -2840,7 +3608,11 @@ function renderArtlib(){
       .map(t2=>`<span class="al-chip al-chip-ero">${esc(t2)}</span>`).join("");
     const softChips = (a.soft_tags || []).slice(0, 3)
       .map(t2=>`<span class="al-chip al-chip-soft">${esc(t2)}</span>`).join("");
-    const spec = a.specialty || a.profile || a.name;
+    const spec = a.style || a.specialty || a.profile || a.name;
+    const strChips = (a.strength || []).slice(0, 3)
+      .map(t2=>`<span class="al-chip">${esc(t2)}</span>`).join("");
+    const featChips = (a.features || []).slice(0, 4)
+      .map(t2=>`<span class="al-chip al-chip-ero">${esc(t2)}</span>`).join("");
     d.innerHTML = `
       <div class="ac-cover al-cover">
         ${coverHtml}
@@ -2850,14 +3622,16 @@ function renderArtlib(){
       <div class="ac-info">
         <div class="al-spec" title="${esc(spec)}">${esc(spec)}</div>
         <div class="ac-tag" title="${esc(a.name)}">${esc(tag)}</div>
-        ${a.profile && a.profile !== spec ? `<div class="al-profile" title="${esc(a.profile)}">${esc(a.profile)}</div>` : ""}
+        ${strChips ? `<div class="al-chips">${strChips}</div>` : ""}
+        ${featChips ? `<div class="al-chips">${featChips}</div>` : ""}
+        ${a.profile && a.profile !== (a.style || a.specialty || a.profile || a.name) ? `<div class="al-profile" title="${esc(a.profile)}">${esc(a.profile)}</div>` : ""}
         ${sexChips ? `<div class="al-chips">${sexChips}</div>` : ""}
         ${softChips ? `<div class="al-chips">${softChips}</div>` : ""}
         <div class="ac-sub">
           <span class="cnt">🖼 ${a.posts.toLocaleString()}${badge}</span>
           ${a.rating ? `<span class="al-chip al-chip-r">${esc(a.rating)}</span>` : ""}
           ${a.archetype ? `<span class="al-chip">${esc(a.archetype)}</span>` : ""}
-          ${inSide ? '<span class="al-chip al-chip-on">★ 已加入</span>' : ""}
+          ${inSide ? '<span class="al-chip al-chip-on">' + t("alreadyAdded") + '</span>' : ""}
         </div>
       </div>`;
     if(cov){
@@ -2885,7 +3659,8 @@ async function alNextCover(a, dir){
   const k = artSelKey(a.name);
   if(!(AL_COVER_LIST[k]||[]).length){
     try{
-      const r = await api(`/api/gallery?source=comfyui&q=${encodeURIComponent(a.name)}&sort=newest&page=1&page_size=200`);
+      // 同画师卡片：用 artist= 精确过滤，不用 q= 全文搜索
+      const r = await api(`/api/gallery?source=comfyui&artist=${encodeURIComponent(a.name)}&sort=newest&page=1&page_size=1000`);
       const files = (r.items||[]).map(x=>x.file);
       const seen = new Set();
       AL_COVER_LIST[k] = files.filter(f=>!seen.has(f)&&seen.add(f));
@@ -2946,8 +3721,8 @@ function renderArtlibPager(){
 function artlibAddToSide(a){
   const key = artSelKey(a.name);
   if(!AW_LIST.find(x=>artSelKey(x.name)===key)){
-    AW_LIST.push({name: a.name, display: "@"+a.name, cover: "", weight: 1});
-    showToast("➕ " + (LANG === "zh" ? "已加入画师串：" : "Added: ") + "@" + a.name);
+    AW_LIST.push({name: a.name, display: afBase(a.name), cover: "", weight: 1});
+    showToast("➕ " + (LANG === "zh" ? "已加入画师串：" : "Added: ") + afBase(a.name));
   } else {
     showToast("ℹ " + (LANG === "zh" ? "已在画师串中" : "Already added"));
   }
@@ -2955,13 +3730,14 @@ function artlibAddToSide(a){
 }
 function artlibCtx(e, a){
   const menu = $("artistCtx");
-  const tag = "@" + a.name;
+  const tag = afBase(a.name);
   const inSide = AW_LIST.find(x=>artSelKey(x.name)===a.name);
   menu.innerHTML = `
     <div class="ctx-item" data-al="info"><span class="ic">ℹ</span>${t("aiInfo")}</div>
     <div class="ctx-item" data-al="add"><span class="ic">➕</span>${LANG === "zh" ? "加入画师串" : "Add to chain"}</div>
     <div class="ctx-item" data-al="copy"><span class="ic">📋</span>${LANG === "zh" ? "复制 @tag" : "Copy @tag"}</div>
     <div class="ctx-item" data-al="copyw"><span class="ic">⚖</span>${LANG === "zh" ? "复制 @tag + 权重" : "Copy @tag + weight"}</div>
+    <div class="ctx-item" data-al="view"><span class="ic">🔍</span>${LANG === "zh" ? "查看大图" : "View large image"}</div>
     ${alCurrentCover(a) ? `<div class="ctx-sep"></div>
     <div class="ctx-item" data-al="setcover"><span class="ic">🖼</span>${LANG === "zh" ? "设置当前图为封面" : "Set current as cover"}</div>
     <div class="ctx-item" data-al="resetcover"><span class="ic">↺</span>${LANG === "zh" ? "重置封面为最新" : "Reset cover to newest"}</div>` : ""}
@@ -2977,14 +3753,15 @@ function artlibCtx(e, a){
     const it = ev.target.closest(".ctx-item"); if(!it) return;
     const act = it.dataset.al; if(!act) return;
     menu.classList.remove("show");
-    if(act === "info"){ showArtInfo(a, "artlib"); }
+    if(act === "view"){ artOpenLightbox(a, alCurrentCover(a)); }
+    else if(act === "info"){ showArtInfo(a, "artlib"); }
     else if(act === "setcover"){ alSaveCover(a, alCurrentCover(a), false); }
     else if(act === "resetcover"){ alSaveCover(a, "", true); }
     else if(act === "add"){ artlibAddToSide(a); }
     else if(act === "copy"){ navigator.clipboard.writeText(tag).then(()=>showToast("📋 " + tag)); }
     else if(act === "copyw"){
       const w = AW_LIST.find(x=>artSelKey(x.name)===a.name)?.weight ?? 1;
-      const txt = `(${tag}:${w.toFixed(2)})`;
+      const txt = afmt(a.name, w);
       navigator.clipboard.writeText(txt).then(()=>showToast("📋 " + txt));
     }
     else if(act === "open"){ window.open(a.url, "_blank"); }
@@ -3013,7 +3790,7 @@ async function _bootScan(skipFirst){
     try{
       const st = await api("/api/status");
       const c = st.comfyui || {}, w = st.webui || {};
-      const building = [c, w].filter(x => !x.ready && x.total > 0);
+      const building = [c, w].filter(x => (!x.ready && x.total > 0));
       if(building.length){
         const total = (c.total||0) + (w.total||0);
         const scanned = (c.scanned||0) + (w.scanned||0);
@@ -3029,6 +3806,8 @@ async function _bootScan(skipFirst){
         if(cur.total > 0) $("count").textContent = `... ${cur.scanned}/${cur.total}`;
         return;
       }
+      // 当前源后台还在补扫新增：先让用户看缓存数据，等扫完再自动刷新列表
+      if(cur.busy) return;
       clearInterval(iv);
       $("count").textContent = (t("countTotal") ? t("countTotal") + " " : "") + TOTAL + (t("countOf") ? " " + t("countOf") : "");
       await loadModels(); await loadSamplers(); await loadStats();
@@ -3043,7 +3822,7 @@ async function boot(){
     return;
   }
   BOOTED = true;
-  await loadDefaultFavs(); await loadFolders();
+  await loadDefaultFavs(); await loadFolders(); await loadChains();
   await loadModels(); await loadSamplers(); await loadLoras(); await loadStats();
   await _bootScan(false);
 }
