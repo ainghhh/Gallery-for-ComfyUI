@@ -189,6 +189,7 @@ async def api_gallery(request):
         min_h=_int(q.get("min_h")),
         fav_only=q.get("fav", "0") == "1",
         sort=q.get("sort", "newest"),
+        seed=q.get("seed", ""),
         page=_int(q.get("page"), 1),
         page_size=min(_int(q.get("page_size"), 60) or 60, 1000),
         tags=q.get("tags", ""),

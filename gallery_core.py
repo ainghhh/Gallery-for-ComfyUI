@@ -895,7 +895,7 @@ def _artist_tokens(name):
 def query(source, q="", model="", sampler="", lora="", steps_min=None, steps_max=None,
           cfg_min=None, cfg_max=None, min_w=None, min_h=None, fav_only=False,
           sort="newest", page=1, page_size=60, tags="", artist="", artists_all=None,
-          artists_any=None, artist_min=None):
+          artists_any=None, artist_min=None, seed=None):
     entries, ready = get_index(source)
     if artist_min:
         # 画师数量过滤：一张图里用到的**不同画师个数** ≥ N（不要求是某个固定组合）
@@ -965,8 +965,16 @@ def query(source, q="", model="", sampler="", lora="", steps_min=None, steps_max
     elif sort == "name":
         entries.sort(key=lambda e: str(e.get("file", "")).lower())
     elif sort == "random":
-        import random
-        entries = random.sample(entries, len(entries)) if entries else entries
+        # 必须用「同一种子」洗牌，而且**绝不能就地洗**：
+        # 原先没有种子，每次请求都重新洗 —— 网格第 N 页和灯箱续翻请求的结果顺序不同，
+        # 于是点 A 打开的是 B。
+        # 另外 get_index() 返回的是缓存列表本身（不是副本），用 shuffle 会连缓存一起改掉，
+        # 那样同一个种子也得不到同一个顺序；random.sample 会新建列表，正好避免。
+        try:
+            sd = int(seed)
+        except Exception:
+            sd = 20260206            # 没传种子时退化成固定顺序（至少是稳定的）
+        entries = random.Random(sd).sample(entries, len(entries)) if entries else entries
     total = len(entries)
     start = (int(page) - 1) * int(page_size)
     page_entries = entries[start:start + int(page_size)]

@@ -469,7 +469,7 @@
 <div class="topbar">
   <div class="tb-inner">
     <span class="title"><span data-i18n="title">Gallery4ComfyUI</span> <small id="srcLabel" data-i18n="subComfy">ComfyUI 图片</small></span>
-    <span class="ver-tag" data-i18n-title="verTitle" title="Ctrl+F5 强刷后应看到 v1.3.3">v1.3.3</span>
+    <span class="ver-tag" data-i18n-title="verTitle" title="Ctrl+F5 强刷后应看到 v1.3.4">v1.3.4</span>
     <div class="srctabs">
       <button class="srctab on" data-src="comfyui" data-i18n="tabComfy">ComfyUI</button>
       <button class="srctab" data-src="webui" data-i18n="tabWebui">WebUI</button>
@@ -1023,7 +1023,7 @@ const I18N = {
     packFail: "打包失败", unitImages: " 张",
     advFoldTitle: "折叠/展开左侧", clickCopy: "点击复制", removeTitle: "移除",
     alreadyAdded: "★ 已加入", loadFail: "⚠ 加载失败", pageNumPh: "页码",
-    verTitle: "Ctrl+F5 强刷后应看到 v1.3.3", favDefaultName: "默认收藏", videoWord: "视频",
+    verTitle: "Ctrl+F5 强刷后应看到 v1.3.4", favDefaultName: "默认收藏", videoWord: "视频",
   },
   en: {
     title: "Gallery4ComfyUI", subComfy: "ComfyUI Images", subWebui: "WebUI Images", subFav: "Favorites",
@@ -1118,7 +1118,7 @@ const I18N = {
     packFail: "Pack failed", unitImages: " images",
     advFoldTitle: "Collapse / expand left panel", clickCopy: "Click to copy", removeTitle: "Remove",
     alreadyAdded: "★ Added", loadFail: "⚠ Failed to load", pageNumPh: "Page",
-    verTitle: "Hard-refresh (Ctrl+F5) to see v1.3.3", favDefaultName: "Favorites", videoWord: "Video",
+    verTitle: "Hard-refresh (Ctrl+F5) to see v1.3.4", favDefaultName: "Favorites", videoWord: "Video",
   }
 };
 let LANG = localStorage.getItem("gallery4comfyui-lang") || "zh";
@@ -1209,6 +1209,10 @@ window.addEventListener("error", e=>{
 const $ = id => document.getElementById(id);
 const API = "/gallery4comfyui";
 let SRC = "comfyui", PAGE = 1, PAGE_SIZE = 60, LOADING = false, TOTAL = 0, TOTAL_PAGES = 1;
+// 随机排序的种子：网格与灯箱必须用同一个种子。服务端若每次请求重新洗牌，
+// 灯箱续翻拿到的顺序就和网格不同 —— 网格里点 A，打开的是 B。
+let RAND_SEED = Math.floor(Math.random() * 2000000000) + 1;
+function reshuffle(){ RAND_SEED = Math.floor(Math.random() * 2000000000) + 1; return RAND_SEED; }
 let CUR_ITEMS = [], CUR_IDX = -1, DEFAULT_FAVS = new Set(), CFG_WEBUI = false;
 // 灯箱自己持有一份「窗口 / 来源 / 下标」：这样从「画师」「画师库」右键打开大图时，
 // 不会打乱图库当前页的 CUR_ITEMS / CUR_IDX 状态。
@@ -1416,6 +1420,7 @@ function galleryParams(page){
     fav: $("btnFav").classList.contains("active") ? "1" : "0",
     sort: $("sortSel").value, page: page, page_size: PAGE_SIZE,
   });
+  if(p.get("sort") === "random") p.set("seed", RAND_SEED);   // 网格与灯箱同一个种子
   // 画师数过滤：只看用了 ≥N 个不同画师的图（多画师 / 画师串组合）
   const amin = $("artistMinSel");
   if(amin && amin.value) p.set("artist_min", amin.value);
@@ -1533,7 +1538,7 @@ $("btnPackLora").onclick = ()=>{
 };
 $("samplerSel").onchange = ()=>load(true);
 $("artistMinSel").onchange = ()=>load(true);   // 画师数 ≥ N（多画师 / 画师串）
-$("sortSel").onchange = ()=>load(true);
+$("sortSel").onchange = ()=>{ if($("sortSel").value === "random") reshuffle(); load(true); };
 $("densitySel").onchange = ()=>$("grid").className = "grid " + $("densitySel").value;
 ["stepsMin","stepsMax","cfgMin","cfgMax","minW","minH"].forEach(id=>$(id).addEventListener("change", ()=>load(true)));
 $("btnAdv").onclick = ()=>{ $("adv").classList.toggle("show"); $("btnAdv").classList.toggle("active"); };
@@ -1872,7 +1877,7 @@ function buildAdvFilters(){
     const sel = $("ag_lora");
     r.items.forEach(it=>{ const op = document.createElement("option"); op.value = it.lora; op.textContent = `${it.lora}（${it.count}）`; sel.appendChild(op); });
   });
-  box.querySelectorAll("input,select").forEach(el=>el.addEventListener("change", ()=>{ ADV.page = 1; advLoad(true); }));
+  box.querySelectorAll("input,select").forEach(el=>el.addEventListener("change", ()=>{ if(el.id === "ag_sort" && el.value === "random") reshuffle(); ADV.page = 1; advLoad(true); }));
   // −/+ 增减按钮
   box.addEventListener("click", e=>{
     const b = e.target.closest(".ns");
@@ -1968,12 +1973,14 @@ function renderTagSel(){
 // 高级搜索查询参数（与主图库同理，供灯箱续翻复用）
 function advGalleryParams(page){
   const f = advParams();
-  return new URLSearchParams({
+  const p = new URLSearchParams({
     source: SRC, q: $("q").value.trim(),
     tags: ADV.tags.join(","), model: f.model, sampler: f.sampler, lora: f.lora,
     steps_min: f.stepsMin, steps_max: f.stepsMax, cfg_min: f.cfgMin, cfg_max: f.cfgMax,
     min_w: f.minW, min_h: f.minH, sort: f.sort, page: page, page_size: f.size || 60,
   });
+  if(f.sort === "random") p.set("seed", RAND_SEED);          // 网格与灯箱同一个种子
+  return p;
 }
 function advLbCtx(){
   return {
